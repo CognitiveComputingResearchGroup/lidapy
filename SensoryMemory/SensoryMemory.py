@@ -2,7 +2,7 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
-from Environment.FrozenLakeEnvironment import env
+from Environment import Environment as env
 
 class SensoryMemory:
     def __init__(self):

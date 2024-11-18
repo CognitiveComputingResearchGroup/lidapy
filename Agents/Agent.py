@@ -3,11 +3,11 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 from SensoryMemory import SensoryMemory
-from Environment import FrozenLakeEnvironment
+from Environment import Environment
 
 class FrozenLakeAgent:
     def __init__(self):
-        self.env = FrozenLakeEnvironment()
+        self.env = Environment()
         self.sensory_memory = SensoryMemory()
 
     def run(self):
