@@ -2,8 +2,8 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
-from Agents.Agent import FrozenLakeAgent as FrozenLake
+from Agents.Agent import FrozenLakeAgent
 
 if __name__ == "__main__":
-    agent = FrozenLake
+    agent = FrozenLakeAgent
     agent.run()
