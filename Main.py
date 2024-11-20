@@ -5,5 +5,5 @@
 from Agents.Agent import FrozenLakeAgent
 
 if __name__ == "__main__":
-    agent = FrozenLakeAgent
+    agent = FrozenLakeAgent() #instantiate FrozenLakeAgent / create instance of the class
     agent.run()

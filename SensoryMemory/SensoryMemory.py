@@ -2,11 +2,13 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
-from Environment import Environment as env
+#from Environment import Environment as env
+from Environment.Environment import FrozenLakeEnvironment
 
 class SensoryMemory:
-    def __init__(self):
+    def __init__(self, environment):
         self.listeners = [] #initializing an empty list to store the listeners
+        self.environment = environment  # store environment reference
 
     def add_sensory_listener(self, listener):
         """Adding the listener to the memory"""
@@ -16,8 +18,8 @@ class SensoryMemory:
         """All sensors associated will run with the memory"""
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
-        state, _ = env.reset()
-        return state
+        state, _ = self.environment.reset() # use environment instance to reset
+        return state # get state from environment instance
 
     def get_sensory_content(self, modality=None, params=None):
         """

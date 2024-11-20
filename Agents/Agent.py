@@ -9,13 +9,13 @@ from MotorPlanExecution.MotorPlanExecution import MPExecution
 class FrozenLakeAgent:
     def __init__(self):
         self.env =  FrozenLakeEnvironment()
-        self.sensory_memory = SensoryMemory()
+        self.sensory_memory = SensoryMemory(self.env)  # pass in environment instance
         self.motor_plan_execution = MPExecution(self.env)
 
     def run(self):
         #Agents behavior logic
         done = False
-        state = self.sensory_memory.run_sensors
+        state = self.sensory_memory.run_sensors()
         print(f"Initial Observation: {state}")
         #Additional code needed for the agents action (MAYBE)?
 
