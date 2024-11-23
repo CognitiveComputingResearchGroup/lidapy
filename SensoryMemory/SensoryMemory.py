@@ -28,6 +28,5 @@ class SensoryMemory:
         :param params: optional parameters to filter or specify the content
         :return: content corresponding to the modality
         """
-
         #Logic to retrieve and return data based on the modality.
         return {"modality": modality, "params": params}

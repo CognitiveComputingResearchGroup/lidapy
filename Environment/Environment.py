@@ -41,10 +41,6 @@ class FrozenLakeEnvironment:
         #action = self.env.action_space.sample()   #Taking a random action
         #print(f"Action: {action}")
 
-        #State: new state of the environment after the agent takes the action
-        #reward: numerical value after agent performs the action
-        #done: boolean value to indicate whether episode is done
-        #Truncated: boolean, truncated due to time limit
         #state,reward,done,truncated,info= self.env.step(action) #Performing the action
         #self.env.render() #Rendering for visual feedback
         #Printing the outcome
