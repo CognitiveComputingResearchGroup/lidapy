@@ -1,3 +1,7 @@
+#LIDA Cognitive Framework
+#Pennsylvania State University, Course : SWENG480
+#Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+
 import gymnasium as gym
 import pygame
 

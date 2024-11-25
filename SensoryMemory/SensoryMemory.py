@@ -4,11 +4,13 @@
 
 #from Environment import Environment as env
 from Environment.Environment import FrozenLakeEnvironment
+from PAM.PAM import PerceptualAssociativeMemory
 
 class SensoryMemory:
-    def __init__(self, environment):
+    def __init__(self, environment, pam):
         self.listeners = [] #initializing an empty list to store the listeners
         self.environment = environment  # store environment reference
+        self.pam = pam # reference to perceptual associative memory
 
     def add_sensory_listener(self, listener):
         """Adding the listener to the memory"""
@@ -19,7 +21,8 @@ class SensoryMemory:
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
         state, _ = self.environment.reset() # use environment instance to reset
-        return state # get state from environment instance
+        percept = self.pam.retrieve_associations(state) # retrieve percept from PAM
+        return state, percept # get state and percept from environment instance
 
     def get_sensory_content(self, modality=None, params=None):
         """
