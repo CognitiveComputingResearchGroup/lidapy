@@ -5,6 +5,12 @@
 import gymnasium as gym
 import pygame
 
+"""
+The environment is essential for preceiving, processing, and
+integrating all sensory information, enabling the agent to interact effectively.
+Sends Sensory information to the Sensory Memory.
+"""
+
 class FrozenLakeEnvironment:
     def __init__(self):
         #generating the frozen lake environment

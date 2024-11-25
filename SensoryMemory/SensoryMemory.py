@@ -6,6 +6,11 @@
 from Environment.Environment import FrozenLakeEnvironment
 from PAM.PAM import PerceptualAssociativeMemory
 
+"""
+This module can temporarily store sensory data from the environment and then
+process and transfer to further working memory.
+"""
+
 class SensoryMemory:
     def __init__(self, environment, pam):
         self.listeners = [] #initializing an empty list to store the listeners
