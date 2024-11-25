@@ -2,6 +2,10 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
+"""
+Responsible for taking in a behavior and executing
+"""
+
 class MPExecution:
     def __init__(self, environment):
         self.env = environment #Storing the environment reference
