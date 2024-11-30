@@ -8,6 +8,7 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
+
 class PerceptualAssociativeMemory:
     def __init__(self):
         #Storing associations
