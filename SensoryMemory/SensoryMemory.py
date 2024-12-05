@@ -25,9 +25,10 @@ class SensoryMemory:
         """All sensors associated will run with the memory"""
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
-        state, _ = self.environment.reset() # use environment instance to reset
+        state, info = self.environment.reset() # use environment instance to reset
         percept = self.pam.retrieve_associations(state) # retrieve percept from PAM
-        return state, percept # get state and percept from environment instance
+        #return state, percept # get state and percept from environment instance
+        return state, info # get state and info from environment instance
 
     def get_sensory_content(self, modality=None, params=None):
         """

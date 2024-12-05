@@ -36,7 +36,7 @@ class PerceptualAssociativeMemory:
         if outcome == "goal":
             self.add_association(state, "goal")
         elif outcome == "hole":
-            self.add_association(state, "danger")
+            self.add_associatkion(state, "danger")
         else:
             self.add_association(state, "safe")
     """
