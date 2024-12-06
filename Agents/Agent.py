@@ -42,18 +42,18 @@ class FrozenLakeAgent:
         done = False
         state_id = 0
         state, percept, action, environment = self.sensory_memory.run_sensors(self.procedural_memory, state_id)
-        print(f"Initial Observation: {state}, Percept: {percept}")
+        print(f"Initial Observation: State: {state}, Percept: {percept}")
         #Additional code needed for the agents action (MAYBE)?
 
         while not done:
             #action = self.env.action_space.sample() #Replace when developed action selection logic
             state, state_id, reward, done, truncated, info = self.action_selection.select_action(percept, state_id, self.sensory_motor_memory) # use action selection to decide next action
             #action = state["target_location"]
-            print(f"Action: {action}")
+            print(f"Action: {action}\nO")
 
             #state, reward, done, truncated, info = self.env.step(action)
             #self.env.render()
-            print(f"State: {state}, Reward: {reward}, Done: {done}, Info: {info}")
+            print(f"State: {state_id}, Reward: {reward}, Done: {done}, Info: {info}")
 
             state_str = "state-"
             state_id_str = state_id.__str__()
