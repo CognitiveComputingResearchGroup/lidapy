@@ -49,7 +49,7 @@ class FrozenLakeAgent:
             #action = self.env.action_space.sample() #Replace when developed action selection logic
             state, state_id, reward, done, truncated, info = self.action_selection.select_action(percept, state_id, self.sensory_motor_memory) # use action selection to decide next action
             #action = state["target_location"]
-            print(f"Action: {action}\nO")
+            print(f"Action: {action}\n")
 
             #state, reward, done, truncated, info = self.env.step(action)
             #self.env.render()
