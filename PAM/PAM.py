@@ -16,29 +16,31 @@ class PerceptualAssociativeMemory:
 
     def add_association(self, cue, pattern):
         #Add new associations
-        if cue not in self.associations:
-            self.associations[cue] = []
-        self.associations[cue].append(pattern)
+        if self.associations.__eq__(None) or cue not in self.associations:
+            self.associations[pattern] = []
+        self.associations[pattern].append(cue)
+        return pattern
 
     def retrieve_associations(self, cue):
         #Retreiving associations for the given cue
-        if cue in self.associations:
+        if not self.associations.__eq__(None) and cue in self.associations:
             return self.associations[cue]
             #return self.associations.get(cue, [])
         else:
-            self.add_association(cue, f"default-pattern-{cue}") # create default association
-            return self.associations[cue]
+            pattern = self.add_association(cue, f"default-pattern-{cue}") # create default association
+            return self.associations[pattern]
 
     def learn(self, state, outcome):
         #if cue not in self.associations:
             #self.associations[cue] = []
         #self.associations[cue].append(pattern)
         if outcome == "goal":
-            self.add_association(state, "goal")
+            self.add_association(state, "goal" + state)
         elif outcome == "hole":
-            self.add_associatkion(state, "danger")
+            self.add_association(state, "danger" + state)
         else:
-            self.add_association(state, "safe")
+            self.add_association(state, "safe" + state)
+
     """
     NEED: to connect to sensory memory, use data as cue for PAM
     Possible implement of function that can extract patterns

@@ -26,11 +26,15 @@ class SensoryMotorMemoryImpl:
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
         self.action = action
-        self.send_action_execution_command(action)
+        state, reward, done, truncated, info = self.send_action_execution_command(action)
+        '''
         #state, info = self.environment.reset() # use environment instance to reset
         #percept = self.pam.retrieve_associations(state) # retrieve percept from PAM
         #return state, percept # get state and percept from environment instance
         #return state, info # get state and info from environment instance
+        '''
+        return state, reward, done, truncated, info
+
 
     def send_action_execution_command(self, action_plan):
         """
@@ -39,5 +43,6 @@ class SensoryMotorMemoryImpl:
         :return: content corresponding to the action_plan
         """
         #Logic to retrieve and return data based on the modality.
-        self.motor_plan.execute(action_plan)
+        state, reward, done, truncated, info = self.motor_plan.execute(action_plan)
+        return state, reward, done, truncated, info
         #return {"modality": modality, "params": params}

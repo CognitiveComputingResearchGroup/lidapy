@@ -5,6 +5,7 @@
 #from Environment import Environment as env
 from Environment.Environment import FrozenLakeEnvironment
 from PAM.PAM import PerceptualAssociativeMemory
+from ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 """
 This module can temporarily store sensory data from the environment and then
@@ -21,21 +22,27 @@ class SensoryMemory:
         """Adding the listener to the memory"""
         self.listeners.append(listener) #appending the listener to the list
 
-    def run_sensors(self):
+    def run_sensors(self, procedural_memory, state_id):
         """All sensors associated will run with the memory"""
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
         state, info = self.environment.reset() # use environment instance to reset
-        percept = self.pam.retrieve_associations(state) # retrieve percept from PAM
-        #return state, percept # get state and percept from environment instance
-        return state, info # get state and info from environment instance
+        action = self.environment.action_space.sample() #Take a random action
+        state_str = "state-"
+        state_id_str = state_id.__str__()
+        state_str += state_id_str
+        procedural_memory.add_scheme(state_str, action)
+        percept = self.pam.retrieve_associations(state_str)  # retrieve percept from PAM
+        return state, percept, action, self.environment # get state and percept from environment instance
+        #return state, info # get state from environment instance
 
-    def get_sensory_content(self, modality=None, params=None):
+    def get_sensory_content(self, state, outcome, modality=None, params=None):
         """
         Returning the content from this Sensory Memory
         :param modality: Specifing the modality
         :param params: optional parameters to filter or specify the content
         :return: content corresponding to the modality
         """
+        self.pam.learn(state, outcome)
         #Logic to retrieve and return data based on the modality.
         return {"modality": modality, "params": params}
