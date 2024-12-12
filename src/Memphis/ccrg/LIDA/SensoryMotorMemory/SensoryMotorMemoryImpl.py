@@ -3,8 +3,6 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 #from Environment import Environment as env
-from Environment.Environment import FrozenLakeEnvironment
-from PAM.PAM import PerceptualAssociativeMemory
 
 """
 This module can temporarily store sensory data from the environment and then

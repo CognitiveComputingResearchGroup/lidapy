@@ -1,19 +1,17 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-import numpy as np
-from gymnasium.utils.seeding import np_random
 
-from ActionSelection.ActionSelection import ActionSelection
-from PAM.PAM import PerceptualAssociativeMemory
-from SensoryMemory.SensoryMemory import SensoryMemory
-from Environment.Environment import FrozenLakeEnvironment
+from src.Memphis.ccrg.LIDA.ActionSelection.ActionSelection import ActionSelection
+from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
+from src.Memphis.ccrg.LIDA.SensoryMemory.SensoryMemory import SensoryMemory
+from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
 from MotorPlanExecution.MotorPlanExecution import MPExecution
-from ProceduralMemory.ProceduralMemory import ProceduralMemory
-from SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
+from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from src.Memphis.ccrg.LIDA.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
 
 
-class FrozenLakeAgent:
+class Agent:
     def __init__(self):
         self.env =  FrozenLakeEnvironment()
         self.pam = PerceptualAssociativeMemory() # create pam instance
@@ -41,7 +39,7 @@ class FrozenLakeAgent:
         #Agents behavior logic
         done = False
         state_id = 0
-        state, percept, action, environment = self.sensory_memory.run_sensors(self.procedural_memory, state_id)
+        state, percept, action, environment, col, row = self.sensory_memory.run_sensors(self.procedural_memory, state_id)
         print(f"Initial Observation: State: {state}, Percept: {percept}")
         #Additional code needed for the agents action (MAYBE)?
 
@@ -63,11 +61,13 @@ class FrozenLakeAgent:
                 self.pam.learn(state_str, "goal")
             elif reward == 0 and done: # fell into a hole
                 self.pam.learn(state_str, "hole")
+                print(f"Action: {action}\n")
             else: # safe state
                 self.pam.learn(state_str, "safe")
 
             action = environment.action_space.sample() #Take a random action
+            #observation = environment.env.spec.kwargs.get("desc")
             self.procedural_memory.add_scheme(state_str, action)
             percept = self.pam.retrieve_associations(state_str)  # update percept
-
         self.env.close()
+
