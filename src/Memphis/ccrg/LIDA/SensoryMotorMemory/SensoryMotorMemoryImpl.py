@@ -10,10 +10,11 @@ process and transfer to further working memory.
 """
 
 class SensoryMotorMemoryImpl:
-    def __init__(self, action, motor_plan):
+    def __init__(self, action, environment):
         self.listeners = [] #initializing an empty list to store the listeners
         self.action = action  # store selected_action reference
-        self.motor_plan = motor_plan # reference to the motor_plan that will be executed
+        self.environment = environment
+        #self.motor_plan = motor_plan # reference to the motor_plan that will be executed
 
     def add_sensory_listener(self, listener):
         """Adding the listener to the memory"""
@@ -41,6 +42,7 @@ class SensoryMotorMemoryImpl:
         :return: content corresponding to the action_plan
         """
         #Logic to retrieve and return data based on the modality.
-        state, reward, done, truncated, info = self.motor_plan.execute(action_plan)
+        state, reward, done, truncated, info = self.environment.step(action_plan)
+        #state, reward, done, truncated, info = self.motor_plan.execute(action_plan)
         return state, reward, done, truncated, info
         #return {"modality": modality, "params": params}

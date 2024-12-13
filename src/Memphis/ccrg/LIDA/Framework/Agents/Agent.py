@@ -16,10 +16,11 @@ class Agent:
         self.env =  FrozenLakeEnvironment()
         self.pam = PerceptualAssociativeMemory() # create pam instance
         self.sensory_memory = SensoryMemory(self.env, self.pam)  # pass in environment and pam instance
-        self.motor_plan_execution = MPExecution(self.env)
+        #self.motor_plan_execution = MPExecution(self.env)
         self.procedural_memory = ProceduralMemory() # initialize procedural memory
         self.action_selection = ActionSelection(self.env.action_space, self.procedural_memory) # pass in procedural memory
-        self.sensory_motor_memory = SensoryMotorMemoryImpl(self.action_selection, self.motor_plan_execution)
+        self.sensory_motor_memory = SensoryMotorMemoryImpl(self.action_selection, self.env)
+        self.modules = {}
         #self.procedural_memory.add_scheme("safe", 2)
         #self.procedural_memory.add_scheme("danger", 0)
 
@@ -35,17 +36,29 @@ class Agent:
         self.procedural_memory.add_scheme("goal", None) # finish when goal reached
         '''
 
+    def add_module(self, module_name, module_instance):
+        self.modules[module_name] = module_instance  # add a module to the agent
+
+    def get_module(self, module_name):
+        return self.modules.get(module_name)  # retrieve a module by name
+
     def run(self):
+        env = self.get_module("Environment")
+        action_selection = self.get_module("ActionSelection")
+        sensory_memory = self.get_module("SensoryMemory")
+        procedural_memory = self.get_module("ProceduralMemory")
+        sensory_motor_memory = self.get_module("SensoryMotorMemory")
+
         #Agents behavior logic
         done = False
         state_id = 0
-        state, percept, action, environment, col, row = self.sensory_memory.run_sensors(self.procedural_memory, state_id)
+        state, percept, action, environment, col, row = sensory_memory.run_sensors(procedural_memory, state_id)
         print(f"Initial Observation: State: {state}, Percept: {percept}")
         #Additional code needed for the agents action (MAYBE)?
 
         while not done:
             #action = self.env.action_space.sample() #Replace when developed action selection logic
-            state, state_id, reward, done, truncated, info = self.action_selection.select_action(percept, state_id, self.sensory_motor_memory) # use action selection to decide next action
+            state, state_id, reward, done, truncated, info = action_selection.select_action(percept, state_id, sensory_motor_memory) # use action selection to decide next action
             #action = state["target_location"]
             print(f"Action: {action}\n")
 
@@ -69,5 +82,5 @@ class Agent:
             #observation = environment.env.spec.kwargs.get("desc")
             self.procedural_memory.add_scheme(state_str, action)
             percept = self.pam.retrieve_associations(state_str)  # update percept
-        self.env.close()
+        env.close()
 

@@ -11,5 +11,5 @@ class AgentFactory(ABC):
     """
 
     @abstractmethod
-    def get_agent(agent_type):
+    def get_agent(self, agent_type):
         pass
