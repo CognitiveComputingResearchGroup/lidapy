@@ -19,14 +19,15 @@ class SensoryMemory:
         """Adding the listener to the memory"""
         self.listeners.append(listener) #appending the listener to the list
 
-    def run_sensors(self, procedural_memory, state_id, state=None, col=None, row=None):
+    def run_sensors(self, procedural_memory, state_id: int=None, state=None, col=None, row=None):
         """All sensors associated will run with the memory"""
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
         if state_id == 0:
             state, info, col, row = self.environment.reset() # use environment instance to reset
         action = self.environment.action_space.sample() #Take a random action
-        #observation = self.environment.env.spec.kwargs.get("desc")
+        observation = self.environment.env.spec.kwargs.get("desc")
+        start_tile = observation[0][0]
 
         state_str = "state-"
         state_id_str = state_id.__str__()

@@ -1,4 +1,4 @@
-from src.Memphis.ccrg.LIDA.Framework.Agents.Agent import Agent
+from src.Framework.Agents.Agent import Agent
 
 def test_agent_integration():
     agent = Agent()

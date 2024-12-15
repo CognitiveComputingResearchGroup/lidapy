@@ -1,7 +1,6 @@
 import argparse
 import logging
-from typing import overload
-from src.Memphis.ccrg.LIDA.Framework.Agents.Agent import Agent
+from src.Framework.Agents.Agent import Agent
 
 
 class AgentStarter:
@@ -39,37 +38,39 @@ class AgentStarter:
         else:
             self.start(properties)
 
-    @overload
-    def start(self, properties):
-        agent_properties = properties['agent']
-        if agent_properties is None:
-            self.logger.critical('Specified Properties object is null, '
-                                 'attempting to load default properties '
-                                 'path instead.')
-            self.start()
+    def start(self, properties=None, properties_path=None):
+        if properties is not None:
+            agent_properties = properties['agent']
+            if agent_properties is None:
+                self.logger.critical('Specified Properties object is null, '
+                                     'attempting to load default properties '
+                                     'path instead.')
+                self.start()
+            else:
+                self.run()
+        elif properties_path is not None:
+            agent_properties = self.load_properties(properties_path)
+            if agent_properties is not None:
+                self.run()
+            else:
+                self.logger.critical(
+                    'Specified Properties object is null, trying'
+                    'to load default properties path instead.')
+                self.start()
         else:
-            self.run()
+            properties_path = AgentStarter.DEFAULT_PROPERTIES_PATH
+            agent_properties = self.load_properties(properties_path)
+            if agent_properties is not None:
+                self.run()
+            else:
+                self.logger.critical(
+                    'Could not load main configuration file from '
+                    'default path: '
+                    f'{properties_path}. Application cannot start.')
 
-    @overload
-    def start(self):
-        properties_path = AgentStarter.DEFAULT_PROPERTIES_PATH
-        agent_properties = self.load_properties(properties_path)
-        if agent_properties is not None:
-            self.run()
-        else:
-            self.logger.critical('Could not load main configuration file from '
-                            'default path: '
-                            f'{properties_path}. Application cannot start.')
 
-    @overload
-    def start(self, properties_path: str = None):
-        agent_properties = self.load_properties(properties_path)
-        if agent_properties is not None:
-            self.run()
-        else:
-            self.logger.critical('Specified Properties object is null, trying'
-                                 'to load default properties path instead.')
-            self.start()
+    #def run(self):
+
 
     """
     Obtains the properties path by parsing the properties file.
