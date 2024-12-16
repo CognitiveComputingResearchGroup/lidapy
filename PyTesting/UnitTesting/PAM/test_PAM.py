@@ -1,5 +1,4 @@
-import pytest
-from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
+from src.PAM.PAM import PerceptualAssociativeMemory
 
 def test_add_associations():
     pam = PerceptualAssociativeMemory() #instance of PAM

@@ -1,11 +1,10 @@
-import pytest
-from src.Memphis.ccrg.LIDA.Framework.Agents.Agent import Agent
-from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
-from src.Memphis.ccrg.LIDA.SensoryMemory.SensoryMemory import SensoryMemory
-from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMemory
-from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
-from src.Memphis.ccrg.LIDA.ActionSelection.ActionSelection import ActionSelection
-import unittest.mock as mock
+from src.Framework.Agents.Agent import Agent
+from src.Environment.Environment import FrozenLakeEnvironment
+from src.SensoryMemory.SensoryMemory import SensoryMemory
+from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from src.PAM.PAM import PerceptualAssociativeMemory
+from src.ActionSelection.ActionSelection import ActionSelection
+
 
 def test_run():
     #Generating instances
