@@ -30,7 +30,7 @@ class PerceptualAssociativeMemory:
             pattern = self.add_association(cue, f"default-pattern-{cue}") # create default association
             return self.associations[pattern]
 
-    def learn(self, state, outcome=None):
+    def learn(self, state, outcome):
         #if cue not in self.associations:
             #self.associations[cue] = []
         #self.associations[cue].append(pattern)

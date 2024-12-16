@@ -1,4 +1,5 @@
-from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
+import pytest
+from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 def test_add_scheme():
     procedural_memory = ProceduralMemory()

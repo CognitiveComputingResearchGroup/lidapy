@@ -1,5 +1,5 @@
 import pytest
-from src.Environment.Environment import FrozenLakeEnvironment
+from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
 
 #Defining a fixture function
 #initializing resources
