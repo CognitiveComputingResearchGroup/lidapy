@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 """
 This provided PyTest is for the Sensory Motor Memory Module:
-It provideds test for the specific functions: add_sensory_listener, receieve_action,
+It provides tests for the specific functions: add_sensory_listener, receieve_action,
     send_action_exection_command. 
 As development continues these are subject to change or update as the module does. 
 Test Cases: TC-044, TC-045, and TC-046.

@@ -3,7 +3,7 @@ from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMe
 
 """
 This provided PyTest is for the Procedural Memory Module:
-It provideds test for the specific functions: add_scheme, get_action
+It provides tests for the specific functions: add_scheme, get_action
 As development continues these are subject to change or update as the module does. 
 Test Cases: TC-040, TC-041.
 """
