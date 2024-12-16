@@ -1,8 +1,8 @@
 import pytest
 
 from unittest.mock import Mock
-from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
-from src.ActionSelection.ActionSelection import ActionSelection
-from src.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
+from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from src.Memphis.ccrg.LIDA.ActionSelection.ActionSelection import ActionSelection
+from src.Memphis.ccrg.LIDA.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
 
 

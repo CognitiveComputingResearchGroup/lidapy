@@ -2,13 +2,13 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
-from src.ActionSelection.ActionSelection import ActionSelection
-from src.PAM.PAM import PerceptualAssociativeMemory
-from src.SensoryMemory.SensoryMemory import SensoryMemory
-from src.Environment.Environment import FrozenLakeEnvironment
-from src.MotorPlanExecution.MotorPlanExecution import MPExecution
-from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
-from src.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
+from src.Memphis.ccrg.LIDA.ActionSelection.ActionSelection import ActionSelection
+from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
+from src.Memphis.ccrg.LIDA.SensoryMemory.SensoryMemory import SensoryMemory
+from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
+from MotorPlanExecution.MotorPlanExecution import MPExecution
+from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from src.Memphis.ccrg.LIDA.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
 
 
 class Agent:

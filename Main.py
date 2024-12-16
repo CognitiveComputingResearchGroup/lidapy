@@ -3,7 +3,7 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 #from src.Memphis.ccrg.LIDA.Framework.Agents.Agent import Agent
-from src.Framework.Initialization.ConcreteAgentFactory import ConcreteAgentFactory
+from src.Memphis.ccrg.LIDA.Framework.Initialization.ConcreteAgentFactory import ConcreteAgentFactory
 
 if __name__ == "__main__":
     #agent = Agent() #instantiate FrozenLakeAgent / create instance of the class

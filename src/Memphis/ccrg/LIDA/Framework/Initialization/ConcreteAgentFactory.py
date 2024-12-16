@@ -1,11 +1,11 @@
-from src.Framework.Agents.Agent import Agent
-from src.Framework.Initialization.AgentFactory import AgentFactory
-from src.ActionSelection.ActionSelection import ActionSelection
-from src.PAM.PAM import PerceptualAssociativeMemory
-from src.SensoryMemory.SensoryMemory import SensoryMemory
-from src.Environment.Environment import FrozenLakeEnvironment
-from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
-from src.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
+from src.Memphis.ccrg.LIDA.Framework.Agents.Agent import Agent
+from src.Memphis.ccrg.LIDA.Framework.Initialization.AgentFactory import AgentFactory
+from src.Memphis.ccrg.LIDA.ActionSelection.ActionSelection import ActionSelection
+from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
+from src.Memphis.ccrg.LIDA.SensoryMemory.SensoryMemory import SensoryMemory
+from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
+from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from src.Memphis.ccrg.LIDA.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
 #from MotorPlanExecution.MotorPlanExecution import MPExecution
 
 class ConcreteAgentFactory(AgentFactory):
