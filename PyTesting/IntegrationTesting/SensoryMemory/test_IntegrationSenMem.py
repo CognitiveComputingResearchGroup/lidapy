@@ -1,9 +1,9 @@
 import pytest
 
-from src.Memphis.ccrg.LIDA.SensoryMemory.SensoryMemory import SensoryMemory
-from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
-from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
-from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from src.SensoryMemory.SensoryMemory import SensoryMemory
+from src.PAM.PAM import PerceptualAssociativeMemory
+from src.Environment.Environment import FrozenLakeEnvironment
+from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 """
 This provided PyTest is for an integration test of the Sensory Memory Module:

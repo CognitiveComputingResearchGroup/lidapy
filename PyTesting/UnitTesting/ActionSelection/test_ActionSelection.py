@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 from src.ActionSelection.ActionSelection import ActionSelection
 from src.SensoryMotorMemory.SensoryMotorMemoryImpl import (
                                                         SensoryMotorMemoryImpl)
-from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 #initializing resources
 @pytest.fixture
