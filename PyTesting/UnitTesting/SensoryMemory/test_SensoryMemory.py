@@ -4,6 +4,13 @@ from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
 from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
 from unittest.mock import Mock #utilize to mock the dependencies
 
+"""
+This provided PyTest is for the Sensory Memory Module:
+It provideds test for the specific functions: run_sensors, add_listener
+As development continues these are subject to change or update as the module does. 
+Test Cases: TC-035, TC-036.
+"""
+
 @pytest.fixture
 def environment():
     #Generating a Mock Environment
