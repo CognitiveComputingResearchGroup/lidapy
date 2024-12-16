@@ -1,5 +1,4 @@
-import pytest
-from src.Memphis.ccrg.LIDA.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 """
 This provided PyTest is for the Procedural Memory Module:

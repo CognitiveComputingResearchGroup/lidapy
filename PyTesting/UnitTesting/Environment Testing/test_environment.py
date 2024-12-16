@@ -1,5 +1,5 @@
 import pytest
-from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
+from src.Environment.Environment import FrozenLakeEnvironment
 
 """
 This provided PyTest is for the Environment Module:

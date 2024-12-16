@@ -1,5 +1,4 @@
-import pytest
-from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
+from src.PAM.PAM import PerceptualAssociativeMemory
 
 """
 This provided PyTest is for the Perceptual Associative Memory (PAM) Module:
