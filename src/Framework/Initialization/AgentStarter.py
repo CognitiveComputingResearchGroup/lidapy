@@ -1,7 +1,7 @@
 import argparse
 import logging
 from typing import overload
-from src.Memphis.ccrg.LIDA.Framework.Agents.Agent import Agent
+from src.Framework.Agents.Agent import Agent
 
 
 class AgentStarter:

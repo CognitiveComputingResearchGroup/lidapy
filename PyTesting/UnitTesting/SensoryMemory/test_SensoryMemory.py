@@ -1,7 +1,7 @@
 import pytest
-from src.Memphis.ccrg.LIDA.SensoryMemory.SensoryMemory import SensoryMemory
-from src.Memphis.ccrg.LIDA.PAM.PAM import PerceptualAssociativeMemory
-from src.Memphis.ccrg.LIDA.Environment.Environment import FrozenLakeEnvironment
+from src.SensoryMemory.SensoryMemory import SensoryMemory
+from src.PAM.PAM import PerceptualAssociativeMemory
+from src.Environment.Environment import FrozenLakeEnvironment
 from unittest.mock import Mock #utilize to mock the dependencies
 
 @pytest.fixture
