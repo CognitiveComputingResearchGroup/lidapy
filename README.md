@@ -7,6 +7,7 @@ Contributions:
     *Generated comments for reference to each modules function
     *Initialized Modules and Functions - Environment (init, reset, step, render, and close), Sensory Memory (init, add_sensory_listener, run_sensors and get_sensory_content), PAM (init, add_associations, retrieve associations)
     *Initialized the Motor-Plan execution Module to include the functions: execute
+    *Modification into the Environment to include: assisting the aware of the agent with its surrounidng tiles.
 
   Nicole Vadillo:
     *Modified the Environment module to include action_space and step function
