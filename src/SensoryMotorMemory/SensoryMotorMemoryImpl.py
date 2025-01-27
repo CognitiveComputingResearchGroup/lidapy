@@ -42,7 +42,7 @@ class SensoryMotorMemoryImpl:
         :return: content corresponding to the action_plan
         """
         #Logic to retrieve and return data based on the modality.
-        state, reward, done, truncated, info = self.environment.step(action_plan)
+        state, reward, done, truncated, info, surrounding_tiles = self.environment.step(action_plan)
         #state, reward, done, truncated, info = self.motor_plan.execute(action_plan)
         return state, reward, done, truncated, info
         #return {"modality": modality, "params": params}

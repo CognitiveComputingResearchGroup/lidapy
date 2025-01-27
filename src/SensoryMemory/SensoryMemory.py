@@ -24,8 +24,11 @@ class SensoryMemory:
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
         if state_id == 0:
-            state, info, col, row = self.environment.reset() # use environment instance to reset
+            state, info, surrounding_tiles, col, row = self.environment.reset()  # Use environment instance to reset
+        else:
+            col, row = self.environment.col, self.environment.row
         action = self.environment.action_space.sample() #Take a random action
+        surrounding_tiles = self.environment.get_surrounding_tiles(self.environment.row, self.environment.col)
         #observation = self.environment.env.spec.kwargs.get("desc")
 
         state_str = "state-"
@@ -33,7 +36,7 @@ class SensoryMemory:
         state_str += state_id_str
         procedural_memory.add_scheme(state_str, action)
         percept = self.pam.retrieve_associations(state_str)  # retrieve percept from PAM
-        return state, percept, action, self.environment, col, row # get state and percept from environment instance
+        return state, percept, action, self.environment, col, row, surrounding_tiles # get state and percept from environment instance
 
     def get_sensory_content(self, state, outcome, modality=None, params=None):
         """

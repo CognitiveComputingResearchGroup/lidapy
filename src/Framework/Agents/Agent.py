@@ -51,19 +51,32 @@ class Agent:
         #Agents behavior logic
         done = False
         state_id = 0
-        state, percept, action, environment, col, row = sensory_memory.run_sensors(procedural_memory, state_id)
+        state, percept, action, environment, col, row, surrounding_tiles = sensory_memory.run_sensors(procedural_memory, state_id)
         print(f"Initial Observation: State: {state}, Percept: {percept}")
+        #print(f"Surrounding Tiles: {surrounding_tiles}")
         #Additional code needed for the agents action (MAYBE)?
 
         while not done:
+            if state_id == 0:
+                state, info, surrounding_tiles, col, row = self.env.reset()  # Use environment instance to reset
+            else:
+                col, row = self.env.col, self.env.row
+
             #action = self.env.action_space.sample() #Replace when developed action selection logic
             state, state_id, reward, done, truncated, info = action_selection.select_action(percept, state_id, sensory_motor_memory) # use action selection to decide next action
             #action = state["target_location"]
+            step_result = self.env.step(action)
+            state, reward, done, truncated, info, surrounding_tiles = step_result
             print(f"Action: {action}\n")
+            print(f"State: {state_id}, Reward: {reward}, Done: {done}, Info: {info}")
+            print(f"Surrounding Tiles: {surrounding_tiles}")
+
 
             #state, reward, done, truncated, info = self.env.step(action)
             #self.env.render()
-            print(f"State: {state_id}, Reward: {reward}, Done: {done}, Info: {info}")
+
+            #surrounding_tiles = self.env.get_surrounding_tiles(self.env.row, self.env.col)
+
 
             state_str = "state-"
             state_id_str = state_id.__str__()
