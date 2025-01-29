@@ -5,7 +5,8 @@ Contributions:
   Katie Killian:
     *Generated PyTesing to include both unit and integration testing. 
     *Generated comments for reference to each modules function
-    *Initialized Modules and Functions - Environment (init, reset, step, render, and close), Sensory Memory (init, add_sensory_listener, run_sensors and get_sensory_content), PAM (init, add_associations, retrieve associations)
+    *Initialized Modules and Functions - Environment (init, reset, step, render, and close)
+    *Initialized Modules and Functions - Sensory Memory (init, add_sensory_listener, run_sensors and get_sensory_content), PAM (init, add_associations, retrieve associations)
     *Initialized the Motor-Plan execution Module to include the functions: execute
     *Modification into the Environment to include: assisting the agent to be aware of the surroudning tiles. Such as adding functions within the environment (updating position and get_surrounding_tiles) then adjusted the reset and step functions. 
 
