@@ -3,7 +3,7 @@ from src.SensoryMemory.SensoryMemory import SensoryMemory
 from unittest.mock import Mock #utilize to mock the dependencies
 
 """
-This provided PyTest is for the Sensory Memory Module:
+This provided PyTest is for the Sensory Memory ModuleSubject:
 It provides tests for the specific functions: run_sensors, add_listener
 As development continues these are subject to change or update as the module does. 
 Test Cases: TC-035, TC-036.

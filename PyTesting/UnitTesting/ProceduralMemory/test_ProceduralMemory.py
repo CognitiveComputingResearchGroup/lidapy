@@ -1,7 +1,7 @@
 from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 """
-This provided PyTest is for the Procedural Memory Module:
+This provided PyTest is for the Procedural Memory ModuleSubject:
 It provides tests for the specific functions: add_scheme, get_action
 As development continues these are subject to change or update as the module does. 
 Test Cases: TC-040, TC-041.

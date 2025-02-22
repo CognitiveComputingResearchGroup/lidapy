@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class GlobalModuleFactory(ABC):
+class GlobalWorkspace(ABC):
     """
     Interface for storing, retrieving, and updating
     modules and attributes between various LIDA modules

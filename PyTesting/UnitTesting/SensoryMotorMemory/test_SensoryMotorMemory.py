@@ -4,7 +4,7 @@ from src.Memphis.ccrg.LIDA.SensoryMotorMemory.SensoryMotorMemoryImpl import Sens
 from unittest.mock import Mock
 
 """
-This provided PyTest is for the Sensory Motor Memory Module:
+This provided PyTest is for the Sensory Motor Memory ModuleSubject:
 It provides tests for the specific functions: add_sensory_listener, receieve_action,
     send_action_exection_command. 
 As development continues these are subject to change or update as the module does. 

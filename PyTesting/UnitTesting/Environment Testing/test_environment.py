@@ -2,7 +2,7 @@ import pytest
 from src.Environment.Environment import FrozenLakeEnvironment
 
 """
-This provided PyTest is for the Environment Module:
+This provided PyTest is for the Environment ModuleSubject:
 It provides tests for the specific functions: reset, step, render
 As development continues these are subject to change or update as the module does. 
 Test Cases: TC-032, TC-033, and TC-034.

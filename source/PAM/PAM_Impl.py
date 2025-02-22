@@ -8,34 +8,21 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
+
 from source.ModuleInitialization.ModuleInterface import Module
 
 
 class PerceptualAssociativeMemory(Module):
     def __init__(self):
-        #Storing associations
-        self.associations = {}
-        self.observers = []
-
-    def add_association(self, cue, pattern):
-        #Add new associations
-        if self.associations.__eq__(None) or cue not in self.associations:
-            self.associations[pattern] = []
-        self.associations[pattern].append(cue)
-        return pattern
-
-    def retrieve_associations(self, cue):
-        #Retreiving associations for the given cue
-        if not self.associations.__eq__(None) and cue in self.associations:
-            return self.associations[cue]
-        else:
-            # create default association
-            pattern = self.add_association(cue,
-                                           f"default-pattern-{cue}")
-            return self.associations[pattern]
+        super().__init__()
 
     def learn(self, state, outcome=None):
-        pass
+        if outcome == "goal":
+            self.add_association(state, "goal" + state)
+        elif outcome == "hole":
+            self.add_association(state, "danger" + state)
+        else:
+            self.add_association(state, "safe" + state)
 
     """
     NEED: to connect to sensory memory, use data as cue for PAM

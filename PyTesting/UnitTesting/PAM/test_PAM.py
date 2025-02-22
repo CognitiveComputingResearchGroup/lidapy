@@ -1,7 +1,7 @@
 from src.PAM.PAM import PerceptualAssociativeMemory
 
 """
-This provided PyTest is for the Perceptual Associative Memory (PAM) Module:
+This provided PyTest is for the Perceptual Associative Memory (PAM) ModuleSubject:
 It provides tests for the specific functions: add_associations, retrieve_associations,
     learn
 As development continues these are subject to change or update as the module does. 
