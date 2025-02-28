@@ -4,6 +4,7 @@
 
 import gymnasium as gym
 from source.Environment.Environment import Environment
+from source.PAM.PAM_Impl import PerceptualAssociativeMemory
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
@@ -28,9 +29,11 @@ class FrozenLakeMinimal(Environment):
             render_mode=render_mode)
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
-        self.action = None
+        self.row = 0
+        self.col = 0
         self.add_observer(SensoryMemoryImpl(None,
-                                            SensoryMotorMemoryImpl(self)))
+                                            PerceptualAssociativeMemory(),
+                                            None))
 
     # Reseting the environment to start a new episode
     def reset(self):
@@ -60,6 +63,31 @@ class FrozenLakeMinimal(Environment):
                 self.step(action)
             else:
                 self.close()
+
+    def update_position(self, action):
+        if action == 3:  # up
+            self.row = max(self.row - 1, 0)
+        elif action == 2:  # Right
+            self.row = min(self.col + 1, self.env.unwrapped.desc.shape[1] - 1)
+        elif action == 1:  # down
+            self.row = min(self.row + 1, self.env.unwrapped.desc.shape[0] - 1)
+        elif action == 0:  # Left
+            self.col = max(self.col - 1, 0)
+
+    def get_surrounding_tiles(self, row, col):
+        # gathering information about the tiles surrounding the agent
+        desc = self.env.unwrapped.desc
+        surrounding_tiles = {}
+        directions = {
+            "up": (max(row - 1, 0), col),
+            "right": (row, min(col + 1, desc.shape[1] - 1)),
+            "down": (min(row + 1, desc.shape[0] - 1), col),
+            "left": (row, max(col - 1, 0)),
+        }
+        for direction, (r, c) in directions.items():
+            surrounding_tiles[direction] = desc[r, c].decode(
+                'utf-8')  # Decode byte to string
+        return surrounding_tiles
 
     # close the environment:
     def close(self):
