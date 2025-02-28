@@ -2,7 +2,7 @@ from source.Environment.FrozenLakeSimpleEnv import FrozenLakeMinimal
 from source.Framework.Agents.Agent import Agent
 
 
-class MinimalReactiveAgent(Agent):
+class AlarmsControlAgent(Agent):
     def __init__(self):
         super().__init__()
         self.environment = FrozenLakeMinimal()

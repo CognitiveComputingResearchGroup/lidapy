@@ -1,3 +1,4 @@
+from source.Framework.Agents.Alarms_Control_Agent import AlarmsControlAgent
 from source.Framework.Agents.Minimal_Reactive_Agent import MinimalReactiveAgent
 from source.Framework.Initialization.AgentFactory import AgentFactory
 
@@ -8,7 +9,9 @@ class ConcreteAgentFactory(AgentFactory):
         super().__init__()
 
     def get_agent(self, agent_type):
-        if agent_type == "MinimalReactiveAgent":
+        if agent_type == "MinimalReactiveAgent" or agent_type == "1":
             return MinimalReactiveAgent()
+        elif agent_type == "AlarmsControlAgent" or agent_type == "2":
+            return AlarmsControlAgent()
         else:
             raise ModuleNotFoundError("Module not found")

@@ -10,11 +10,17 @@ Output: Local Associations, passed to others
 """
 
 from source.ModuleInitialization.ModuleInterface import Module
+from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 
 
 class PerceptualAssociativeMemory(Module):
     def __init__(self):
         super().__init__()
+
+    def notify(self, module):
+        if isinstance(module, SensoryMemoryImpl):
+            state = module.get_sensory_content(module)
+            self.learn(state["state"], state["action"])
 
     def learn(self, state, outcome=None):
         if outcome == "goal":
