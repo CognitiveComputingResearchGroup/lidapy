@@ -7,9 +7,16 @@ from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 
 class ProceduralMemoryImpl(ProceduralMemory):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, action_selection, environment):
+        super().__init__(environment=environment)
+        if action_selection is not None:
+            self.add_observer(action_selection)
 
     def notify(self, module):
         if isinstance(module, PerceptualAssociativeMemory):
-            module.retrieve_associations(self)
+            state = module.get_state()["state"]["state"]
+            associations = module.retrieve_associations(state)
+            action = module.get_state()["action"]
+            for association in associations:
+                self.add_scheme(association, action)
+            self.notify_observers()

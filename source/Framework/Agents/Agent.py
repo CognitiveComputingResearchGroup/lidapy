@@ -10,3 +10,6 @@ class Agent(Module, ABC):
 
     def notify(self, module):
         pass
+
+    def get_state(self):
+        pass

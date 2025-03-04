@@ -5,10 +5,11 @@ from source.ModuleInitialization.ModuleInterface import Module
 
 
 class ProceduralMemory(Module):
-    def __init__(self):
+    def __init__(self, environment):
         super().__init__()
         self.schemes = {}  # initialize empty memory for schemes
         self.observers = []
+        self.environment = environment
 
     def add_scheme(self, percept, action):
         self.schemes[percept] = action  # add new scheme to memory

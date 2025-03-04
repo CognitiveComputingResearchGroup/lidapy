@@ -3,6 +3,7 @@
 # Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 from source.Environment.Environment import Environment
+from source.Framework.Agents.Agent import Agent
 from source.SensoryMemory.SensoryMemory import SensoryMemory
 
 
@@ -25,7 +26,7 @@ class SensoryMemoryImpl(SensoryMemory):
         self.action = None
 
     def notify(self, module):
-        if isinstance(module, Environment):
+        if isinstance(module, Agent):
             self.state = module.get_state()
             self.run_sensors(self.state, module)
 
@@ -34,7 +35,7 @@ class SensoryMemoryImpl(SensoryMemory):
         # Logic to gather information from the environment
         # Example: Reading the current state or rewards
         # Sample an action from environment action space
-        self.action = module.env.action_space.sample()
+        self.action = module.environment.env.action_space.sample()
         self.notify_observers()
 
     def get_sensory_content(self, modality=None, params=None):

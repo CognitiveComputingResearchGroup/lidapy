@@ -14,27 +14,34 @@ from source.ModuleInitialization.ModuleInterface import Module
 class PerceptualAssociativeMemory(Module):
     def __init__(self):
         #Storing associations
+        super().__init__()
         self.associations = {}
         self.observers = []
+
+    def notify(self, module):
+        pass
 
     def add_association(self, cue, pattern):
         #Add new associations
         if self.associations.__eq__(None) or cue not in self.associations:
-            self.associations[pattern] = []
-        self.associations[pattern].append(cue)
+            self.associations[cue] = []
+        self.associations[cue].append(pattern)
         return pattern
 
     def retrieve_associations(self, cue):
         #Retreiving associations for the given cue
-        if not self.associations.__eq__(None) and cue in self.associations:
+        if self.associations.__eq__(None) and cue in self.associations:
             return self.associations[cue]
         else:
             # create default association
             pattern = self.add_association(cue,
                                            f"default-pattern-{cue}")
-            return self.associations[pattern]
+            return pattern
 
     def learn(self, state, outcome=None):
+        pass
+
+    def get_state(self):
         pass
 
     """

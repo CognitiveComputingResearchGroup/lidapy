@@ -24,10 +24,10 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
         if isinstance(module, SensoryMemory):
-            self.event = module.get_sensory_content(module)
+            self.event = module.get_sensory_content(module)["action"]
         elif isinstance(module, ActionSelection):
-            self.event = module.get_action_content(module)
+            self.event = module.select_action()
         self.notify_observers()
 
     def receive_action(self):
-        return self.event["action"]
+        return self.event

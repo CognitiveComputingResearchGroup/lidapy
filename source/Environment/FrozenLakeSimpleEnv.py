@@ -3,8 +3,12 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 import gymnasium as gym
+
+from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.Environment.Environment import Environment
-from source.PAM.PAM_Impl import PerceptualAssociativeMemory
+from source.PAM.PAM_Impl import PerceptualAssociativeMemory, PAMImpl
+from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
@@ -19,7 +23,7 @@ Sends Sensory information to the Sensory Memory.
 
 class FrozenLakeMinimal(Environment):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
-    def __init__(self, render_mode="human", size=4):
+    def __init__(self, agent, render_mode="human", size=4):
         super().__init__()
         # generating the frozen lake environment
         self.env = gym.make(
@@ -31,22 +35,25 @@ class FrozenLakeMinimal(Environment):
         self.state = None
         self.row = 0
         self.col = 0
-        self.add_observer(SensoryMemoryImpl(None,
-                                            PerceptualAssociativeMemory(),
-                                            None))
+        self.add_observer(agent)
 
     # Reseting the environment to start a new episode
     def reset(self):
         # interacting with the environment by using Reset()
         state, info = self.env.reset()
-        self.state = {"state": state, "info": info, "done": False}
+        surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
+        self.state = {"state": state, "info": info, "done": False,
+                      "outcome": surrounding_tiles}
         self.notify_observers()
 
     # perform an action in environment:
     def step(self, action):
         # perform and update
         state, reward, done, truncated, info = self.env.step(action)
-        self.state = {"state": state, "info": info, "done": done}
+        self.update_position(action)
+        surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
+        self.state = {"state": state, "info": info, "done": done,
+                      "outcome": surrounding_tiles}
         self.notify_observers()
 
     # render environment's current state:
