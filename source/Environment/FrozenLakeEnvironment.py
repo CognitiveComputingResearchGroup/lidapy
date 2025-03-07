@@ -3,7 +3,16 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 import gymnasium as gym
+
+from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.Environment.Environment import Environment
+from source.PAM.PAM_Impl import PerceptualAssociativeMemory, PAMImpl
+from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
+from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
+from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
+from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
+    SensoryMotorMemoryImpl
 
 """
 The environment is essential for receiving, processing, and
@@ -12,52 +21,62 @@ effectively.
 Sends Sensory information to the Sensory Memory.
 """
 
-class FrozenLakeEnvironment(Environment):
+class FrozenLake(Environment):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
-    col = 0  # Data to hold the current column the agent occupies
-    row = 0  # Data to hold the current row the agent occupies
-
-    def __init__(self, render_mode="human", size=4):
-        # def __init__(self):
+    def __init__(self, agent, render_mode="human", size=4):
+        super().__init__()
         # generating the frozen lake environment
         self.env = gym.make(
             'FrozenLake-v1',
             desc=None,
-            is_slippery=True,
+            is_slippery=False,
             render_mode=render_mode)
-
         self.action_space = self.env.action_space  # action_space attribute
-        # self.col = 0 #Agents column position
-        # self.row = 0 #Agents row position
+        self.state = None
+        self.row = 0
+        self.col = 0
+        self.add_observer(agent)
+        self.logger.name = agent.__class__.__name__
 
     # Reseting the environment to start a new episode
     def reset(self):
         # interacting with the environment by using Reset()
         state, info = self.env.reset()
-        self.col, self.row = 0, 0  # Assuming the agent is started at (0,0)
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
-        return state, info, surrounding_tiles, self.col, self.row
+        self.state = {"state": state, "info": info, "done": False,
+                      "outcome": surrounding_tiles}
+        self.logger.info(f"state: {state}, " + f"info: {info}, " +
+                         f"done: False")
+        self.notify_observers()
 
     # perform an action in environment:
     def step(self, action):
         # perform and update
         state, reward, done, truncated, info = self.env.step(action)
-        self.update_position(
-            action)  # updating the agents position based on the action
+        self.update_position(action)
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
-        return state, reward, done, truncated, info, surrounding_tiles  # action chosen by the agent
-        # ^returns state, reward, done, truncated, info
+        self.state = {"state": state, "info": info, "done": done,
+                      "outcome": surrounding_tiles}
+        self.logger.info(f"state: {state}, " + f"info: {info}, " +
+                          f"done: {done}, " + f"action: {action}")
+        self.notify_observers()
 
     # render environment's current state:
     def render(self):
         self.env.render()
 
-    # close the environment:
-    def close(self):
-        self.env.close()
+    def get_state(self):
+        return self.state
+
+    def notify(self, module):
+        if isinstance(module, SensoryMotorMemory):
+            action = module.receive_action()
+            if not self.state["done"]:
+                self.step(action)
+            else:
+                self.close()
 
     def update_position(self, action):
-        # updating the agents position based on the action taken
         if action == 3:  # up
             self.row = max(self.row - 1, 0)
         elif action == 2:  # Right
@@ -81,3 +100,7 @@ class FrozenLakeEnvironment(Environment):
             surrounding_tiles[direction] = desc[r, c].decode(
                 'utf-8')  # Decode byte to string
         return surrounding_tiles
+
+    # close the environment:
+    def close(self):
+        self.env.close()

@@ -1,5 +1,5 @@
 from source.Environment.Environment import Environment
-from source.Environment.FrozenLakeSimpleEnv import FrozenLakeMinimal
+from source.Environment.FrozenLakeEnvironment import FrozenLake
 from source.Framework.Agents.Agent import Agent
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
@@ -9,7 +9,7 @@ from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
 class MinimalReactiveAgent(Agent):
     def __init__(self):
         super().__init__()
-        self.environment = FrozenLakeMinimal(self)
+        self.environment = FrozenLake(self)
         self.sensory_motor_mem = SensoryMotorMemoryImpl(self.environment)
         self.sensory_memory = SensoryMemoryImpl(self.environment, None,
                                                 self.sensory_motor_mem)

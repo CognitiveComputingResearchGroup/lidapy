@@ -1,6 +1,6 @@
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.Environment.Environment import Environment
-from source.Environment.FrozenLakeSimpleEnv import FrozenLakeMinimal
+from source.Environment.FrozenLakeEnvironment import FrozenLake
 from source.Framework.Agents.Agent import Agent
 from source.PAM.PAM_Impl import PAMImpl
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
@@ -12,7 +12,7 @@ from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
 class AlarmsControlAgent(Agent):
     def __init__(self):
         super().__init__()
-        self.environment = FrozenLakeMinimal(self)
+        self.environment = FrozenLake(self)
         self.sensory_motor_mem = SensoryMotorMemoryImpl(self.environment)
         self.action_selection = ActionSelectionImpl(self.sensory_motor_mem)
         self.procedural_memory = ProceduralMemoryImpl(self.action_selection,
