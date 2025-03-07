@@ -12,7 +12,7 @@ from source.ModuleInitialization.ModuleInterface import Module
 
 
 class PerceptualAssociativeMemory(Module):
-    def __init__(self):
+    def __init__(self, workspace=None):
         #Storing associations
         super().__init__()
         self.associations = {}

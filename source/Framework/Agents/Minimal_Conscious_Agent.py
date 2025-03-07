@@ -7,9 +7,10 @@ from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
     SensoryMotorMemoryImpl
+from source.Workspace.WorkspaceImpl import WorkspaceImpl
 
 
-class MinimallyConsciousAgent(Agent):
+class MinimalConsciousAgent(Agent):
     def __init__(self):
         super().__init__()
         self.environment = FrozenLake(self)
@@ -18,8 +19,10 @@ class MinimallyConsciousAgent(Agent):
         self.procedural_memory = ProceduralMemoryImpl(self.action_selection,
                                                       self.environment)
         self.pam = PAMImpl(self.procedural_memory)
+        self.workspace = WorkspaceImpl()
         self.sensory_memory = SensoryMemoryImpl(None,self.pam,
-                                                None)
+                                                None,
+                                                self.workspace)
 
         #Add observers
         self.add_observer(self.sensory_memory)

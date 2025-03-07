@@ -1,7 +1,7 @@
 from source.Framework.Agents.Alarms_Control_Agent import AlarmsControlAgent
 from source.Framework.Agents.Minimal_Reactive_Agent import MinimalReactiveAgent
-from source.Framework.Agents.Minimally_Conscious_Agent import \
-    MinimallyConsciousAgent
+from source.Framework.Agents.Minimal_Conscious_Agent import \
+    MinimalConsciousAgent
 from source.Framework.Initialization.AgentFactory import AgentFactory
 
 
@@ -15,7 +15,7 @@ class ConcreteAgentFactory(AgentFactory):
             return MinimalReactiveAgent()
         elif agent_type == "AlarmsControlAgent" or agent_type == "2":
             return AlarmsControlAgent()
-        elif agent_type == "MinimallyConsciousAgent" or agent_type == "3":
-            return MinimallyConsciousAgent()
+        elif agent_type == "MinimalConsciousAgent" or agent_type == "3":
+            return MinimalConsciousAgent()
         else:
             raise ModuleNotFoundError("Module not found")

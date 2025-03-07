@@ -15,10 +15,12 @@ from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 
 
 class PAMImpl(PerceptualAssociativeMemory):
-    def __init__(self, procedural_memory=None):
+    def __init__(self, procedural_memory=None, workspace=None):
         super().__init__()
         if procedural_memory is not None:
             self.add_observer(procedural_memory)
+        if workspace is not None:
+            self.add_observer(workspace)
         self.action = None
         self.state = None
         self.action_value = {

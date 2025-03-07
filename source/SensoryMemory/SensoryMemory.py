@@ -10,7 +10,7 @@ process and transfer to further working memory.
 """
 
 class SensoryMemory(Module):
-    def __init__(self, pam=None, sensory_motor_memory=None):
+    def __init__(self, pam=None, sensory_motor_memory=None, workspace=None):
         super().__init__()
         self.observers = []
 

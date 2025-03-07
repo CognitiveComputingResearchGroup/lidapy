@@ -1,10 +1,12 @@
+from source.PAM.PAM import PerceptualAssociativeMemory
 from source.Workspace.Workspace import Workspace
+from source.ModuleInitialization.DefaultLogger import getLogger
 
 
 class WorkspaceImpl(Workspace):
     def __init__(self):
         super().__init__()
-        self.logger.name = self.__class__.__name__
+        self.logger = getLogger(self.__class__.__name__)
 
     def addCueListener(self, cue_listener):
         self.observers.add(cue_listener)
@@ -32,4 +34,7 @@ class WorkspaceImpl(Workspace):
         pass
 
     def notify(self, module):
-        pass
+        if isinstance(module, PerceptualAssociativeMemory):
+            state = module.get_state()["state"]["state"]
+            percept = module.retrieve_associations(state)
+            self.receive_percept(percept)
