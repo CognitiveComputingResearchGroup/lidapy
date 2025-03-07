@@ -29,13 +29,14 @@ class FrozenLakeMinimal(Environment):
         self.env = gym.make(
             'FrozenLake-v1',
             desc=None,
-            is_slippery=True,
+            is_slippery=False,
             render_mode=render_mode)
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
         self.row = 0
         self.col = 0
         self.add_observer(agent)
+        self.logger.name = agent.__class__.__name__
 
     # Reseting the environment to start a new episode
     def reset(self):
@@ -44,6 +45,8 @@ class FrozenLakeMinimal(Environment):
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
         self.state = {"state": state, "info": info, "done": False,
                       "outcome": surrounding_tiles}
+        self.logger.info(f"state: {state}, " + f"info: {info}, " +
+                         f"done: False")
         self.notify_observers()
 
     # perform an action in environment:
@@ -54,6 +57,8 @@ class FrozenLakeMinimal(Environment):
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
         self.state = {"state": state, "info": info, "done": done,
                       "outcome": surrounding_tiles}
+        self.logger.info(f"state: {state}, " + f"info: {info}, " +
+                          f"done: {done}, " + f"action: {action}")
         self.notify_observers()
 
     # render environment's current state:

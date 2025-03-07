@@ -11,13 +11,15 @@ class ProceduralMemory(Module):
         self.observers = []
         self.environment = environment
 
-    def add_scheme(self, percept, action):
-        self.schemes[percept] = action  # add new scheme to memory
+    def add_scheme(self, state, percept, action):
+        if self.schemes.__eq__(None) or state not in self.schemes:
+            self.schemes[state] = {}  # add new scheme to memory
+            self.schemes[state][percept] = action
         # percept: percept cue ("goal", "safe", or "danger")
         # action: corresponding action or scheme
 
-    def get_action(self, percept):
-        return self.schemes.get(percept, None)  # get action for the percept
+    def get_action(self, state, percept):
+        return self.schemes[state].get(percept, None)  # get action for the percept
         # return corresponding action or None if not found
 
     def notify(self, module):

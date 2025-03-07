@@ -14,14 +14,15 @@ class ActionSelectionImpl(ActionSelection):
 
     def notify(self, module):
         if isinstance(module, ProceduralMemory):
-            action = module.get_action("goal")
+            state = module.environment.get_state()["state"]
+            action = module.get_action(state, "goal")
 
             if action is None:
-                action = module.get_action("safe")
+                action = module.get_action(state, "safe")
             if action is None:
-                action = module.get_action("start")
-            """if action is None:
-                action = module.get_action("danger")"""
+                action = module.get_action(state, "start")
+            if action is None:
+                action = module.get_action(state, "danger")
 
             self.scheme = action
             self.notify_observers()

@@ -18,5 +18,5 @@ class ProceduralMemoryImpl(ProceduralMemory):
             associations = module.retrieve_associations(state)
             action = module.get_state()["action"]
             for association in associations:
-                self.add_scheme(association, action)
+                self.add_scheme(state, association, action)
             self.notify_observers()
