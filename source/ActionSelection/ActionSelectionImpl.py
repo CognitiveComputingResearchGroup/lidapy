@@ -1,4 +1,5 @@
 from source.ActionSelection.ActionSelection import ActionSelection
+from source.ModuleInitialization.DefaultLogger import getLogger
 from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 
@@ -8,6 +9,7 @@ class ActionSelectionImpl(ActionSelection):
         # Add modules relevant to action selection
         self.add_observer(sensory_motor_memory)
         self.scheme = {}
+        self.logger = getLogger(self.__class__.__name__).logger
 
     def select_action(self):
         return self.scheme
@@ -23,6 +25,7 @@ class ActionSelectionImpl(ActionSelection):
                 action = module.get_action(state, "start")
             if action is None:
                 action = module.get_action(state, "danger")
+                self.logger.warning("Danger ahead, falling back to safety!")
 
             self.scheme = action
             self.notify_observers()

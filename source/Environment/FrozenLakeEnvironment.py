@@ -4,15 +4,9 @@
 
 import gymnasium as gym
 
-from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.Environment.Environment import Environment
-from source.PAM.PAM_Impl import PerceptualAssociativeMemory, PAMImpl
-from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
-from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
-from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
+from source.ModuleInitialization.DefaultLogger import getLogger
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
-from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
-    SensoryMotorMemoryImpl
 
 """
 The environment is essential for receiving, processing, and
@@ -36,7 +30,7 @@ class FrozenLake(Environment):
         self.row = 0
         self.col = 0
         self.add_observer(agent)
-        self.logger.name = agent.__class__.__name__
+        self.logger = getLogger(agent.__class__.__name__).logger
 
     # Reseting the environment to start a new episode
     def reset(self):
