@@ -11,11 +11,11 @@ class ConcreteAgentFactory(AgentFactory):
         super().__init__()
 
     def get_agent(self, agent_type):
-        if agent_type == "MinimalReactiveAgent" or agent_type == "1":
+        if agent_type == "MinimalReactiveAgent" or agent_type == 1:
             return MinimalReactiveAgent()
-        elif agent_type == "AlarmsControlAgent" or agent_type == "2":
+        elif agent_type == "AlarmsControlAgent" or agent_type == 2:
             return AlarmsControlAgent()
-        elif agent_type == "MinimalConsciousAgent" or agent_type == "3":
+        elif agent_type == "MinimalConsciousAgent" or agent_type == 3:
             return MinimalConsciousAgent()
         else:
-            raise ModuleNotFoundError("Module not found")
+            raise ModuleNotFoundError(f"Module {agent_type} not found")
