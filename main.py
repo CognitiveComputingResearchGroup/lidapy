@@ -3,11 +3,13 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 import argparse
+import sys
+
 from source.Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
 
-DEFAULT_AGENT_ID = 1
-DEFAULT_AGENT_TYPE = 'MinimalReactiveAgent'
+DEFAULT_AGENT_ID = 2
+DEFAULT_AGENT_TYPE = "godot_client"
 
 
 def parse_args():
@@ -27,10 +29,22 @@ if __name__ == "__main__":
     agent_factory = ConcreteAgentFactory()
     try:
         args = parse_args()
-        agent = agent_factory.get_agent(args.id) # Initialize agent
-
+        if args.type != DEFAULT_AGENT_TYPE:
+            agent = agent_factory.get_agent(args.type)
+        else:
+            agent = agent_factory.get_agent(args.id) # Initialize agent
+        agent = agent_factory.get_agent(args.type)
         # Start the agent
-        agent.run()
+        try:
+            agent.run()
+            sys.exit(0)
+        except Exception as e:
+            print(e)
+        try:
+            agent.main()
+            sys.exit(0)
+        except Exception as e:
+            print(e)
     except Exception as e:
         raise e
 

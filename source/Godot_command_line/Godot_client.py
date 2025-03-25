@@ -26,7 +26,6 @@ ACTION_MAP = {'W': 'up',
               'D': 'right',
               'Q': 'rotate_counterclockwise',
               'E': 'rotate_clockwise'}
-
 verbose = False
 seqno = 1  # current request's sequence number
 
@@ -86,8 +85,8 @@ def create_request(data):
 
     return {'header': header, 'data': data}
 
-
-if __name__ == '__main__':
+def main():
+    global seqno
     try:
         args = parse_args()
         connection = connect(host=args.host, port=args.port)
@@ -118,3 +117,6 @@ if __name__ == '__main__':
             sys.exit(1)
         except SystemExit:
             os._exit(1)
+
+if __name__ == '__main__':
+    main()
