@@ -1,14 +1,14 @@
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
-from source.GlobalWorkspace.Coalition import Coalition
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
+from source.Workspace.CurrentSituationModel.CurrentSituationalModel import \
+    CurrentSituationalModel
 
 
 class AttentionCodeletImpl(AttentionCodelet):
     def __init__(self, current_situational_model, global_workspace):
         super().__init__(current_situational_model, global_workspace)
 
-        self.currentSituationalModel = current_situational_model
-        self.global_workspace = global_workspace
+        self.add_observer(current_situational_model)
         self.DEFAULT_CODELET_REFRACTORY_PERIOD = 50
         self.codeletRefractoryPeriod = None
 
@@ -33,4 +33,19 @@ class AttentionCodeletImpl(AttentionCodelet):
 
     def get_refactory_period(self):
         return self.codeletRefractoryPeriod
+
+    def bufferContainsSoughtContent(self, buffer):
+        if isinstance(buffer, CurrentSituationalModel):
+            if self.getSoughtContent() in buffer.getBufferContent():
+                return True
+            else:
+                return False
+
+    """
+        Returns sought content and related content from specified
+        WorkspaceBuffer
+        """
+    def retrieveWorkspaceContent(self, buffer):
+        if isinstance(buffer, CurrentSituationalModel):
+            return buffer.getBufferContent()
 

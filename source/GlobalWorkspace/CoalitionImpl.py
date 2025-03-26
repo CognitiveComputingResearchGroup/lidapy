@@ -1,7 +1,8 @@
+from source.Framework.Shared.ActivatibleImpl import ActivatibleImpl
 from source.GlobalWorkspace.Coalition import Coalition
 
 
-class CoalitionImpl(Coalition):
+class CoalitionImpl(Coalition, ActivatibleImpl):
     def __init__(self, broadcast_content = None, attention_codelet = None):
         super().__init__()
 

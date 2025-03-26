@@ -1,11 +1,11 @@
+from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.ModuleInitialization.Codelet import Codelet
-from source.ModuleInitialization.ModuleInterface import Module
 
 
 class CodeletImpl(Codelet):
     def __init__(self):
         super().__init__()
-        self.soughtContent  = Module()
+        self.soughtContent  = NodeStructureImpl()
 
     def getSoughtContent(self):
         return self.soughtContent

@@ -1,28 +1,29 @@
-from abc import ABC, abstractmethod
+from source.ModuleInitialization.ModuleInterface import Module
 
 
-class GlobalWorkspace(ABC):
-    """
-    Interface for storing, retrieving, and updating
-    modules and attributes between various LIDA modules
-    """
-
+class GlobalWorkspace(Module):
     def __init__(self):
+        super().__init__()
         self.modules = {}
         self.attributes = {}
 
-    def add_module(self, module_name, module_instance):
-        # add a module to the instance
-        self.modules[module_name] = module_instance
+    def addCoalition(self, coalition):
+        pass
 
-    def get_module(self, module_name):
-        return self.modules.get(module_name)  # retrieve a module by name
+    def addBroadcastTrigger(self, trigger):
+        pass
 
-    def add_attribute(self, attribute, value):
-        self.attributes[attribute] = value
+    def getBroadcastSentCount(self):
+        pass
 
-    def update_attribute(self, attribute_name, value):
-        self.attributes[attribute_name] = value
+    def getTickAtLastBroadcast(self):
+        pass
 
-    def get_attribute(self, attribute_name):
-        return self.attributes.get(attribute_name)
+    def setCoalitionDecayStrategy(self, decay_strategy):
+        pass
+
+    def getCoalitionDecayStrategy(self):
+        pass
+
+    def notify(self, module):
+        pass

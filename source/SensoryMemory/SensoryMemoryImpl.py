@@ -15,15 +15,15 @@ process and transfer to further working memory.
 
 class SensoryMemoryImpl(SensoryMemory):
     def __init__(self, environment=None, pam=None, sensory_motor_memory=None,
-                 workspace=None):
+                 csm=None):
         super().__init__()
         # Add observers to the subject
         if pam is not None:
             self.add_observer(pam)
         if sensory_motor_memory is not None:
             self.add_observer(sensory_motor_memory)
-        if workspace is not None:
-            self.add_observer(workspace)
+        if csm is not None:
+            self.add_observer(csm)
 
         self.state = None
         self.action = None

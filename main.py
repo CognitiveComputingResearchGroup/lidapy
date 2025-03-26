@@ -9,7 +9,7 @@ from source.Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
 
 DEFAULT_AGENT_ID = 2
-DEFAULT_AGENT_TYPE = "godot_client"
+DEFAULT_AGENT_TYPE = "AlarmsControlAgent"
 
 
 def parse_args():

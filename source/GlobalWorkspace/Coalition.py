@@ -1,7 +1,8 @@
+from source.Framework.Shared.Activatible import Activatible
 from source.ModuleInitialization.ModuleInterface import Module
 
 
-class Coalition(Module):
+class Coalition(Module, Activatible):
     def __init__(self, broadcast_content = None, attention_codelet = None):
         super().__init__()
         self.observers = []

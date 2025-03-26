@@ -1,34 +1,40 @@
 from source.PAM.PAM import PerceptualAssociativeMemory
+from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
+    CurrentSituationalModelImpl
 from source.Workspace.Workspace import Workspace
 from source.ModuleInitialization.DefaultLogger import getLogger
 
 
 class WorkspaceImpl(Workspace):
-    def __init__(self):
+    def __init__(self, csm):
         super().__init__()
         self.logger = getLogger(self.__class__.__name__)
-
-    def addCueListener(self, cue_listener):
-        self.observers.add(cue_listener)
-
-    def addWorkspaceListener(self, workspace_listener):
-        self.observers.add(workspace_listener)
+        self.nodes = []
+        self.add_observer(PerceptualAssociativeMemory)
+        self.csm = csm
+        self.winning_coalition = None
 
     def cueEpisodicMemories(self, node_structure):
         self.notify_observers()
         self.logger.info("Cue performed.")
 
-    def get_module_content(self , params):
-        pass
+    def get_module_content(self , params=None):
+        return {"Nodes" : self.nodes,
+                "Winning Coalition" : self.winning_coalition}
 
     def receive_broadcast(self, coalition):
-        pass
+        self.winning_coalition = coalition
+        self.csm.receiveCoalition(coalition)
+        self.csm.notify_observers()
 
     def receive_percept(self, percept):
-        self.percepts.append(percept)
+        workspace_buffer = CurrentSituationalModelImpl()
+        workspace_buffer.addBufferContent(percept)
 
     def receiveLocalAssociation(self, node_structure):
-        pass
+        workspace_buffer = CurrentSituationalModelImpl()
+        workspace_buffer.addBufferContent(node_structure)
+        self.observers.notifyObservers()
 
     def decayModule(self, time):
         pass
