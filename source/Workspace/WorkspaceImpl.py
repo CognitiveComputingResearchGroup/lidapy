@@ -6,11 +6,11 @@ from source.ModuleInitialization.DefaultLogger import getLogger
 
 
 class WorkspaceImpl(Workspace):
-    def __init__(self, csm):
+    def __init__(self, csm, pam):
         super().__init__()
         self.logger = getLogger(self.__class__.__name__)
         self.nodes = []
-        self.add_observer(PerceptualAssociativeMemory)
+        self.add_observer(pam)
         self.csm = csm
         self.winning_coalition = None
 
@@ -30,11 +30,12 @@ class WorkspaceImpl(Workspace):
     def receive_percept(self, percept):
         workspace_buffer = CurrentSituationalModelImpl()
         workspace_buffer.addBufferContent(percept)
+        self.nodes.append(workspace_buffer)
 
     def receiveLocalAssociation(self, node_structure):
         workspace_buffer = CurrentSituationalModelImpl()
         workspace_buffer.addBufferContent(node_structure)
-        self.observers.notifyObservers()
+        self.nodes.append(workspace_buffer)
 
     def decayModule(self, time):
         pass

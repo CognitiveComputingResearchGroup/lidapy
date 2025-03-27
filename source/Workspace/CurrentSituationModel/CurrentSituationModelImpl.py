@@ -1,9 +1,10 @@
-from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
+from source.AttentionCodelets.AttentionCodeletImpl import AttentionCodeletImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
 from source.SensoryMemory.SensoryMemory import SensoryMemory
-from source.Workspace.CurrentSituationModel.CurrentSituationalModel import CurrentSituationalModel
+from source.Workspace.CurrentSituationModel.CurrentSituationalModel import (
+    CurrentSituationalModel)
 
 
 class CurrentSituationalModelImpl(CurrentSituationalModel):
@@ -54,5 +55,5 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
     def notify(self, module):
         if isinstance(module, SensoryMemory):
             self.receiveVentralStream(module.get_sensory_content())
-        elif isinstance(module, AttentionCodelet):
-            self.receiveCoalition(module.getSoughtContent())
+        elif isinstance(module, AttentionCodeletImpl):
+            self.receiveCoalition(module.FormCoalition())

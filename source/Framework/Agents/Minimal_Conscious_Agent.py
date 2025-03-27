@@ -23,9 +23,9 @@ class MinimalConsciousAgent(Agent):
         self.procedural_memory = ProceduralMemoryImpl(self.action_selection,
                                                       self.environment)
         self.pam = PAMImpl(self.procedural_memory)
-        self.csm = CurrentSituationalModelImpl()
-        self.workspace = WorkspaceImpl(self.csm)
         self.global_workspace = GlobalWorkSpaceImpl()
+        self.csm = CurrentSituationalModelImpl()
+        self.workspace = WorkspaceImpl(self.csm, self.pam)
         self.attention_codelets = AttentionCodeletImpl(self.csm,
                                                        self.global_workspace)
         self.sensory_memory = SensoryMemoryImpl(None,self.pam,
@@ -36,6 +36,7 @@ class MinimalConsciousAgent(Agent):
         self.add_observer(self.sensory_memory)
 
     def run(self):
+        self.attention_codelets.run_task()
         self.environment.reset()
 
     def notify(self, module):

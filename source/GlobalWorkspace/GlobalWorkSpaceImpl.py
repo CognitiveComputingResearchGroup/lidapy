@@ -9,8 +9,8 @@ from source.ModuleInitialization.DefaultLogger import getLogger
 from source.PAM.PAM import PerceptualAssociativeMemory
 from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
-from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
-    CurrentSituationalModelImpl
+from source.Workspace.CurrentSituationModel.CurrentSituationalModel import \
+    CurrentSituationalModel
 
 DEFAULT_REFRACTORY_PERIOD = 40
 DEFAULT_COALITION_REMOVAL_THRESHOLD = 0.0
@@ -35,6 +35,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.aggregate_trigger_threshold = DEFAULT_THRESHOLD
         self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
         self.broadcast_refractory_period = DEFAULT_REFRACTORY_PERIOD
+        self.winningCoalition = None
         self.logger = getLogger(self.__class__.__name__).logger
 
     def addCoalition(self, coalition):
@@ -44,6 +45,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.coalitions.append(coalition)
         self.logger.debug(f"New coalition added with activation {
                 coalition.getActivatibleRemovalThreshold()}")
+        self.newCoalitionEvent()
 
     def addBroadcastTrigger(self, trigger):
         self.broadcast_triggers.append(trigger)
@@ -70,23 +72,29 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                 self.broadcast_refractory_period):
                 self.broadcast_started = False
             else:
-                self.broadcast_was_sent = True
+                self.broadcast_was_sent = self.sendBroadCast()
                 if self.broadcast_was_sent:
                     self.last_broadcast_trigger = trigger
 
 
     def sendBroadCast(self):
         self.logger.debug("Triggering broadcast")
-        winningCoaliton = self.chooseCoalition()
-        if winningCoaliton is not None:
-            self.coalitions.remove(winningCoaliton)
+        self.winningCoalition = self.chooseCoalition()
+        self.broadcast_was_sent = False
+        if self.winningCoalition is not None:
+            self.coalitions.remove(self.winningCoalition)
             self.notify_observers()
             self.broadcast_sent_count += 1
             self.tick_at_last_broadcast = time.time()
+            self.broadcast_was_sent = True
         else:
             self.logger.debug("Broadcast was triggerd but there are no "
                               "coalitions")
         self.broadcast_started = False
+        return self.broadcast_was_sent
+
+    def getWinningCoalition(self):
+        return self.winningCoalition
 
     def chooseCoalition(self):
         chosenCoalition = None
@@ -115,5 +123,5 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                     self.logger.debug("Coalition removed")
 
     def notify(self, module):
-        if isinstance(module, CurrentSituationalModelImpl):
+        if isinstance(module, CurrentSituationalModel):
             self.addCoalition(module.getCoalition())
