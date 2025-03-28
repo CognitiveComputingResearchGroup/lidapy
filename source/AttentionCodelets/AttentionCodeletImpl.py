@@ -1,7 +1,10 @@
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
+from source.Framework.Shared.NodeStructure import NodeStructure
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.ModuleInitialization.DefaultLogger import getLogger
+from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
+    CurrentSituationalModelImpl
 from source.Workspace.CurrentSituationModel.CurrentSituationalModel import \
     CurrentSituationalModel
 
@@ -13,7 +16,7 @@ DEFAULT_CODELET_ACTIVATION = 1.0
 class AttentionCodeletImpl(AttentionCodelet):
     def __init__(self, current_situational_model, global_workspace):
         super().__init__(current_situational_model, global_workspace)
-        self.current_situational_model = current_situational_model
+        self.buffer = current_situational_model
         self.global_workspace = global_workspace
         self.add_observer(current_situational_model)
         self.codeletRefractoryPeriod = DEFAULT_CODELET_REFRACTORY_PERIOD
@@ -22,14 +25,15 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.logger = getLogger(self.__class__.__name__).logger
 
     def run_task(self):
-        if self.bufferContainsSoughtContent(self.current_situational_model):
+        if self.bufferContainsSoughtContent(self.buffer):
             csm_content = self.retrieveWorkspaceContent(
-                                    self.current_situational_model)
+                                    self.buffer)
             if csm_content is None:
                 self.logger.warning("Null WorkspaceContent returned."
                                           "Coalition cannot be formed.")
             elif csm_content.getLinkableCount() > 0:
                 formed_coalition = CoalitionImpl(csm_content, self)
+                formed_coalition.setCreatingAttentionCodelet(self)
                 self.notify_observers()
                 self.logger.info("Coalition successfully formed.")
 
@@ -49,30 +53,33 @@ class AttentionCodeletImpl(AttentionCodelet):
             self.learn(broadcast)
 
     def learn(self, coalition):
-        coalitionCodelet = coalition.getCreatingAttentionCodelet()
-        if isinstance (coalitionCodelet, AttentionCodelet):
+        global coalition_codelet
+        if isinstance(coalition, CoalitionImpl):
+            coalition_codelet = coalition.getCreatingAttentionCodelet()
+        if isinstance (coalition_codelet, AttentionCodelet):
             newCodelet = AttentionCodeletImpl(self.current_situational_model,
                                               self.global_workspace)
             content = coalition.getContent()
             newCodelet.setSoughtContent(content.copy())
             newCodelet.run_task()
             self.logger.debug(f"Created new codelet: {newCodelet}")
-        elif coalitionCodelet is not None:
+        elif coalition_codelet is not None:
     # TODO Reinforcement amount might be a function of the broadcast's
     # activation
-            coalitionCodelet.reinforceBaseLevelActivation(
+            coalition_codelet.reinforceBaseLevelActivation(
                 self.codelet_reinforcement)
-            self.logger.debug(f"Reinforcing codelet: {coalitionCodelet}")
+            self.logger.debug(f"Reinforcing codelet: {coalition_codelet}")
 
     def FormCoalition(self):
         return self.formed_coalition
 
     def bufferContainsSoughtContent(self, buffer):
-        if isinstance(buffer, CurrentSituationalModel):
-            if self.getSoughtContent() == buffer.getBufferContent():
-                return True
-            else:
-                return False
+        if isinstance(buffer, CurrentSituationalModelImpl):
+            for node in buffer.getBufferContent().getNodes():
+                for sought_node in self.getSoughtContent().getNodes():
+                    if node.getLabel() == sought_node.getLabel():
+                        return True
+        return False
 
     """
         Returns sought content and related content from specified

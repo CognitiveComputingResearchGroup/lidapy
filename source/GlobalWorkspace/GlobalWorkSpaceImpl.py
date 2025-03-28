@@ -1,5 +1,7 @@
 import time
 
+from torch.nn.parallel.comm import broadcast
+
 from source.ActionSelection.ActionSelection import ActionSelection
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
 from source.Framework.Strategies.DecayStrategy import DecayStrategy
@@ -43,8 +45,8 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         coalition.setActivatibleRemovalThreshold(
             self.coalition_removal_threshold)
         self.coalitions.append(coalition)
-        self.logger.debug(f"New coalition added with activation {
-                coalition.getActivatibleRemovalThreshold()}")
+        self.logger.debug("New coalition added with activation "
+                f"{coalition.getActivatibleRemovalThreshold()}")
         self.newCoalitionEvent()
 
     def addBroadcastTrigger(self, trigger):
@@ -55,12 +57,19 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
 
     def newCoalitionEvent(self):
         aggregateActivation = 0.0
-        for trigger in self.broadcast_triggers:
+        if not self.broadcast_triggers:
+            for trigger in self.broadcast_triggers:
+                for coalition in self.coalitions:
+                    aggregateActivation += coalition.getActivation()
+                    if aggregateActivation > self.aggregate_trigger_threshold:
+                        self.logger.debug("Aggregate activation trigger fired")
+                        self.triggerBroadcast(trigger)
+        else:
             for coalition in self.coalitions:
                 aggregateActivation += coalition.getActivation()
                 if aggregateActivation > self.aggregate_trigger_threshold:
                     self.logger.debug("Aggregate activation trigger fired")
-                    self.triggerBroadcast(trigger)
+                    self.triggerBroadcast(None)
 
     def getTickAtLastBroadcast(self):
         return self.tick_at_last_broadcast

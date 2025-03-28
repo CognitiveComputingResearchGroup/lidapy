@@ -153,6 +153,11 @@ class NodeStructureImpl(NodeStructure):
     def getLinkCount(self):
         return self.links.count()
 
+    def getLinkableCount(self):
+        #TODO Implement actual getLinkableCount function
+        #temp frozen lake implementation
+        return self.getNodeCount() + self.getLinkCount()
+
     def getDefaultNodeType(self):
         return DEFAULT_NODE_TYPE
 

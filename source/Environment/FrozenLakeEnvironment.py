@@ -1,6 +1,8 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+import threading
+import time
 
 import gymnasium as gym
 
@@ -31,6 +33,7 @@ class FrozenLake(Environment):
         self.col = 0
         self.add_observer(agent)
         self.logger = getLogger(agent.__class__.__name__).logger
+        #self.attention_codelets_thread = agent.get_module_content()
 
     # Reseting the environment to start a new episode
     def reset(self):
@@ -67,6 +70,8 @@ class FrozenLake(Environment):
             action = module.receive_action()
             if not self.state["done"]:
                 self.step(action)
+                #self.attention_codelets_thread.start()
+
             else:
                 self.close()
 
@@ -74,7 +79,7 @@ class FrozenLake(Environment):
         if action == 3:  # up
             self.row = max(self.row - 1, 0)
         elif action == 2:  # Right
-            self.row = min(self.col + 1, self.env.unwrapped.desc.shape[1] - 1)
+            self.col = min(self.col + 1, self.env.unwrapped.desc.shape[1] - 1)
         elif action == 1:  # down
             self.row = min(self.row + 1, self.env.unwrapped.desc.shape[0] - 1)
         elif action == 0:  # Left

@@ -1,4 +1,7 @@
+import random
+
 from source.ActionSelection.ActionSelection import ActionSelection
+from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
 from source.ModuleInitialization.DefaultLogger import getLogger
 from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
@@ -17,15 +20,17 @@ class ActionSelectionImpl(ActionSelection):
     def notify(self, module):
         if isinstance(module, ProceduralMemory):
             state = module.environment.get_state()["state"]
-            action = module.get_action(state, "goal")
-
-            if action is None:
-                action = module.get_action(state, "safe")
-            if action is None:
-                action = module.get_action(state, "start")
-            if action is None:
-                action = module.get_action(state, "danger")
+            actions = module.get_action(state, "goal")
+            if not actions:
+                actions = module.get_action(state, "safe")
+            if not actions:
+                actions = module.get_action(state, "start")
+            if not actions:
                 self.logger.warning("Danger ahead, falling back to safety!")
 
+            action = random.choice(actions)
             self.scheme = action
-            self.notify_observers()
+        elif isinstance(module, GlobalWorkspace):
+            winning_coalition = module.getWinningCoalition()
+
+        self.notify_observers()

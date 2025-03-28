@@ -1,3 +1,5 @@
+from source.Framework.Shared.NodeImpl import NodeImpl
+from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
 from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
     CurrentSituationalModelImpl
@@ -28,14 +30,34 @@ class WorkspaceImpl(Workspace):
         self.csm.notify_observers()
 
     def receive_percept(self, percept):
-        workspace_buffer = CurrentSituationalModelImpl()
-        workspace_buffer.addBufferContent(percept)
-        self.nodes.append(workspace_buffer)
+        global node
+        workspace_buffer = NodeStructureImpl()
+        for association in percept:
+            for key, value in association.items():
+                action = value
+                node = NodeImpl()
+                #Temp frozen lake impl.
+                node.setId(action)      #Set the node ID as the action value
+                node.setLabel(key)      #The key contains the percept
+
+                if key == 'goal':
+                    activation = 2
+                    incentive_salience = 2
+                elif key == 'danger':
+                    activation = -1
+                    incentive_salience = 2
+                else:
+                    activation = 1
+                    incentive_salience = 1
+
+                node.setActivation(activation)
+                node.setIncentiveSalience(incentive_salience)
+
+        workspace_buffer.addNode_(node)
+        self.csm.addBufferContent(workspace_buffer)
 
     def receiveLocalAssociation(self, node_structure):
-        workspace_buffer = CurrentSituationalModelImpl()
-        workspace_buffer.addBufferContent(node_structure)
-        self.nodes.append(workspace_buffer)
+        self.csm.addBufferContent(node_structure)
 
     def decayModule(self, time):
         pass
