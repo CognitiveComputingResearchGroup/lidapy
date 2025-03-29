@@ -1,5 +1,3 @@
-from win32comext.shell.shellcon import LOF_DEFAULT
-
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructure import NodeStructure

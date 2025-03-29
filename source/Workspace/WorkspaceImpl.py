@@ -8,12 +8,11 @@ from source.ModuleInitialization.DefaultLogger import getLogger
 
 
 class WorkspaceImpl(Workspace):
-    def __init__(self, csm, pam):
+    def __init__(self):
         super().__init__()
         self.logger = getLogger(self.__class__.__name__)
         self.nodes = []
-        self.add_observer(pam)
-        self.csm = csm
+        self.csm = None
         self.winning_coalition = None
 
     def cueEpisodicMemories(self, node_structure):

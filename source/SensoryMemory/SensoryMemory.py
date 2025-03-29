@@ -10,14 +10,13 @@ process and transfer to further working memory.
 """
 
 class SensoryMemory(Module):
-    def __init__(self, pam=None, sensory_motor_memory=None, workspace=None):
+    def __init__(self):
         super().__init__()
-        self.observers = []
 
     def notify(self, module):
         pass
 
-    def run_sensors(self, state=None, module=None):
+    def run_sensors(self):
         """All sensors associated will run with the memory"""
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
@@ -32,5 +31,5 @@ class SensoryMemory(Module):
         """
 
         # Logic to retrieve and return data based on the modality.
-        return {"state": self.state, "action": self.action,
-                "modality": modality, "params": params}
+        return {"stimuli": self.stimuli, "modality": modality,
+                "params": params}

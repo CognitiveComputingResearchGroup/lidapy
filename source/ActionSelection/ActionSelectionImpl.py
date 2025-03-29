@@ -7,10 +7,9 @@ from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 
 class ActionSelectionImpl(ActionSelection):
-    def __init__(self, sensory_motor_memory):
+    def __init__(self):
         super().__init__()
         # Add modules relevant to action selection
-        self.add_observer(sensory_motor_memory)
         self.scheme = {}
         self.logger = getLogger(self.__class__.__name__).logger
 
@@ -21,6 +20,7 @@ class ActionSelectionImpl(ActionSelection):
         if isinstance(module, ProceduralMemory):
             state = module.environment.get_state()["state"]
             actions = module.get_action(state, "goal")
+
             if not actions:
                 actions = module.get_action(state, "safe")
             if not actions:

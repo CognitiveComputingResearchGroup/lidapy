@@ -11,7 +11,6 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
     def __init__(self):
         super().__init__()
         self.node_structure = NodeStructureImpl()
-        self.add_observer(GlobalWorkspace)
         self.formed_coalition = None
         self.action_value = {
             "up" : 3,

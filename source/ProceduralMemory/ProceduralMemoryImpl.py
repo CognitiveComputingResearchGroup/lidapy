@@ -9,16 +9,9 @@ from source.PAM.PAM_Impl import PAMImpl
 from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 
-class PerceptualAssociativeMemoryImpl:
-    pass
-
-
 class ProceduralMemoryImpl(ProceduralMemory):
-    def __init__(self, action_selection, environment):
-        super().__init__(environment=environment)
-        if action_selection is not None:
-            self.add_observer(action_selection)
-        self.lock = Lock()
+    def __init__(self):
+        super().__init__()
 
     def notify(self, module):
         if isinstance(module, PAMImpl):

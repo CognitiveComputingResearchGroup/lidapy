@@ -3,9 +3,8 @@ from source.ModuleInitialization.ModuleInterface import Module
 
 
 class AttentionCodelet(Codelet):
-    def __init__(self, current_situational_model, global_workspace):
+    def __init__(self):
         super().__init__()
-        self.observers = []
 
     def notify(self, module):
         pass

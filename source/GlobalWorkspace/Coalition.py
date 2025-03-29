@@ -3,7 +3,7 @@ from source.ModuleInitialization.ModuleInterface import Module
 
 
 class Coalition(Module, Activatible):
-    def __init__(self, broadcast_content = None, attention_codelet = None):
+    def __init__(self):
         super().__init__()
         self.observers = []
 

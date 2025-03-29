@@ -14,11 +14,10 @@ DEFAULT_CODELET_REMOVAL_THRESHOLD = -1.0
 DEFAULT_CODELET_ACTIVATION = 1.0
 
 class AttentionCodeletImpl(AttentionCodelet):
-    def __init__(self, current_situational_model, global_workspace):
-        super().__init__(current_situational_model, global_workspace)
-        self.buffer = current_situational_model
-        self.global_workspace = global_workspace
-        self.add_observer(current_situational_model)
+    def __init__(self):
+        super().__init__()
+        self.buffer = None
+        self.global_workspace = None
         self.codeletRefractoryPeriod = DEFAULT_CODELET_REFRACTORY_PERIOD
         self.formed_coalition = None
         self.codelet_reinforcement = DEFAULT_CODELET_REINFORCEMENT

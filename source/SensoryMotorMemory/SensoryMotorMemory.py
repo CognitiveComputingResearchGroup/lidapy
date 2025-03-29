@@ -4,7 +4,6 @@ from source.ModuleInitialization.ModuleInterface import Module
 class SensoryMotorMemory(Module):
     def __init__(self):
         super().__init__()
-        self.observers = []
         self.listeners = []
 
     def notify(self, module):

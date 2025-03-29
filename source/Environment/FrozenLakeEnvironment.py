@@ -1,12 +1,11 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-import threading
-import time
 
 import gymnasium as gym
-
+from threading import Thread
 from source.Environment.Environment import Environment
+from source.Framework.Shared.NodeImpl import NodeImpl
 from source.ModuleInitialization.DefaultLogger import getLogger
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 
@@ -19,7 +18,7 @@ Sends Sensory information to the Sensory Memory.
 
 class FrozenLake(Environment):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
-    def __init__(self, agent, render_mode="human", size=4):
+    def __init__(self, agent, attention_codelets,render_mode="human", size=4):
         super().__init__()
         # generating the frozen lake environment
         self.env = gym.make(
@@ -33,13 +32,15 @@ class FrozenLake(Environment):
         self.col = 0
         self.add_observer(agent)
         self.logger = getLogger(agent.__class__.__name__).logger
-        #self.attention_codelets_thread = agent.get_module_content()
+        self.attention_codelets_thread = Thread(attention_codelets.run_task())
+        self.agent_stimuli = {}
 
     # Reseting the environment to start a new episode
     def reset(self):
         # interacting with the environment by using Reset()
         state, info = self.env.reset()
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
+        self.agent_stimuli = {"image" : surrounding_tiles}
         self.state = {"state": state, "info": info, "done": False,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
@@ -52,6 +53,7 @@ class FrozenLake(Environment):
         state, reward, done, truncated, info = self.env.step(action)
         self.update_position(action)
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
+        self.agent_stimuli = {"image": surrounding_tiles}
         self.state = {"state": state, "info": info, "done": done,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
@@ -65,12 +67,16 @@ class FrozenLake(Environment):
     def get_state(self):
         return self.state
 
+    def get_stimuli(self):
+        return self.agent_stimuli
+
     def notify(self, module):
         if isinstance(module, SensoryMotorMemory):
             action = module.receive_action()
             if not self.state["done"]:
                 self.step(action)
-                #self.attention_codelets_thread.start()
+                if not self.attention_codelets_thread.is_alive():
+                    self.attention_codelets_thread.start()
 
             else:
                 self.close()
@@ -99,6 +105,9 @@ class FrozenLake(Environment):
             surrounding_tiles[direction] = desc[r, c].decode(
                 'utf-8')  # Decode byte to string
         return surrounding_tiles
+
+    def get_position(self):
+        return {"row": self.row, "col" : self.col}
 
     # close the environment:
     def close(self):

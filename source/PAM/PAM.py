@@ -8,40 +8,37 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
+from source.Framework.Shared.NodeImpl import NodeImpl
+from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
+from source.ModuleInitialization.DefaultLogger import getLogger
 from source.ModuleInitialization.ModuleInterface import Module
 
 
 class PerceptualAssociativeMemory(Module):
-    def __init__(self, workspace=None):
+    def __init__(self):
         #Storing associations
         super().__init__()
-        self.associations = {}
-        self.observers = []
+        self.associations = NodeStructureImpl()
+        self.logger = getLogger(self.__class__.__name__).logger
 
     def notify(self, module):
         pass
 
-    def add_association(self, cue, pattern):
+    def add_association(self, cue : NodeImpl):
         #Add new associations
-        if not self.associations or cue not in self.associations:
-            self.associations[cue] = []
-        self.associations[cue].append(pattern)
-        return pattern
+        self.logger.debug(f"Storing node {cue}")
+        self.associations.addNode_(cue)
 
-    def retrieve_associations(self, cue):
+    def retrieve_associations(self, cue : NodeStructureImpl):
         #Retreiving associations for the given cue
-        if self.associations and cue in self.associations:
-            return self.associations[cue]
-        else:
-            # create default association
-            pattern = self.add_association(cue,
-                                           f"default-pattern-{cue}")
-            return pattern
+        self.logger.info(f"Retrieved {len(cue.getLinkCount())} associations")
+        return cue.getLinks()
 
-    def learn(self, cue, outcome=None):
-        pass
+    def receive_broadcast(self, coalition):
+        self.logger.debug(f"Received broadcast coalition {coalition}")
+        map(self.add_association, coalition.getContent())
 
-    def get_state(self):
+    def learn(self, cue):
         pass
 
     """

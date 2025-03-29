@@ -12,11 +12,8 @@ from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 
 
 class SensoryMotorMemoryImpl(SensoryMotorMemory):
-    def __init__(self, environment):
+    def __init__(self):
         super().__init__()
-        if environment is not None:
-            self.add_observer(environment)
-
         self.event = None
 
     def notify(self, module):

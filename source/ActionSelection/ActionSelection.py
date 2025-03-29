@@ -8,7 +8,6 @@ from source.ModuleInitialization.ModuleInterface import Module
 class ActionSelection(Module):
     def __init__(self):
         super().__init__()
-        self.observers = []
 
     def select_action(self):
         pass

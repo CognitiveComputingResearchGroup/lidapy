@@ -1,9 +1,10 @@
 # LIDA Cognitive Framework
 # Pennsylvania State University, Course : SWENG480
 # Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-
 from source.Environment.Environment import Environment
 from source.Framework.Agents.Agent import Agent
+from source.Framework.Shared.NodeImpl import NodeImpl
+from source.ModuleInitialization.DefaultLogger import getLogger
 from source.SensoryMemory.SensoryMemory import SensoryMemory
 
 
@@ -14,31 +15,41 @@ process and transfer to further working memory.
 
 
 class SensoryMemoryImpl(SensoryMemory):
-    def __init__(self, environment=None, pam=None, sensory_motor_memory=None,
-                 csm=None):
+    def __init__(self):
         super().__init__()
-        # Add observers to the subject
-        if pam is not None:
-            self.add_observer(pam)
-        if sensory_motor_memory is not None:
-            self.add_observer(sensory_motor_memory)
-        if csm is not None:
-            self.add_observer(csm)
 
-        self.state = None
-        self.action = None
+        #Add module specific attributes
+        self.processors = {}
+        self.logger = getLogger(__class__.__name__).logger
+        self.stimuli = None
+        self.position = None
+        self.nodal_cues = []
+
+        for key, processor in self.processor_dict.items():
+            self.processors[key] =  getattr(self.sensor_module, processor)
+
+        self.logger.debug(f"Initialized SensoryMemory with "
+                          f"{len(self.processors)} sensor processors")
 
     def notify(self, module):
-        if isinstance(module, Agent):
-            self.state = module.get_state()
-            self.run_sensors(self.state, module)
+        if isinstance(module, Environment):
+            self.stimuli = module.get_stimuli()
+            self.position = module.get_position()
+            self.run_sensors()
 
-    def run_sensors(self, state=None, module=None):
+    def run_sensors(self):
         """All sensors associated will run with the memory"""
         # Logic to gather information from the environment
-        # Example: Reading the current state or rewards
-        # Sample an action from environment action space
-        self.action = module.environment.env.action_space.sample()
+        for sensor, value in self.stimuli.items():
+            if sensor not in self.sensors:
+                self.logger.debug(f"Sensor '{sensor}' is currently not "
+                                  f"supported.")
+            else:
+                sensory_cue = self.processors[sensor](value)
+                if sensory_cue is not None:
+                    if isinstance (sensory_cue, NodeImpl):
+                        self.nodal_cues.append(sensory_cue)
+        self.logger.debug(f"Processed {len(self.nodal_cues)} sensory cue(s)")
         self.notify_observers()
 
     def get_sensory_content(self, modality=None, params=None):
@@ -48,7 +59,8 @@ class SensoryMemoryImpl(SensoryMemory):
         :param params: optional parameters to filter or specify the content
         :return: content corresponding to the modality
         """
-
+        for key, content in self.stimuli.items():
+            modality = key
         # Logic to retrieve and return data based on the modality.
-        return {"state": self.state, "action": self.action,
-                "modality": modality, "params": params}
+        return {"cue": self.nodal_cues, "modality": modality,
+                "params": self.position}

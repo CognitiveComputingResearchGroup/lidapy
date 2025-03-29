@@ -4,8 +4,6 @@ from source.ModuleInitialization.ModuleInterface import Module
 class GlobalWorkspace(Module):
     def __init__(self):
         super().__init__()
-        self.modules = {}
-        self.attributes = {}
 
     def addCoalition(self, coalition):
         pass

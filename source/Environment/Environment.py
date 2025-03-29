@@ -4,7 +4,6 @@ from source.ModuleInitialization.ModuleInterface import Module
 class Environment(Module):
     def __init__(self):
         super().__init__()
-        self.observers = []
 
     def notify(self, module):
         pass
@@ -22,4 +21,10 @@ class Environment(Module):
 
     # close the environment:
     def close(self):
+        pass
+
+    def get_stimuli(self):
+        pass
+
+    def get_position(self):
         pass

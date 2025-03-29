@@ -5,7 +5,6 @@ from source.Workspace.BroadCastQueue import BroadCastQueue
 class BroadCastQueueImpl(BroadCastQueue):
     def __init__(self):
         super().__init__()
-        self.observers = []
         self.DEFAULT_QUEUE_CAPACITY = 20
         self.broadcastQueueCapacity  = self.DEFAULT_QUEUE_CAPACITY
         self.broadcast_queue = []

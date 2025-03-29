@@ -26,7 +26,7 @@ class ConcreteAgentFactory(AgentFactory):
                 raise ModuleNotFoundError(f"Module \"{agent_type}\" not found")
 
     def load_module_from_file(self, agent_type):
-        with open('Configs/module_locations.yaml', 'r') as yaml_file:
+        with open("Configs/module_locations.yaml", "r") as yaml_file:
             try:
                 loaded_module_locations = safe_load(yaml_file)
             except YAMLError as exc:

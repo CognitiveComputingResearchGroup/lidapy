@@ -4,6 +4,7 @@ class NodeImpl(Node):
     def __init__(self):
         super().__init__()
         self.groundingPAMNode = None
+        self.activation = None
 
     def getGroundingPamNode(self):
         return self.groundingPAMNode

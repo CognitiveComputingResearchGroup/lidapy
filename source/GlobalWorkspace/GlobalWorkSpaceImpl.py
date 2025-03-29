@@ -23,11 +23,6 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         super().__init__()
         self.coalitions = []
         self.broadcast_triggers = []
-        self.add_observer(PerceptualAssociativeMemory)
-        self.add_observer(AttentionCodelet)
-        self.add_observer(ProceduralMemory)
-        self.add_observer(ActionSelection)
-        self.add_observer(SensoryMotorMemory)
         self.coalition_decay_strategy = DecayStrategy()
         self.broadcast_sent_count = 0
         self.broadcast_started = False

@@ -3,13 +3,12 @@ from source.GlobalWorkspace.Coalition import Coalition
 
 
 class CoalitionImpl(Coalition, ActivatibleImpl):
-    def __init__(self, broadcast_content = None, attention_codelet = None):
+    def __init__(self):
         super().__init__()
-
         self.id_counter = 0
         self.ID = self.id_counter + 1
-        self.broadcastContent = broadcast_content
-        self.attention_codelet = attention_codelet
+        self.broadcastContent = None
+        self.attention_codelet = None
 
     def setCoalitionActivation(self):
         pass
