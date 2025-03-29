@@ -1,0 +1,5 @@
+audio: _process_audio
+image: _process_image
+internal_state: _process_internal_state
+text: _process_text
+touch: _process_touch
