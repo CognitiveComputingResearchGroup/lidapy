@@ -98,5 +98,4 @@ class PAMImpl(PerceptualAssociativeMemory):
                                               "label": link.getCategory(
                                                   "label")}
                                              , 0, 0)
-        sleep(0.5)
         self.notify_observers()
