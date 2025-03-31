@@ -1,5 +1,5 @@
 import pytest
-from src.Environment.Environment import FrozenLakeEnvironment
+from source.Environment.FrozenLakeEnvironment import FrozenLake
 
 """
 This provided PyTest is for the Environment ModuleSubject:
@@ -12,7 +12,7 @@ Test Cases: TC-032, TC-033, and TC-034.
 #initializing resources
 @pytest.fixture
 def environment():
-    return FrozenLakeEnvironment(render_mode="human")
+    return FrozenLake(render_mode="human")
 
 def test_reset(environment):
     #Calling the reset

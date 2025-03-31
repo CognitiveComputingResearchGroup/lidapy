@@ -1,4 +1,4 @@
-from src.Framework.Agents.Agent import Agent
+from source.Framework.Agents.Agent import Agent
 
 """
 This provided PyTest is for the Integration Test of the Autonomous Agent:
