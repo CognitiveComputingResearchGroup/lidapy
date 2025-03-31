@@ -1,4 +1,4 @@
-from src.PAM.PAM import PerceptualAssociativeMemory
+from source.PAM.PAM import PerceptualAssociativeMemory
 
 """
 This provided PyTest is for the Perceptual Associative Memory (PAM) ModuleSubject:

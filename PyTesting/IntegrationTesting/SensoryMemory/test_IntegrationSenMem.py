@@ -1,9 +1,9 @@
 import pytest
 
-from src.SensoryMemory.SensoryMemory import SensoryMemory
-from src.PAM.PAM import PerceptualAssociativeMemory
-from src.Environment.Environment import FrozenLakeEnvironment
-from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from source.SensoryMemory.SensoryMemory import SensoryMemory
+from source.PAM.PAM import PerceptualAssociativeMemory
+from source.Environment.Environment import FrozenLakeEnvironment
+from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 """
 This provided PyTest is for an integration test of the Sensory Memory ModuleSubject:

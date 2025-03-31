@@ -1,4 +1,4 @@
-from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 """
 This provided PyTest is for the Procedural Memory ModuleSubject:

@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import MagicMock
 
-from src.ActionSelection.ActionSelection import ActionSelection
-from src.SensoryMotorMemory.SensoryMotorMemoryImpl import (
+from source.ActionSelection.ActionSelection import ActionSelection
+from source.SensoryMotorMemory.SensoryMotorMemoryImpl import (
                                                         SensoryMotorMemoryImpl)
 
 #initializing resources
