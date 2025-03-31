@@ -27,7 +27,7 @@ class PAMImpl(PerceptualAssociativeMemory):
         #self.logger.debug("Initialized PerceptualAssociativeMemory")
 
         """Create node for each cell the agent could visit"""
-        for cell in range(64):
+        for cell in range(16):
             node = NodeImpl()
             """Set the cell identifier to the corresponding state"""
             node.setId(cell)

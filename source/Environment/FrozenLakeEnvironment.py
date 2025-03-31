@@ -24,7 +24,7 @@ class FrozenLake(Environment):
             'FrozenLake-v1',
             desc=None,
             is_slippery=False,
-            map_name="8x8",
+            map_name="4x4",
             render_mode=render_mode)
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
@@ -46,7 +46,6 @@ class FrozenLake(Environment):
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                          f"done: False")
-        sleep(0.5)
         self.notify_observers()
 
     # perform an action in environment:
@@ -61,7 +60,6 @@ class FrozenLake(Environment):
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                           f"done: {done}, " + f"action: {action}")
-        sleep(0.5)
         self.notify_observers()
 
     # render environment's current state:
