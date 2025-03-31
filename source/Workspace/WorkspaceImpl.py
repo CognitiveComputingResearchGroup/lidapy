@@ -1,8 +1,8 @@
+from time import sleep
+
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
-from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
-    CurrentSituationalModelImpl
 from source.Workspace.Workspace import Workspace
 from source.ModuleInitialization.DefaultLogger import getLogger
 
@@ -13,47 +13,31 @@ class WorkspaceImpl(Workspace):
         self.logger = getLogger(self.__class__.__name__)
         self.nodes = []
         self.csm = None
-        self.winning_coalition = None
+        self.coalition = None
+        self.logger = getLogger(self.__class__.__name__).logger
+        self.episodic_memory = None
+        self.logger.debug("Initialized Workspace")
 
     def cueEpisodicMemories(self, node_structure):
+        self.episodic_memory = node_structure
+        self.logger.info(f"{len(self.episodic_memory.getLinks())} episodic "
+                         f"memories cued")
         self.notify_observers()
-        self.logger.info("Cue performed.")
 
     def get_module_content(self , params=None):
-        return {"Nodes" : self.nodes,
-                "Winning Coalition" : self.winning_coalition}
+        return self.episodic_memory
 
     def receive_broadcast(self, coalition):
-        self.winning_coalition = coalition
+        self.coalition = coalition
         self.csm.receiveCoalition(coalition)
         self.csm.notify_observers()
 
     def receive_percept(self, percept):
-        global node
         workspace_buffer = NodeStructureImpl()
-        for association in percept:
-            for key, value in association.items():
-                action = value
-                node = NodeImpl()
-                #Temp frozen lake impl.
-                node.setId(action)      #Set the node ID as the action value
-                node.setLabel(key)      #The key contains the percept
-
-                if key == 'goal':
-                    activation = 2
-                    incentive_salience = 2
-                elif key == 'danger':
-                    activation = -1
-                    incentive_salience = 2
-                else:
-                    activation = 1
-                    incentive_salience = 1
-
-                node.setActivation(activation)
-                node.setIncentiveSalience(incentive_salience)
-
-        workspace_buffer.addNode_(node)
+        workspace_buffer.addLinks(percept, "Adjacent node")
         self.csm.addBufferContent(workspace_buffer)
+        sleep(15)   #Cue memories after a short while
+        self.cueEpisodicMemories(workspace_buffer)
 
     def receiveLocalAssociation(self, node_structure):
         self.csm.addBufferContent(node_structure)
@@ -63,6 +47,8 @@ class WorkspaceImpl(Workspace):
 
     def notify(self, module):
         if isinstance(module, PerceptualAssociativeMemory):
-            state = module.get_state()["state"]["state"]
-            percept = module.retrieve_associations(state)
+            state = module.__getstate__()
+            percept = None
+            if isinstance(state, NodeImpl):
+                percept = module.retrieve_association(state)
             self.receive_percept(percept)

@@ -1,6 +1,7 @@
+from source.Framework.Shared.ActivatibleImpl import ActivatibleImpl
 from source.Framework.Shared.Node import Node
 
-class NodeImpl(Node):
+class NodeImpl(Node, ActivatibleImpl):
     def __init__(self):
         super().__init__()
         self.groundingPAMNode = None

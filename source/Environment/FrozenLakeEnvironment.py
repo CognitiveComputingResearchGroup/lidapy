@@ -1,11 +1,10 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+from time import sleep
 
 import gymnasium as gym
-from threading import Thread
 from source.Environment.Environment import Environment
-from source.Framework.Shared.NodeImpl import NodeImpl
 from source.ModuleInitialization.DefaultLogger import getLogger
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 
@@ -18,53 +17,58 @@ Sends Sensory information to the Sensory Memory.
 
 class FrozenLake(Environment):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
-    def __init__(self, agent, attention_codelets,render_mode="human", size=4):
+    def __init__(self, render_mode="human"):
         super().__init__()
         # generating the frozen lake environment
         self.env = gym.make(
             'FrozenLake-v1',
             desc=None,
             is_slippery=False,
+            map_name="8x8",
             render_mode=render_mode)
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
         self.row = 0
         self.col = 0
-        self.add_observer(agent)
-        self.logger = getLogger(agent.__class__.__name__).logger
-        self.attention_codelets_thread = Thread(attention_codelets.run_task())
+        self.steps = 0
+        self.reward = 0
+        self.logger = getLogger(__class__.__name__).logger
         self.agent_stimuli = {}
+        self.logger.debug(f"Initialized {__class__.__name__} Environment")
 
     # Reseting the environment to start a new episode
     def reset(self):
         # interacting with the environment by using Reset()
         state, info = self.env.reset()
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
-        self.agent_stimuli = {"image" : surrounding_tiles}
+        self.agent_stimuli = {"text": self.form_stimuli(surrounding_tiles)}
         self.state = {"state": state, "info": info, "done": False,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                          f"done: False")
+        sleep(0.5)
         self.notify_observers()
 
     # perform an action in environment:
     def step(self, action):
         # perform and update
         state, reward, done, truncated, info = self.env.step(action)
+        self.steps += 1
         self.update_position(action)
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
-        self.agent_stimuli = {"image": surrounding_tiles}
+        self.agent_stimuli = {"text": self.form_stimuli(surrounding_tiles)}
         self.state = {"state": state, "info": info, "done": done,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                           f"done: {done}, " + f"action: {action}")
+        sleep(0.5)
         self.notify_observers()
 
     # render environment's current state:
     def render(self):
         self.env.render()
 
-    def get_state(self):
+    def __getstate__(self):
         return self.state
 
     def get_stimuli(self):
@@ -73,12 +77,14 @@ class FrozenLake(Environment):
     def notify(self, module):
         if isinstance(module, SensoryMotorMemory):
             action = module.receive_action()
-            if not self.state["done"]:
+            if not self.state["done"] and self.steps < 1000:
                 self.step(action)
-                if not self.attention_codelets_thread.is_alive():
-                    self.attention_codelets_thread.start()
-
+                self.reward += 1
             else:
+                """self.steps = 0
+                self.col = 0
+                self.row = 0
+                self.reset()"""
                 self.close()
 
     def update_position(self, action):
@@ -105,6 +111,19 @@ class FrozenLake(Environment):
             surrounding_tiles[direction] = desc[r, c].decode(
                 'utf-8')  # Decode byte to string
         return surrounding_tiles
+
+    def form_stimuli(self, surrounding_tiles):
+        stimuli = {}
+        reward = {"reward" : self.reward}
+        directions = {
+            "up": 3,
+            "right": 2,
+            "down" : 1,
+            "left" : 0
+        }
+        for direction, tile in surrounding_tiles.items():
+            stimuli[directions[direction]] = tile
+        return stimuli
 
     def get_position(self):
         return {"row": self.row, "col" : self.col}

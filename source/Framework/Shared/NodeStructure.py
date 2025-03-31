@@ -30,7 +30,13 @@ class NodeStructure:
     def addLink(self, link_type, source_id, sink_id, category, activation,
                 removal_threshold):
         pass
-    def addLinks(self, link, link_type):
+    def addLinks(self, links, link_type):
+        pass
+
+    def setLinkType(self, link, link_type):
+        pass
+
+    def getLinkType(self, link):
         pass
     def removeNode(self, node):
         pass

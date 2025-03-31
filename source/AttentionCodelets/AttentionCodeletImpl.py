@@ -1,3 +1,5 @@
+from time import sleep
+
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
 from source.Framework.Shared.NodeStructure import NodeStructure
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
@@ -24,17 +26,24 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.logger = getLogger(self.__class__.__name__).logger
 
     def run_task(self):
+        self.logger.debug("Running attention codelets")
+        """sleep(3)    #Wait for csm initialization"""
         if self.bufferContainsSoughtContent(self.buffer):
             csm_content = self.retrieveWorkspaceContent(
                                     self.buffer)
             if csm_content is None:
                 self.logger.warning("Null WorkspaceContent returned."
                                           "Coalition cannot be formed.")
-            elif csm_content.getLinkableCount() > 0:
-                formed_coalition = CoalitionImpl(csm_content, self)
+            elif csm_content.getLinkCount() > 0:
+                formed_coalition = CoalitionImpl()
+                formed_coalition.setContent(csm_content)
                 formed_coalition.setCreatingAttentionCodelet(self)
-                self.notify_observers()
+                formed_coalition.setActivation(2)
                 self.logger.info("Coalition successfully formed.")
+                self.notify_observers()
+        else:
+            sleep(4)   #Wait for csm initialization
+            self.run_task()
 
     def set_refactory_period(self, ticks):
         if ticks > 0:
@@ -48,36 +57,34 @@ class AttentionCodeletImpl(AttentionCodelet):
 
     def notify(self, module):
         if isinstance(module, GlobalWorkSpaceImpl):
-            broadcast = module.getWinningCoalition()
-            self.learn(broadcast)
+            winning_coalition = module.__getstate__()
+            self.learn(winning_coalition)
 
     def learn(self, coalition):
         global coalition_codelet
         if isinstance(coalition, CoalitionImpl):
             coalition_codelet = coalition.getCreatingAttentionCodelet()
         if isinstance (coalition_codelet, AttentionCodelet):
-            newCodelet = AttentionCodeletImpl(self.current_situational_model,
-                                              self.global_workspace)
+            newCodelet = AttentionCodeletImpl()
+            newCodelet.buffer = self.buffer
             content = coalition.getContent()
-            newCodelet.setSoughtContent(content.copy())
+            newCodelet.setSoughtContent(content)
             newCodelet.run_task()
             self.logger.debug(f"Created new codelet: {newCodelet}")
         elif coalition_codelet is not None:
     # TODO Reinforcement amount might be a function of the broadcast's
     # activation
-            coalition_codelet.reinforceBaseLevelActivation(
-                self.codelet_reinforcement)
+            #coalition_codelet.reinforceBaseLevelActivation(
+                #self.codelet_reinforcement)
             self.logger.debug(f"Reinforcing codelet: {coalition_codelet}")
 
-    def FormCoalition(self):
+    def getModuleContent(self):
         return self.formed_coalition
 
     def bufferContainsSoughtContent(self, buffer):
         if isinstance(buffer, CurrentSituationalModelImpl):
-            for node in buffer.getBufferContent().getNodes():
-                for sought_node in self.getSoughtContent().getNodes():
-                    if node.getLabel() == sought_node.getLabel():
-                        return True
+            if buffer.getBufferContent() is not None:
+                return True
         return False
 
     """
@@ -85,6 +92,6 @@ class AttentionCodeletImpl(AttentionCodelet):
         WorkspaceBuffer
         """
     def retrieveWorkspaceContent(self, buffer):
-        if isinstance(buffer, CurrentSituationalModel):
+        if isinstance(buffer, CurrentSituationalModelImpl):
             return buffer.getBufferContent()
 

@@ -1,39 +1,48 @@
 import time
-
-from torch.nn.parallel.comm import broadcast
-
-from source.ActionSelection.ActionSelection import ActionSelection
-from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
-from source.Framework.Strategies.DecayStrategy import DecayStrategy
+from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.GlobalWorkspace.Coalition import Coalition
 from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
 from source.ModuleInitialization.DefaultLogger import getLogger
-from source.PAM.PAM import PerceptualAssociativeMemory
-from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
-from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 from source.Workspace.CurrentSituationModel.CurrentSituationalModel import \
     CurrentSituationalModel
 
 DEFAULT_REFRACTORY_PERIOD = 40
 DEFAULT_COALITION_REMOVAL_THRESHOLD = 0.0
 DEFAULT_THRESHOLD = 0.0
+DEFAULT_DECAY_STRATEGY = LinearDecayStrategy()
 
 class GlobalWorkSpaceImpl(GlobalWorkspace):
     def __init__(self):
         super().__init__()
         self.coalitions = []
         self.broadcast_triggers = []
-        self.coalition_decay_strategy = DecayStrategy()
+        self.coalition_decay_strategy = None
         self.broadcast_sent_count = 0
         self.broadcast_started = False
         self.broadcast_was_sent = False
-        self.tick_at_last_broadcast = None
         self.last_broadcast_trigger = None
+        self.aggregate_trigger_threshold = None
+        self.coalition_removal_threshold = None
+        self.broadcast_refractory_period = None
+        self.winningCoalition = None
+        self.ticks = 0
+        self.tick_at_last_broadcast = 0
+        self.logger = getLogger(self.__class__.__name__).logger
+        #self.logger.debug("Initialized GlobalWorkspaceImpl")
+
+    def run_task(self):
+        self.coalition_decay_strategy = DEFAULT_DECAY_STRATEGY
         self.aggregate_trigger_threshold = DEFAULT_THRESHOLD
         self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
         self.broadcast_refractory_period = DEFAULT_REFRACTORY_PERIOD
-        self.winningCoalition = None
-        self.logger = getLogger(self.__class__.__name__).logger
+        self.ticks = time.time()
+        trigger1 = "no_broadcast_for_extended_period"
+        trigger2 = "winning_coalition_trigger"
+        trigger3 = "no_winning_coalition_trigger"
+        self.broadcast_triggers.append(trigger1)
+        self.broadcast_triggers.append(trigger2)
+        self.broadcast_triggers.append(trigger3)
+        self.logger.debug("Initialized GlobalWorkspaceImpl")
 
     def addCoalition(self, coalition):
         coalition.setDecayStrategy(self.coalition_decay_strategy)
@@ -58,6 +67,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                     aggregateActivation += coalition.getActivation()
                     if aggregateActivation > self.aggregate_trigger_threshold:
                         self.logger.debug("Aggregate activation trigger fired")
+                        self.broadcast_was_sent = True
                         self.triggerBroadcast(trigger)
         else:
             for coalition in self.coalitions:
@@ -72,7 +82,8 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
     def triggerBroadcast(self, trigger):
         if self.broadcast_started:
             self.broadcast_started = False
-            if (time.time() - self.tick_at_last_broadcast <
+            self.ticks = time.time() - self.ticks
+            if (self.ticks - self.tick_at_last_broadcast <
                 self.broadcast_refractory_period):
                 self.broadcast_started = False
             else:
@@ -89,15 +100,17 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
             self.coalitions.remove(self.winningCoalition)
             self.notify_observers()
             self.broadcast_sent_count += 1
-            self.tick_at_last_broadcast = time.time()
+            self.ticks = time.time() - self.ticks
+            self.tick_at_last_broadcast = self.ticks
             self.broadcast_was_sent = True
         else:
             self.logger.debug("Broadcast was triggerd but there are no "
                               "coalitions")
+            self.broadcast_was_sent = False
         self.broadcast_started = False
         return self.broadcast_was_sent
 
-    def getWinningCoalition(self):
+    def __getstate__(self):
         return self.winningCoalition
 
     def chooseCoalition(self):
@@ -128,4 +141,5 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
 
     def notify(self, module):
         if isinstance(module, CurrentSituationalModel):
-            self.addCoalition(module.getCoalition())
+            if module.getModuleContent() is not None:
+                self.addCoalition(module.getModuleContent())

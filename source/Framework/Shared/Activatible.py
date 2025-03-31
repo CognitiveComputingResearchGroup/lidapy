@@ -44,6 +44,9 @@ class Activatible:
     def getExciteStrategy(self):
         pass
 
+    def decay(self, ticks):
+        pass
+
     def setDecayStrategy(self, strategy):
         pass
 

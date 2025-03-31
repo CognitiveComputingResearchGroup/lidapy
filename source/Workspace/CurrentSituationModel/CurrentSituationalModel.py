@@ -22,9 +22,6 @@ class CurrentSituationalModel(Module):
     def receiveVentralStream(self, stream):
         pass
 
-    def getCoalition(self):
-        pass
-
     def receiveCoalition(self, coalition):
         pass
 

@@ -5,7 +5,7 @@ from source.Framework.Shared.NodeStructure import NodeStructure
 DEFAULT_NODE = NodeImpl()
 DEFAULT_NODE_TYPE = DEFAULT_NODE.getLabel()
 DEFAULT_LINK = LinkImpl()
-DEFAULT_LINK_TYPE = DEFAULT_LINK.getCategory()
+DEFAULT_LINK_TYPE = "DEFAULT_LINK"
 
 class NodeStructureImpl(NodeStructure):
     def __init__(self):
@@ -26,6 +26,7 @@ class NodeStructureImpl(NodeStructure):
         node = NodeImpl()
         node.setLabel(label)
         node.setActivation(activation)
+        node.setActivatibleRemovalThreshold(removal_threshold)
         if node not in self.nodes:
             self.nodes.append(node)
 
@@ -35,7 +36,7 @@ class NodeStructureImpl(NodeStructure):
 
     def addDefaultLink(self, source_node, sink_link, category, activation,
                        removal_threshold):
-        self.addDefaultLink_(source_node.getId(), sink_link.getCategory["id"],
+        self.addDefaultLink_(source_node.getId(), sink_link.getCategory("id"),
                      category, activation, removal_threshold)
 
     def addDefaultLink_(self, source_id, sink_id, category, activation,
@@ -55,10 +56,24 @@ class NodeStructureImpl(NodeStructure):
     def addLink(self, link_type, source_id, sink_id, category, activation,
                 removal_threshold):
         link = LinkImpl()
-        link.setCategory(link_type["id"], link_type["label"])
+        link.setCategory(category["id"], category["label"])
         link.setSource(source_id)
         link.setSink(sink_id)
         link.setActivation(activation)
+        if link not in self.links:
+            self.links.append(link)
+
+    def addLinks(self, links, link_type):
+        for link in links:
+            if link not in self.links:
+                self.setLinkType(link, link_type)
+                self.links.append(link)
+
+    def setLinkType(self, link, link_type):
+        link.setType(link_type)
+
+    def getLinkType(self, link):
+        return link.getType()
 
     def removeNode(self, node):
         self.nodes.remove(node)
@@ -92,10 +107,12 @@ class NodeStructureImpl(NodeStructure):
         return False
 
     def mergeWith(self, node_structure):
-        for node in node_structure.nodes:
-            self.nodes.append(node)
-        for link in node_structure.links:
-            self.links.append(link)
+        if node_structure.nodes is not None:
+            for node in node_structure.nodes:
+                self.nodes.append(node)
+        if node_structure.links is not None:
+            for link in node_structure.links:
+                self.links.append(link)
 
     def copy(self):
         return self
@@ -133,7 +150,7 @@ class NodeStructureImpl(NodeStructure):
     def getConnectedSinks(self, node):
         sink_links = []
         for link in self.links:
-            if link.getSource() == node:
+            if link.getSource() == node.getId():
                 sink_links.append(link)
         return sink_links
 
@@ -146,10 +163,10 @@ class NodeStructureImpl(NodeStructure):
         return sink_nodes
 
     def getNodeCount(self):
-        return self.nodes.count()
+        return self.nodes.__len__()
 
     def getLinkCount(self):
-        return self.links.count()
+        return self.links.__len__()
 
     def getLinkableCount(self):
         #TODO Implement actual getLinkableCount function

@@ -26,17 +26,33 @@ class PerceptualAssociativeMemory(Module):
 
     def add_association(self, cue : NodeImpl):
         #Add new associations
-        self.logger.debug(f"Storing node {cue}")
-        self.associations.addNode_(cue)
+        if cue is not None and cue not in self.associations.getNodes():
+            self.logger.debug(f"Storing node {cue}")
+            self.associations.addNode_(cue)
 
     def retrieve_associations(self, cue : NodeStructureImpl):
         #Retreiving associations for the given cue
         self.logger.info(f"Retrieved {len(cue.getLinkCount())} associations")
         return cue.getLinks()
 
+    def retrieve_association(self, cue: NodeImpl):
+        links = None
+        if not NodeImpl:
+            self.logger.debug(f"Unable to retrieve association for {cue}")
+        else:
+            if cue in self.associations.getNodes():
+                links = self.associations.getConnectedSinks(cue)
+                self.logger.info(f"Retrieved {len(links)} associations")
+            else:
+                self.logger.debug(f"Unable to retrieve association for {cue}")
+        return links
+
     def receive_broadcast(self, coalition):
         self.logger.debug(f"Received broadcast coalition {coalition}")
         map(self.add_association, coalition.getContent())
+
+    def get_stored_nodes(self):
+        pass
 
     def learn(self, cue):
         pass

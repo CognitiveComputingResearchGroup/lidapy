@@ -1,18 +1,12 @@
 - modality: text
   name: text
-  processor: _process_text
+  processor: text_processing
 - modality: image
   name: image
-  processor: _process_image
+  processor: image_processing
 - modality: audio
   name: audio
-  processor: _process_audio
-- modality: touch
-  name: touch
-  processor: _process_touch
-- modality: image
-  name: visual2
-  processor: _process_image
-- modality: internal_state
-  name: internal_state
-  processor: _process_internal_state
+  processor: audio_processing
+- modality: video
+  name: video
+  processor: video_processing

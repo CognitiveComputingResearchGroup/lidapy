@@ -1,14 +1,14 @@
 import importlib
-import Configs
+import time
 from importlib import util
 from threading import Thread
 from yaml import YAMLError, safe_load
+
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.AttentionCodelets.AttentionCodeletImpl import AttentionCodeletImpl
 from source.Environment.Environment import Environment
 from source.Environment.FrozenLakeEnvironment import FrozenLake
 from source.Framework.Agents.Agent import Agent
-from source.Framework.Shared.NodeStructure import NodeStructure
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.PAM.PAM_Impl import PAMImpl
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
@@ -23,58 +23,93 @@ from source.Workspace.WorkspaceImpl import WorkspaceImpl
 class MinimalConsciousAgent(Agent):
     def __init__(self):
         super().__init__()
-        self.sensor_module = self.load_sensors_from_file("Sensors")
-        self.sensors = self.get_agent_sensors()
-        self.processor_dict = self.get_agent_processors()
 
+        #Agent modules
         self.global_workspace = GlobalWorkSpaceImpl()
         self.csm = CurrentSituationalModelImpl()
-        self.attention_codelets = AttentionCodeletImpl(self.csm,
-                                                       self.global_workspace)
-        self.environment = FrozenLake(self, self.attention_codelets)
-        self.sensory_motor_mem = SensoryMotorMemoryImpl(self.environment)
-        self.action_selection = ActionSelectionImpl(self.sensory_motor_mem)
-        self.procedural_memory = ProceduralMemoryImpl(self.action_selection,
-                                                      self.environment)
-        self.pam = PAMImpl(self.procedural_memory)
-        self.workspace = WorkspaceImpl(self.csm, self.pam)
-        self.sensory_memory = SensoryMemoryImpl(None,self.pam,
-                                                None,
-                                                self.workspace,
-                                                self.processor_dict,
-                                                self.sensors,
-                                                self.sensor_module)
+        self.attention_codelets = AttentionCodeletImpl()
+        self.environment = FrozenLake()
+        self.sensory_motor_mem = SensoryMotorMemoryImpl()
+        self.action_selection = ActionSelectionImpl()
+        self.procedural_memory = ProceduralMemoryImpl()
+        self.pam = PAMImpl()
+        self.workspace = WorkspaceImpl()
+        self.sensory_memory = SensoryMemoryImpl()
 
-        #Add observers
-        self.add_observer(self.sensory_memory)
+        #Module observers
+        self.sensory_motor_mem.add_observer(self.environment)
+        self.action_selection.add_observer(self.sensory_motor_mem)
+        self.environment.add_observer(self.sensory_memory)
+        self.attention_codelets.add_observer(self.csm)
+        self.pam.add_observer(self.procedural_memory)
+        self.pam.add_observer(self.workspace)
+        self.procedural_memory.add_observer(self.action_selection)
+        self.workspace.add_observer(self.pam)
+        self.workspace.add_observer(self.global_workspace)
+        self.sensory_memory.add_observer(self.pam)
+        self.sensory_memory.add_observer(self.csm)
+        self.sensory_memory.add_observer(self.sensory_motor_mem)
+        self.global_workspace.add_observer(self.pam)
+        self.global_workspace.add_observer(self.procedural_memory)
+        self.global_workspace.add_observer(self.action_selection)
+        self.global_workspace.add_observer(self.sensory_motor_mem)
+        self.global_workspace.add_observer(self.attention_codelets)
+        self.csm.add_observer(self.global_workspace)
+
+        #Sensory Memory Sensors
+        self.sensory_memory.sensor_dict = self.get_agent_sensors()
+        self.sensory_memory.sensor = self.load_sensors_from_file("Sensors")
+        self.sensory_memory.processor_dict = self.get_agent_processors()
+
+        #Add procedural_mem schemes
+        self.procedural_memory.scheme = ["Stay safe", "Seek goal"]
+
+        #Add workspace csm
+        self.workspace.csm = self.csm
+
+        #Add attention codelets buffer
+        self.attention_codelets.buffer = self.csm
 
         #Agent thread
         self.agent_thread = Thread(target=self.environment.reset)
 
-        #Attention Codelets thread
-        self.attention_codelets_thread = (
-                            Thread(target=self.attention_codelets.run_task))
+        # Attention codelets thread
+        self.attention_codelets_thread = Thread(
+            target=self.attention_codelets.run_task)
 
-        self.action_value = {
-            "3": "up",
-            "2": "right",
-            "1": "down",
-            "0": "left",
-        }
+        #Sensory memory thread
+        self.sensory_memory_thread = (
+                        Thread(target=self.sensory_memory.run_sensors))
+
+        #CSM thread
+        self.csm_thread = Thread(target=self.csm.run_task)
+
+        #GlobalWorkspace thread
+        self.global_workspace_thread = (
+                        Thread(target=self.global_workspace.run_task))
+
+        #ProceduralMem thread
+        self.procedural_memory_thread = (
+            Thread(target=self.procedural_memory.run,
+                   args=((["Stay safe", "Seek goal"]), )))
+
+        # SensoryMotorMem thread
+        self.sensory_motor_mem_thread = (
+            Thread(target=self.sensory_motor_mem.run))
+
 
     def run(self):
         self.agent_thread.start()
-        sought_content = NodeStructure()
-        sought_content.addNode("safe", 1.0, 0.0)
-        sought_content.addNode("start", 1.0, 0.0)
-        sought_content.addNode("goal", 2.0, -1.0)
-        sought_content.addNode("danger", -1.0, 0.5)
-        self.attention_codelets.setSoughtContent(NodeStructure())
+        self.sensory_memory_thread.start()
         self.attention_codelets_thread.start()
+        self.csm_thread.start()
+        self.global_workspace_thread.start()
+        self.procedural_memory_thread.start()
+        self.sensory_motor_mem_thread.start()
 
     def notify(self, module):
         if isinstance(module, Environment):
-            self.notify_observers()
+            state = module.get_state()
 
     def load_sensors_from_file(self, type):
         with open(
@@ -117,5 +152,5 @@ class MinimalConsciousAgent(Agent):
                 print(exc)
         return DEFAULT_PROCESSORS
 
-    def get_state(self):
+    def __getstate__(self):
         return self.environment.get_stimuli()

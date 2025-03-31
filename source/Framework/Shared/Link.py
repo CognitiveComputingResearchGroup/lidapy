@@ -21,7 +21,13 @@ class Link(Activatible):
     def setSink(self, sink):
         pass
 
-    def getCategory(self):
+    def setType(self, link_type):
+        pass
+
+    def getType(self):
+        pass
+
+    def getCategory(self, key):
         pass
 
     def setCategory(self, key, value):

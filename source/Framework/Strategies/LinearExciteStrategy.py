@@ -11,19 +11,17 @@ class LinearExciteStrategy(ExciteStrategy):
         self.lower_bound = DEFAULT_LOWER_BOUND
 
     def excite(self, current_activation, ticks, params=None):
-        slope = self.slope
         if params is not None and params.length != 0:
-            slope = params[0]
-        self.calcActivation(current_activation, ticks, slope)
+            self.slope = params[0]
+        self.calcActivation(current_activation, ticks)
 
     def excite_(self, current_activation, ticks, params=None):
-        slope = self.slope
         if params is not None and params["slope"] is not None:
-            slope = params["slope"]
-        self.calcActivation(current_activation, ticks, slope)
+            self.slope = params["slope"]
+        self.calcActivation(current_activation, ticks)
 
-    def calcActivation(self, current_activation, ticks, slope):
-        current_activation += slope * ticks
+    def calcActivation(self, current_activation, ticks):
+        current_activation += self.slope * ticks
         if current_activation > self.upper_bound:
                 return self.upper_bound
         elif current_activation < self.lower_bound:

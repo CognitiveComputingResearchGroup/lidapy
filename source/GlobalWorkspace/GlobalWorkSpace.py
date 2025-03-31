@@ -23,5 +23,8 @@ class GlobalWorkspace(Module):
     def getCoalitionDecayStrategy(self):
         pass
 
+    def __getstate__(self):
+        pass
+
     def notify(self, module):
         pass

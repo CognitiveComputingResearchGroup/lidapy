@@ -1,7 +1,8 @@
+from time import sleep
+
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
-from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
-from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
+from source.ModuleInitialization.DefaultLogger import getLogger
 from source.SensoryMemory.SensoryMemory import SensoryMemory
 from source.Workspace.CurrentSituationModel.CurrentSituationalModel import (
     CurrentSituationalModel)
@@ -10,14 +11,14 @@ from source.Workspace.CurrentSituationModel.CurrentSituationalModel import (
 class CurrentSituationalModelImpl(CurrentSituationalModel):
     def __init__(self):
         super().__init__()
-        self.node_structure = NodeStructureImpl()
+        self.node_structure = None
         self.formed_coalition = None
-        self.action_value = {
-            "up" : 3,
-            "right" : 2,
-            "down" : 1,
-            "left" : 0,
-        }
+        self.logger = getLogger(__class__.__name__).logger
+        #self.logger.debug("Initialized CurrentSituationalModel")
+
+    def run_task(self):
+        self.node_structure = NodeStructureImpl()
+        self.logger.debug("Initialized CurrentSituationalModel")
 
     def addBufferContent(self, workspace_content):
         self.node_structure.mergeWith(workspace_content)
@@ -29,42 +30,25 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
         self.node_structure.decayNodeStructure(time)
 
     def receiveVentralStream(self, stream):
-        activation = 0
-        incentive_salience = 0
-        #Initial observations of surrounding tiles
-        index = 0  # Id of the corresponding node
-        for key, value in stream["outcome"]:
-            ven_stream_node = NodeImpl()
-            if value == 'G':
-                activation = 2
-                ven_stream_node.setLabel("goal")
-                incentive_salience = 2
-            elif value == 'H':
-                ven_stream_node.setLabel("danger")
-                activation = -1
-                incentive_salience = 2
-            elif value == 'S':
-                ven_stream_node.setLabel("start")
-            else:
-                ven_stream_node.setLabel("safe")
-                activation = 1
-                incentive_salience = 1
-            index = self.action_value[key]
-            ven_stream_node.setId(index)
-            ven_stream_node.setActivation(activation)
-            ven_stream_node.setIncentiveSalience(incentive_salience)
-            self.addBufferContent(ven_stream_node)
+        self.addBufferContent(stream)
+        sleep(0.5)  # Seed control to other modules
 
-    def getCoalition(self):
+    def getModuleContent(self):
         return self.formed_coalition
 
     def receiveCoalition(self, coalition):
         self.formed_coalition = coalition
-        self.addBufferContent(self.formed_coalition)
+        #self.addBufferContent(self.formed_coalition)
         self.notify_observers()
 
     def notify(self, module):
         if isinstance(module, SensoryMemory):
-            self.receiveVentralStream(module.get_sensory_content())
+            link_list = module.get_sensory_content()["cue"]
+            stream = NodeStructureImpl()
+            for link in link_list:
+                stream.addDefaultLink__(link)
+            self.logger.debug(f"Received {len(link_list)} cues from ventral "
+                              f"stream")
+            self.receiveVentralStream(stream)
         elif isinstance(module, AttentionCodelet):
-            self.receiveCoalition(module.FormCoalition())
+            self.receiveCoalition(module.getModuleContent())
