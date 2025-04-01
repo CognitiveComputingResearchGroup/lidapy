@@ -1,5 +1,4 @@
 import importlib
-import time
 from importlib import util
 from threading import Thread
 from yaml import YAMLError, safe_load
@@ -105,9 +104,7 @@ class MinimalConsciousAgent(Agent):
         self.sensory_memory_thread.start()
         self.pam_thread.start()
         self.csm_thread.start()
-        self.attention_codelets_thread.daemon = True
         self.attention_codelets_thread.start()
-        self.global_workspace_thread.daemon = True
         self.global_workspace_thread.start()
         self.procedural_memory_thread.start()
         self.sensory_motor_mem_thread.start()
