@@ -1,12 +1,6 @@
-from email.errors import NonASCIILocalPartDefect
-
 import pytest
 import logging
 
-from pygame import NOEVENT
-
-from source.Framework.Shared.NodeImpl import NodeImpl
-from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
 from source.PAM.PAM_Impl import PAMImpl
 
@@ -22,38 +16,40 @@ NodeImpl: Representing an individual memory node
 NodeStructureImpl: Storing and managing the nodes
 """
 class exampleNode:
+    #initializing the node with default id, activation and label
     def __init__(self, id=0):
         self.id = id
         self.activation = 0.0
         self.label = ""
 
-    def setID(self, id):
+    def setID(self, id): #Setting the Id for the Node
         self.id = id
-    def getID(self):
+    def getID(self): #Get the current id for the node
         return self.id
-    def setActivation(self, a):
+    def setActivation(self, a): #Set the activation level for the node
         self.activation = a
-    def getActivation(self):
+    def getActivation(self): #Retrieve the current activation of the node
         return self.activation
-    def setLabel(self, label):
+    def setLabel(self, label): #Set the label for the node
         self.label = label
-    def getLinks(self):
+    def getLinks(self): #Return an empty list representing no links
         return [] #Empty list just for testing purposes
-    def decay(self, rate):
+    def decay(self, rate): #Decrease the activation by a given rate
         self.activation -= rate
-    def isRemovable(self):
+    def isRemovable(self): #Determinr if the node is removable based on activation
         return self.activation < 0.1 #If low it can be removed
 
 class exampleNodeStructure:
+   #initializing node structure with empty nodes and links
     def __init__(self):
         self.nodes = []
         self.links = {}
 
-    def addNode_(self, node):
+    def addNode_(self, node): #add a node to the structure
         self.nodes.append(node)
-    def getNodes(self):
+    def getNodes(self): #get all nodes in the structure
         return self.nodes
-    def remove(self, node):
+    def remove(self, node): #remove a node from the structure
         if node in self.nodes:
             self.nodes.remove(node)
     def addDefaultLink(self, source, target, meta, a, b):
@@ -61,22 +57,26 @@ class exampleNodeStructure:
             self.links[source] = []
         self.links[source].append(target)
     def getConnectedSinks(self, node):
-        return self.links.getSource(node, [])
+        return self.links.get(node, [])
 
 #Example logger to avoid excessive testing output
 def getLogger(name):
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter('%(message)s'))
-        logger.addHandler(handler)
+    logger = logging.getLogger(name) #Getting a logger instance with a name
+    logger.setLevel(logging.DEBUG) #set the logging level to DEBUG (capturing all levels of messages)
+    if not logger.handlers: #Checking if the logger already contains handlers to avoid additional
+        handler = logging.StreamHandler() #Generating a stream handler to log to console
+        handler.setFormatter(logging.Formatter('%(message)s')) #Set the format (only the message part)
+        logger.addHandler(handler) #Adding the handler to the logger
     return logger
 
-#Pathcing the example dependencies to the PAM and PAMImpl
+"""Patching the example dependencies to the PAM and PAMImpl"""
+#Assigning the example node structure to the NodeStructureImpl
 PerceptualAssociativeMemory.NodeStructureImpl = exampleNodeStructure()
+#Assigning the example node structure to the NodeStructureImpl to PAM
 PAMImpl.NodeStructureImpl = exampleNodeStructure()
+#Assigning the example NodeImpl to the PAMImpl
 PAMImpl.NodeImpl = exampleNode()
+#Assigning a logger to the PAM and PAMImpl
 PerceptualAssociativeMemory.getLogger = staticmethod(getLogger)
 PAMImpl.getLogger = staticmethod(getLogger)
 
