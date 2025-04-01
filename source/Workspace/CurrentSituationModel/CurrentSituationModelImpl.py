@@ -11,14 +11,13 @@ from source.Workspace.CurrentSituationModel.CurrentSituationalModel import (
 class CurrentSituationalModelImpl(CurrentSituationalModel):
     def __init__(self):
         super().__init__()
-        self.node_structure = None
+        self.node_structure = NodeStructureImpl()
         self.formed_coalition = None
         self.logger = getLogger(__class__.__name__).logger
-        #self.logger.debug("Initialized CurrentSituationalModel")
+        self.logger.debug("Initialized CurrentSituationalModel")
 
     def run_task(self):
         self.node_structure = NodeStructureImpl()
-        self.logger.debug("Initialized CurrentSituationalModel")
 
     def addBufferContent(self, workspace_content):
         self.node_structure.mergeWith(workspace_content)

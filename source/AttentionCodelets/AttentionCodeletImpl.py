@@ -21,10 +21,13 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.formed_coalition = None
         self.codelet_reinforcement = DEFAULT_CODELET_REINFORCEMENT
         self.logger = getLogger(self.__class__.__name__).logger
+        self.logger.debug("Initialized attention codelets")
+
+    def start(self):
+        self.logger.debug("Running attention codelets")
+        self.run_task()
 
     def run_task(self):
-        self.logger.debug("Running attention codelets")
-        sleep(27)            #Wait for csm initialization
         if self.bufferContainsSoughtContent(self.buffer):
             csm_content = self.retrieveWorkspaceContent(
                                     self.buffer)
@@ -38,8 +41,12 @@ class AttentionCodeletImpl(AttentionCodelet):
                 formed_coalition.setActivation(2)
                 self.logger.info("Coalition successfully formed.")
                 self.notify_observers()
+
+            else:
+                sleep(5)
+                self.run_task()
         else:
-            sleep(4)   #Wait for csm initialization
+            sleep(5)
             self.run_task()
 
     def set_refactory_period(self, ticks):

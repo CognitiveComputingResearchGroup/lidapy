@@ -25,16 +25,19 @@ class PAMImpl(PerceptualAssociativeMemory):
         self.memory = NodeStructureImpl()
         self.current_cell = None
         self.position = None
-        #self.logger.debug("Initialized PerceptualAssociativeMemory")
+        self.logger.debug("Initialized PerceptualAssociativeMemory")
 
-    def run(self):
+
         """Create node for each cell the agent could visit"""
-        for cell in range(64):
+        for cell in range(16):
             node = NodeImpl()
             """Set the cell identifier to the corresponding state"""
             node.setId(cell)
             """Store the node in memory"""
             self.memory.addNode_(node)
+
+    def run(self):
+        pass
 
     def __getstate__(self):
         return self.current_cell
@@ -58,8 +61,7 @@ class PAMImpl(PerceptualAssociativeMemory):
             winning_coalition = module.__getstate__()
 
     def learn(self, cue):
-        #Check all cells for the corresponding one
-
+        #Check all cells for the corresponding node
         for node in self.memory.getNodes():
             if (node.getActivation() is not None and
                                             node.getActivation() >= 0.05):

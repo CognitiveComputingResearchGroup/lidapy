@@ -31,7 +31,13 @@ class ActionSelectionImpl(ActionSelection):
 
             self.scheme = action
             if self.scheme is not None:
+                self.logger.debug(
+                    f"Action plan retrieved from instantiated "
+                    f"schemes")
                 self.notify_observers()
+            else:
+                self.logger.debug("No action found plan for the selected "
+                                  "scheme")
 
         elif isinstance(module, GlobalWorkspace):
             winning_coalition = module.__getstate__()

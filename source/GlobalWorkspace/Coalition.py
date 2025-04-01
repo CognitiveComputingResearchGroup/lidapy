@@ -8,7 +8,6 @@ class Coalition(Module, Activatible):
     def __init__(self):
         super().__init__()
         self.observers = []
-        self.lock = threading.Lock()
 
     def notify(self, module):
         pass

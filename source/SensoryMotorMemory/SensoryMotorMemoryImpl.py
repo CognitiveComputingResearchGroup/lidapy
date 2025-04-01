@@ -44,9 +44,11 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
                         index += 1
             if self.event is not None:
                 self.notify_observers()
+                self.logger.debug("Retrieved motor plan(s) from action plan")
         elif isinstance(module, ActionSelection):
             self.event = module.select_action()
             if self.event is not None:
+                self.logger.debug("Retrieved motor plan(s) from action plan")
                 self.notify_observers()
         elif isinstance(module, GlobalWorkspace):
             winning_coalition = module.__getstate__()

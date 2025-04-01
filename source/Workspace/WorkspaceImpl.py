@@ -13,12 +13,15 @@ class WorkspaceImpl(Workspace):
     def __init__(self):
         super().__init__()
         self.logger = getLogger(self.__class__.__name__)
-        self.nodes = []
+        self.nodes = None
         self.csm = None
         self.coalition = None
         self.logger = getLogger(self.__class__.__name__).logger
         self.episodic_memory = None
         self.logger.debug("Initialized Workspace")
+
+    def run(self):
+        self.nodes = []
 
     def cueEpisodicMemories(self, node_structure):
         self.episodic_memory = node_structure

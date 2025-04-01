@@ -45,9 +45,11 @@ class ProceduralMemoryImpl(ProceduralMemory):
             for scheme in schemes:
                 self.add_scheme(self.state, scheme)
                 scheme.setSink(self.state.getId())
+            self.logger.debug(f"Instantiated {len(schemes)} action schemes")
         else:
             self.add_scheme(self.state, schemes)
             schemes.setSink(self.state.getId())
+            self.logger.debug("Instantiated single action scheme")
 
     def learn(self, broadcast):
         result = self.get_closest_match(broadcast)
@@ -146,5 +148,7 @@ class ProceduralMemoryImpl(ProceduralMemory):
                     min_distance = min(min_distance, distance)
                     if distance <= min_distance:
                         current_scheme = scheme
+        self.logger.debug(f"Instantiated scheme with the minimum distance "
+                          f"to current goal: {current_scheme}")
         return current_scheme
 

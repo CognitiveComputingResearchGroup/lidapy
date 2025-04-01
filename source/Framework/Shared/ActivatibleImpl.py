@@ -18,28 +18,22 @@ class ActivatibleImpl(Activatible):
 
     def setActivation(self, value):
         if value > 1.0:
-            with self.lock:
-                self.activation = 1.0
+            self.activation = 1.0
         elif value < -1.0:
-            with self.lock:
-                self.activation = -1.0
+            self.activation = -1.0
         else:
-            with self.lock:
-                self.activation = value
+            self.activation = value
 
     def getActivation(self):
         return self.activation
 
     def setIncentiveSalience(self, value):
         if value > 1.0:
-            with self.lock:
-                self.incentiveSalience = 1.0
+            self.incentiveSalience = 1.0
         elif value < -1.0:
-            with self.lock:
-                self.incentiveSalience = -1.0
+            self.incentiveSalience = -1.0
         else:
-            with self.lock:
-                self.incentiveSalience = value
+            self.incentiveSalience = value
 
     def getIncentiveSalience(self):
         return self.incentiveSalience
@@ -58,10 +52,9 @@ class ActivatibleImpl(Activatible):
         if self.decayStrategy is not None:
             self.logger.debug(f"Before decaying {self} has current "
                               f"activation: {self.getActivation()}")
-            with (self.lock):
-                self.activation = self.calcActivationLinearDecay(
+            self.activation = self.calcActivationLinearDecay(
                     self.activation, ticks)
-                self.incentiveSalience = self.calcActivationLinearDecay(
+            self.incentiveSalience = self.calcActivationLinearDecay(
                     self.incentiveSalience, ticks)
             self.logger.debug(f"After decaying {self} has current "
                                   f"activation: {self.getActivation()}")
@@ -80,8 +73,7 @@ class ActivatibleImpl(Activatible):
         if self.exciteStrategy is not None:
             self.logger.debug(f"Before excitation {self} has current "
                               f"activation: {self.getActivation()}")
-            with self.lock:
-                self.activation = self.calcActivationLinearExcite(
+            self.activation = self.calcActivationLinearExcite(
                     self.getActivation(), amount)
 
             self.logger.debug(f"After excitation {self} has current "
@@ -89,8 +81,7 @@ class ActivatibleImpl(Activatible):
         else:
             """self.logger.debug(f"Before excitation {self} has current "
                               f"activation: {self.getActivation()}")"""
-            with self.lock:
-                self.activation = self.calcActivationLinearExcite(
+            self.activation = self.calcActivationLinearExcite(
                     self.getActivation(), amount)
 
             """self.logger.debug(f"After excitation {self} has current "
@@ -101,8 +92,7 @@ class ActivatibleImpl(Activatible):
             self.logger.debug(f"Before excitation {self} has current "
                               f"incentive salience: "
                               f"{self.getIncentiveSalience()}")
-            with self.lock:
-                self.activation = self.calcActivationLinearExcite(
+            self.activation = self.calcActivationLinearExcite(
                     self.getIncentiveSalience(), amount)
 
             self.logger.debug(f"After excitation {self} has current "
