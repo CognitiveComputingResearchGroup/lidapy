@@ -3,6 +3,8 @@ from time import sleep
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
+from source.Workspace.CurrentSituationModel.CurrentSituationalModel import \
+    CurrentSituationalModel
 from source.Workspace.Workspace import Workspace
 from source.ModuleInitialization.DefaultLogger import getLogger
 
@@ -36,8 +38,6 @@ class WorkspaceImpl(Workspace):
         workspace_buffer = NodeStructureImpl()
         workspace_buffer.addLinks(percept, "Adjacent node")
         self.csm.addBufferContent(workspace_buffer)
-        sleep(15)   #Cue memories after a short while
-        self.cueEpisodicMemories(workspace_buffer)
 
     def receiveLocalAssociation(self, node_structure):
         self.csm.addBufferContent(node_structure)
@@ -52,3 +52,6 @@ class WorkspaceImpl(Workspace):
             if isinstance(state, NodeImpl):
                 percept = module.retrieve_association(state)
             self.receive_percept(percept)
+        elif isinstance(module, CurrentSituationalModel):
+            cue = module.getBufferContent()
+            self.cueEpisodicMemories(cue)

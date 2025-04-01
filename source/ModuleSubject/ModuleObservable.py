@@ -2,7 +2,6 @@ import threading
 from threading import Thread
 from tenacity import sleep
 
-
 class ModuleSubject:
     def __init__(self):
         self.observers = []
@@ -20,10 +19,9 @@ class ModuleSubject:
             self.observer_threads.append(thread)
             thread.start()
             sleep(25)
-            #thread.join()
         for thread in self.observer_threads:
             if thread.is_alive():
                 event = threading.Event()
                 event.set()
-                thread.join(15)
-            #observer.notify(self)
+                sleep(5)
+                thread.join(60)

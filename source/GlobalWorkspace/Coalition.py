@@ -1,3 +1,5 @@
+import threading
+
 from source.Framework.Shared.Activatible import Activatible
 from source.ModuleInitialization.ModuleInterface import Module
 
@@ -6,6 +8,7 @@ class Coalition(Module, Activatible):
     def __init__(self):
         super().__init__()
         self.observers = []
+        self.lock = threading.Lock()
 
     def notify(self, module):
         pass

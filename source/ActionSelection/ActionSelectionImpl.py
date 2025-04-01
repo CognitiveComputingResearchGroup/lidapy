@@ -20,10 +20,18 @@ class ActionSelectionImpl(ActionSelection):
     def notify(self, module):
         if isinstance(module, ProceduralMemory):
             state = module.__getstate__()
-            action = module.get_action(state["state"], state["scheme"])
+            schemes = module.get_schemes(state)
+            action = None
+
+            random_index = random.randint(0, len(schemes) - 1)
+            while schemes[random_index].getActivation() <= 0.5:
+                random_index = random.randint(0, len(schemes) - 1)
+
+            action = module.get_action(state, schemes[random_index])
 
             self.scheme = action
             if self.scheme is not None:
                 self.notify_observers()
+
         elif isinstance(module, GlobalWorkspace):
             winning_coalition = module.__getstate__()

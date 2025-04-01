@@ -44,6 +44,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.broadcast_triggers.append(trigger3)
         self.logger.debug("Initialized GlobalWorkspaceImpl")
 
+
     def addCoalition(self, coalition):
         coalition.setDecayStrategy(self.coalition_decay_strategy)
         coalition.setActivatibleRemovalThreshold(

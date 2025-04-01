@@ -4,9 +4,7 @@
 from time import sleep
 
 from source.Environment.Environment import Environment
-from source.Framework.Agents.Agent import Agent
 from source.Framework.Shared.LinkImpl import LinkImpl
-from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.ModuleInitialization.DefaultLogger import getLogger
 from source.SensoryMemory.SensoryMemory import SensoryMemory
@@ -50,6 +48,7 @@ class SensoryMemoryImpl(SensoryMemory):
     def run_sensors(self):
         """All sensors associated will run with the memory"""
         # Logic to gather information from the environment
+        self.links = []
         if self.stimuli is not None:
             for sensor, value in self.stimuli.items():
                 if sensor not in self.sensor_dict:

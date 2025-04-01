@@ -77,6 +77,8 @@ class MinimalConsciousAgent(Agent):
         self.attention_codelets_thread = Thread(
             target=self.attention_codelets.run_task)
 
+        self.pam_thread = Thread(target=self.pam.run)
+
         #Sensory memory thread
         self.sensory_memory_thread = (
                         Thread(target=self.sensory_memory.run_sensors))
@@ -91,7 +93,7 @@ class MinimalConsciousAgent(Agent):
         #ProceduralMem thread
         self.procedural_memory_thread = (
             Thread(target=self.procedural_memory.run,
-                   args=((["Stay safe", "Seek goal"]), )))
+                   args=((["Avoid hole", "Find goal"]), )))
 
         # SensoryMotorMem thread
         self.sensory_motor_mem_thread = (
@@ -101,8 +103,11 @@ class MinimalConsciousAgent(Agent):
     def run(self):
         self.agent_thread.start()
         self.sensory_memory_thread.start()
-        self.attention_codelets_thread.start()
+        self.pam_thread.start()
         self.csm_thread.start()
+        self.attention_codelets_thread.daemon = True
+        self.attention_codelets_thread.start()
+        self.global_workspace_thread.daemon = True
         self.global_workspace_thread.start()
         self.procedural_memory_thread.start()
         self.sensory_motor_mem_thread.start()

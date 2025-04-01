@@ -31,14 +31,14 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
 
     def receiveVentralStream(self, stream):
         self.addBufferContent(stream)
-        sleep(0.5)  # Seed control to other modules
+        """sleep(0.5)  # Seed control to other modules"""
 
     def getModuleContent(self):
         return self.formed_coalition
 
     def receiveCoalition(self, coalition):
         self.formed_coalition = coalition
-        #self.addBufferContent(self.formed_coalition)
+        self.logger.debug(f"Received new coalition")
         self.notify_observers()
 
     def notify(self, module):

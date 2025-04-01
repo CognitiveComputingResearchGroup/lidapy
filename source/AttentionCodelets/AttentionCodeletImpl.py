@@ -1,14 +1,11 @@
 from time import sleep
 
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
-from source.Framework.Shared.NodeStructure import NodeStructure
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.ModuleInitialization.DefaultLogger import getLogger
 from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
     CurrentSituationalModelImpl
-from source.Workspace.CurrentSituationModel.CurrentSituationalModel import \
-    CurrentSituationalModel
 
 DEFAULT_CODELET_REFRACTORY_PERIOD = 50
 DEFAULT_CODELET_REINFORCEMENT = 0.5
@@ -27,7 +24,7 @@ class AttentionCodeletImpl(AttentionCodelet):
 
     def run_task(self):
         self.logger.debug("Running attention codelets")
-        """sleep(3)    #Wait for csm initialization"""
+        sleep(27)            #Wait for csm initialization
         if self.bufferContainsSoughtContent(self.buffer):
             csm_content = self.retrieveWorkspaceContent(
                                     self.buffer)
