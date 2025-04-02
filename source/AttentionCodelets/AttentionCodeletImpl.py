@@ -1,14 +1,11 @@
 from time import sleep
 
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
-from source.Framework.Shared.NodeStructure import NodeStructure
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.ModuleInitialization.DefaultLogger import getLogger
 from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
     CurrentSituationalModelImpl
-from source.Workspace.CurrentSituationModel.CurrentSituationalModel import \
-    CurrentSituationalModel
 
 DEFAULT_CODELET_REFRACTORY_PERIOD = 50
 DEFAULT_CODELET_REINFORCEMENT = 0.5
@@ -24,16 +21,22 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.formed_coalition = None
         self.codelet_reinforcement = DEFAULT_CODELET_REINFORCEMENT
         self.logger = getLogger(self.__class__.__name__).logger
+        self.logger.debug("Initialized attention codelets")
+
+    def start(self):
+        self.logger.debug("Running attention codelets")
+        self.run_task()
 
     def run_task(self):
-        self.logger.debug("Running attention codelets")
-        """sleep(3)    #Wait for csm initialization"""
+        sleep(6)            #Wait for csm content initialization
         if self.bufferContainsSoughtContent(self.buffer):
             csm_content = self.retrieveWorkspaceContent(
                                     self.buffer)
             if csm_content is None:
                 self.logger.warning("Null WorkspaceContent returned."
                                           "Coalition cannot be formed.")
+                sleep(9)
+                self.run_task()
             elif csm_content.getLinkCount() > 0:
                 formed_coalition = CoalitionImpl()
                 formed_coalition.setContent(csm_content)
@@ -41,8 +44,9 @@ class AttentionCodeletImpl(AttentionCodelet):
                 formed_coalition.setActivation(2)
                 self.logger.info("Coalition successfully formed.")
                 self.notify_observers()
+                sleep(9)
+                self.run_task()
         else:
-            sleep(4)   #Wait for csm initialization
             self.run_task()
 
     def set_refactory_period(self, ticks):

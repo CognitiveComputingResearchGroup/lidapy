@@ -3,7 +3,9 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 import argparse
+import multiprocessing
 import sys
+from time import sleep
 
 from source.Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
@@ -36,7 +38,25 @@ if __name__ == "__main__":
 
         # Start the agent
         try:
-            agent.run()
+            multiprocessing.set_start_method("spawn")
+            agent.environment_thread.start()
+            agent.environment_thread.join()
+            agent.sensory_memory_process.start()
+            agent.sensory_memory_process.join()
+            agent.pam_process.start()
+            agent.pam_process.join()
+            agent.csm_process.start()
+            agent.csm_process.join()
+            agent.workspace_process.start()
+            agent.workspace_process.join()
+            agent.attention_codelets_process.start()
+            agent.attention_codelets_process.join()
+            agent.global_workspace_process.start()
+            agent.global_workspace_process.join()
+            agent.procedural_memory_process.start()
+            agent.procedural_memory_process.join()
+            agent.sensory_motor_mem_process.start()
+            agent.sensory_motor_mem_process.join()
             sys.exit(0)
         except Exception as e:
             print(e)

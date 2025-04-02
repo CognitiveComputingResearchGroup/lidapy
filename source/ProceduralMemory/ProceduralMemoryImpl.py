@@ -2,7 +2,6 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 import difflib
-import random
 import numpy as np
 
 from source.Framework.Shared.LinkImpl import LinkImpl
@@ -21,12 +20,11 @@ class ProceduralMemoryImpl(ProceduralMemory):
 
     def notify(self, module):
         if isinstance(module, PerceptualAssociativeMemory):
-            state = module.__getstate__()
-            self.state = state
+            self.state = module.__getstate__()
             associations = None
 
-            if isinstance(state, NodeImpl):
-                associations = module.retrieve_association(state)
+            if isinstance(self.state, NodeImpl):
+                associations = module.retrieve_association(self.state)
 
             """Get the closest_match to the scheme from surrounding
             link nodes"""
@@ -35,63 +33,47 @@ class ProceduralMemoryImpl(ProceduralMemory):
 
         elif isinstance(module, GlobalWorkspace):
             winning_coalition = module.__getstate__()
-            self.learn(winning_coalition, self.scheme)
+            self.learn(winning_coalition)
 
     def activate_schemes(self, associations):
-        actions = None
-        percepts = []
         schemes = None
-        result = None
-
         if associations is not None:
             """Get only the links that match the scheme"""
-            schemes, actions = (
-                self.get_closest_match(associations, self.scheme))
+            schemes = self.get_closest_match(associations)
 
         if isinstance(schemes, list):
-            for scheme, action in zip(schemes, actions):
-                self.add_scheme(self.state, scheme, action)
-                scheme.setActivation(1.0)
-            random_index = random.randint(0, len(schemes) - 1)
-            while schemes[random_index].getActivation == 1.0:
-                random_index = random.randint(0, len(schemes) - 1)
-            self.percept = schemes[random_index]
+            for scheme in schemes:
+                self.add_scheme(self.state, scheme)
+                #scheme.setSink(self.state.getId())
+            self.logger.debug(f"Instantiated {len(schemes)} action scheme(s)")
         else:
-            self.add_scheme(self.state, schemes, actions)
-            schemes.setActivation(1.0)
-            schemes.setSink(self.state.getId())
-            self.percept = schemes
+            self.add_scheme(self.state, schemes)
+            #schemes.setSink(self.state.getId())
+            self.logger.debug("Instantiated single action scheme")
 
-    def learn(self, broadcast, scheme):
-        percepts = []
-        schemes = []
-        actions = []
-
-        result = self.get_closest_match(broadcast, self.scheme)
+    def learn(self, broadcast):
+        result = self.get_closest_match(broadcast)
         current_scheme = None
 
         """If closest match returns more than one link, optimize results"""
-        if isinstance(result[0], list):
+        if isinstance(result, list):
             #Find the scheme that minimizes distance to goal
-            current_scheme = self.seek_goal(result[0])
+            current_scheme = self.seek_goal(result)
         else:
             """Scheme leads to goal if single link is returned"""
-            current_scheme = result[0]
-            action = result[1]
+            current_scheme = result
 
-        action = current_scheme.getCategory("id")
-        self.add_scheme(self.state, current_scheme, action)
+        self.add_scheme(self.state, current_scheme)
         self.notify_observers()
 
-    def get_closest_match(self, links, scheme):
+    def get_closest_match(self, links):
         schemes = []
         percepts = []
         wanted_scheme = None
         alright_schemes = []
-        actions = []
-        action = None
         closest_match = []
 
+        """Get a list of all percepts"""
         if links is not None:
             for link in links:
                 percepts.append(link.getCategory("label"))
@@ -100,19 +82,25 @@ class ProceduralMemoryImpl(ProceduralMemory):
         if not "goal" in percepts:
             values_to_match = 1
 
+        """Match the percept to a scheme based on string similarity"""
         if isinstance(self.scheme, list):
             for scheme in self.scheme:
                 closest_match.append(difflib.get_close_matches(scheme,
                                                                percepts,
                                                             n=values_to_match))
         else:
-            for scheme in self.scheme:
-                closest_match = difflib.get_close_matches(self.scheme,
+            closest_match = difflib.get_close_matches(self.scheme,
                                                           percepts,
+
                                                           n=values_to_match)
+        ""'Get the corresponding schemes'
         for link in links:
-            for matches in closest_match:
-                if link.getCategory("label") in matches:
+            if isinstance(closest_match, list):
+                for matches in closest_match:
+                    if link.getCategory("label") in matches:
+                        schemes.append(link)
+            else:
+                if link.getCategory("label") == closest_match:
                     schemes.append(link)
 
         for scheme in schemes:
@@ -120,15 +108,13 @@ class ProceduralMemoryImpl(ProceduralMemory):
                 wanted_scheme = scheme  # Seek goal
                 break
             else:
-                alright_schemes.append(scheme)  # Stay safe
+                links.remove(scheme)            # Avoid hole
+                #alright_schemes.append(scheme)  # Stay safe
 
         if wanted_scheme is not None:
-            action = wanted_scheme.getCategory("id")
-            return wanted_scheme, action
+            return wanted_scheme
         else:
-            for scheme in schemes:
-                actions.append(scheme.getCategory("id"))
-            return alright_schemes, actions
+            return links
 
     def seek_goal(self, schemes):
         min_distance = 64
@@ -166,5 +152,7 @@ class ProceduralMemoryImpl(ProceduralMemory):
                     min_distance = min(min_distance, distance)
                     if distance <= min_distance:
                         current_scheme = scheme
+        self.logger.debug(f"Instantiated scheme with distance, {min_distance} "
+                          f"to current goal: {current_scheme}")
         return current_scheme
 

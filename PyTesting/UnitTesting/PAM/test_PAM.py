@@ -22,9 +22,9 @@ class exampleNode:
         self.activation = 0.0
         self.label = ""
 
-    def setID(self, id): #Setting the Id for the Node
+    def setId(self, id): #Setting the Id for the Node
         self.id = id
-    def getID(self): #Get the current id for the node
+    def getId(self): #Get the current id for the node
         return self.id
     def setActivation(self, a): #Set the activation level for the node
         self.activation = a
@@ -39,11 +39,58 @@ class exampleNode:
     def isRemovable(self): #Determinr if the node is removable based on activation
         return self.activation < 0.1 #If low it can be removed
 
+from source.Framework.Shared.ActivatibleImpl import ActivatibleImpl
+from source.Framework.Shared.Link import Link
+
+
+class exampleLink:
+    # initializing the link with default id, activation and label
+    def __init__(self):
+        self.grounding_pam_link = None
+        self.id = 0
+        self.source = None
+        self.sink = None
+        self.label = "TestLink"
+        self.category = {"id" : self.id,
+                         "label" : self.label}
+        self.type = None
+
+    def getSource(self):
+        return self.source
+
+    def setSource(self, source):
+        self.source = source
+
+    def getSink(self):
+        return self.sink
+
+    def setType(self, link_type):
+        self.type = link_type
+
+    def getType(self):
+        return self.type
+
+    def setSink(self, sink):
+        self.sink = sink
+
+    def getCategory(self, key):
+        return self.category[key]
+
+    def setCategory(self, id, label):
+        self.category["id"] = id
+        self.category["label"] = label
+
+    def setGroundingPamLink(self, grounding_pam_link):
+        self.grounding_pam_link = grounding_pam_link
+
+    def getGroundingPamLink(self):
+        return self.grounding_pam_link
+
 class exampleNodeStructure:
    #initializing node structure with empty nodes and links
     def __init__(self):
         self.nodes = []
-        self.links = {}
+        self.links = []
 
     def addNode_(self, node): #add a node to the structure
         self.nodes.append(node)
@@ -53,11 +100,22 @@ class exampleNodeStructure:
         if node in self.nodes:
             self.nodes.remove(node)
     def addDefaultLink(self, source, target, meta, a, b):
-        if source not in self.links:
-            self.links[source] = []
-        self.links[source].append(target)
+        if not source in self.getConnectedSources(target):
+            target.setSource(source.getId())
+            target.setCategory(meta["id"], meta["label"])
+            self.links.append(target)
     def getConnectedSinks(self, node):
-        return self.links.get(node, [])
+        links = []
+        for link in self.links:
+            if link.getSource() == node.getId():
+                links.append(link)
+        return links
+    def getConnectedSources(self, link):
+        nodes = []
+        for node in self.nodes:
+            if node.getId() == link.getSource():
+                nodes.append(node)
+        return nodes
 
 #Example logger to avoid excessive testing output
 def getLogger(name):
@@ -102,12 +160,30 @@ def test_retrieve_association():
     """ Testing the function retrieve association"""
     pam = PerceptualAssociativeMemory()
     testNode = exampleNode(id=1)
+    testLink = exampleLink()
+    pam.associations = exampleNodeStructure()
 
     #Before storing, the retrieval should return the node
     result = pam.retrieve_association(testNode)
-    assert result is None #Should return None when the node is not within the association
 
-    #add the node and simulate the connection
+    """Should return None when the node is not within the association"""
+    assert result is None
+
+    pam.add_association(testNode)
+    result = pam.retrieve_association(testNode)
+    """Should return an empty list when the node is within the association
+           but the node is not a source for any links"""
+    assert len(result) == 0
+
+    pam.associations.addDefaultLink(testNode, testLink, {"id": 0,
+                                                         "label": "test"},
+                                                                0,0)
+
+    result = pam.retrieve_association(testNode)
+    assert len(result) > 0
+    assert testLink in result
+
+    """#add the node and simulate the connection
     pam.add_association(testNode)
     connected_node = exampleNode(id=2)
 
@@ -115,7 +191,7 @@ def test_retrieve_association():
     pam.associations.links = {testNode: [connected_node]}
 
     result = pam.retrieve_association(testNode)
-    assert result == [connected_node] #Linked node should be retrieved
+    assert result == [connected_node] #Linked node should be retrieved"""
 
 #Testing the get_stored_nodes function
 def test_get_stored_nodes():
@@ -138,6 +214,7 @@ def test_learn():
         },
         "cue":[] #No surrounding links within this test
     }
+    pamImpl.position = cue["params"]["position"]
 
     #before learning, current cell should be None
     assert pamImpl.current_cell is None

@@ -10,6 +10,7 @@ DEFAULT_LINK_TYPE = "DEFAULT_LINK"
 class NodeStructureImpl(NodeStructure):
     def __init__(self):
         super().__init__()
+        self.max_links = 4
 
     def addDefaultNode(self, label, activation, removal_threshold):
         self.addNode(label, activation, removal_threshold)
@@ -36,8 +37,10 @@ class NodeStructureImpl(NodeStructure):
 
     def addDefaultLink(self, source_node, sink_link, category, activation,
                        removal_threshold):
-        self.addDefaultLink_(source_node.getId(), sink_link.getCategory("id"),
-                     category, activation, removal_threshold)
+        if not source_node in self.getConnectedSources(sink_link):
+            self.addDefaultLink_(source_node.getId(),
+                                 sink_link.getCategory("id"), category,
+                                 activation, removal_threshold)
 
     def addDefaultLink_(self, source_id, sink_id, category, activation,
                        removal_threshold):
@@ -60,8 +63,8 @@ class NodeStructureImpl(NodeStructure):
         link.setSource(source_id)
         link.setSink(sink_id)
         link.setActivation(activation)
-        if link not in self.links:
-            self.links.append(link)
+        link.setActivatibleRemovalThreshold(removal_threshold)
+        self.links.append(link)
 
     def addLinks(self, links, link_type):
         for link in links:
@@ -158,7 +161,7 @@ class NodeStructureImpl(NodeStructure):
     def getConnectedSources(self, link):
         sink_nodes = []
         for node in self.nodes:
-            if node.getSource() == link:
+            if link.getSource() == node.getId():
                 sink_nodes.append(node)
         return sink_nodes
 

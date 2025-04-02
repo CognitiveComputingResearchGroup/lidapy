@@ -1,4 +1,6 @@
 import time
+from asyncio import wait_for
+
 from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.GlobalWorkspace.Coalition import Coalition
 from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
@@ -28,7 +30,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.ticks = 0
         self.tick_at_last_broadcast = 0
         self.logger = getLogger(self.__class__.__name__).logger
-        #self.logger.debug("Initialized GlobalWorkspaceImpl")
+        self.logger.debug("Initialized GlobalWorkspaceImpl")
 
     def run_task(self):
         self.coalition_decay_strategy = DEFAULT_DECAY_STRATEGY
@@ -42,7 +44,6 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.broadcast_triggers.append(trigger1)
         self.broadcast_triggers.append(trigger2)
         self.broadcast_triggers.append(trigger3)
-        self.logger.debug("Initialized GlobalWorkspaceImpl")
 
     def addCoalition(self, coalition):
         coalition.setDecayStrategy(self.coalition_decay_strategy)

@@ -11,14 +11,13 @@ from source.Workspace.CurrentSituationModel.CurrentSituationalModel import (
 class CurrentSituationalModelImpl(CurrentSituationalModel):
     def __init__(self):
         super().__init__()
-        self.node_structure = None
+        self.node_structure = NodeStructureImpl()
         self.formed_coalition = None
         self.logger = getLogger(__class__.__name__).logger
-        #self.logger.debug("Initialized CurrentSituationalModel")
+        self.logger.debug("Initialized CurrentSituationalModel")
 
     def run_task(self):
         self.node_structure = NodeStructureImpl()
-        self.logger.debug("Initialized CurrentSituationalModel")
 
     def addBufferContent(self, workspace_content):
         self.node_structure.mergeWith(workspace_content)
@@ -31,14 +30,14 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
 
     def receiveVentralStream(self, stream):
         self.addBufferContent(stream)
-        sleep(0.5)  # Seed control to other modules
+        """sleep(0.5)  # Seed control to other modules"""
 
     def getModuleContent(self):
         return self.formed_coalition
 
     def receiveCoalition(self, coalition):
         self.formed_coalition = coalition
-        #self.addBufferContent(self.formed_coalition)
+        self.logger.debug(f"Received new coalition")
         self.notify_observers()
 
     def notify(self, module):

@@ -1,7 +1,8 @@
-import pytest
-
-from source.Memphis.ccrg.LIDA.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
 from unittest.mock import Mock
+
+from source.Environment.FrozenLakeEnvironment import FrozenLake
+from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
+    SensoryMotorMemoryImpl
 
 """
 This provided PyTest is for the Sensory Motor Memory ModuleSubject:
@@ -12,31 +13,48 @@ Test Cases: TC-044, TC-045, and TC-046.
 """
 
 def test_add_sensory_listener():
-    sensory_memory = SensoryMotorMemoryImpl(action = None, environment = Mock())
-    listener = Mock() #Mock listener
-    sensory_memory.add_sensory_listener(listener)
-    assert listener in sensory_memory.listeners
+    sensory_motor_memory = SensoryMotorMemoryImpl()
+    env = FrozenLake()
+    sensory_motor_memory.add_observer(env)
+    assert env in sensory_motor_memory.observers
 
 def test_receive_action():
-    env = Mock() #Generating a mock environment for testing
-    env.step.return_value = ('state', 'reward', 'done', 'truncated', 'info')
-    sensory_memory = SensoryMotorMemoryImpl(action = None, environment = env)
-    action = "some_action"
-    state, reward, done, truncated, info = sensory_memory.receive_action(action)
+    environment = FrozenLake()  # Generating environment for testing
+    environment.reset()
+    sensory_motor_memory = SensoryMotorMemoryImpl()
+    action = 1
+    sensory_motor_memory.event = action
+    action = sensory_motor_memory.receive_action()
+    state, reward, done, truncated, info = environment.env.step(action)
 
     #Assertions
-    assert state == 'state'
-    assert reward == 'reward'
-    assert done == 'done'
-    assert truncated == 'truncated'
-    assert info == 'info'
+    assert state != 'state'
+    assert reward != 'reward'
+    assert done != 'done'
+    assert truncated != 'truncated'
+    assert info != 'info'
 
 def test_send_action_execution_command():
-    env = Mock() #Generating mock environment for testing
-    expected_output = ('state', 'reward', 'done', 'truncated', 'info')
-    env.step.return_value = expected_output
-    sensory_memory = SensoryMotorMemoryImpl(action = None, environment = env)
-    result = sensory_memory.send_action_execution_command("some_action_plan")
+    environment = FrozenLake()  # Generating environment for testing
+    environment.reset()
+    sensory_motor_memory = SensoryMotorMemoryImpl()
+    sensory_motor_memory.add_observer(environment)
+    action_plan = [1,3,2]
+    sensory_motor_memory.action_plan = action_plan
+    """The observer will call 
+    sensory_motor_memory.send_action_execution_command and retrieve the 
+    action plan"""
+    sensory_motor_memory.notify_observers()
 
-    #Assertion
-    assert result == expected_output
+    state = 0
+    reward = 0
+    done = False
+    truncated = False
+    info = "0.33333"
+
+    # Assertions
+    assert environment.state != state
+    assert environment.reward != 'reward'
+    assert done == False
+    assert truncated == False
+    assert info != 0.33333

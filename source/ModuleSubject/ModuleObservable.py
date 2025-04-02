@@ -1,6 +1,6 @@
 import threading
 from threading import Thread
-from tenacity import sleep
+from time import sleep
 
 
 class ModuleSubject:
@@ -16,14 +16,14 @@ class ModuleSubject:
 
     def notify_observers(self):
         for observer in self.observers:
-            thread = Thread(target=observer.notify, args=(self, ))
+            observer.notify(self)
+            thread = Thread(target=observer.notify, args=(self,))
             self.observer_threads.append(thread)
+            thread.name = observer.__class__.__name__
             thread.start()
-            sleep(25)
+            sleep(5)
             #thread.join()
         for thread in self.observer_threads:
-            if thread.is_alive():
-                event = threading.Event()
-                event.set()
-                thread.join(15)
-            #observer.notify(self)
+            event = threading.Event()
+            event.set()
+            thread.join(15)

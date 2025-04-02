@@ -1,7 +1,9 @@
 import importlib
-import time
 from importlib import util
+from multiprocessing import Process
 from threading import Thread
+from time import sleep
+
 from yaml import YAMLError, safe_load
 
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
@@ -62,7 +64,7 @@ class MinimalConsciousAgent(Agent):
         self.sensory_memory.processor_dict = self.get_agent_processors()
 
         #Add procedural_mem schemes
-        self.procedural_memory.scheme = ["Stay safe", "Seek goal"]
+        self.procedural_memory.scheme = ["Avoid hole", "Find goal"]
 
         #Add workspace csm
         self.workspace.csm = self.csm
@@ -71,41 +73,46 @@ class MinimalConsciousAgent(Agent):
         self.attention_codelets.buffer = self.csm
 
         #Agent thread
-        self.agent_thread = Thread(target=self.environment.reset)
+        self.environment_thread = Thread(target=self.environment.reset)
 
         # Attention codelets thread
         self.attention_codelets_thread = Thread(
-            target=self.attention_codelets.run_task)
+            target=self.attention_codelets.start)
+
+        #self.attention_codelets_process.daemon = True
+
+        self.pam_process = Process(target=self.pam.run, args=(self.pam,))
 
         #Sensory memory thread
-        self.sensory_memory_thread = (
-                        Thread(target=self.sensory_memory.run_sensors))
+        self.sensory_memory_process = (
+                        Process(target=self.sensory_memory.run_sensors,
+                                args=(self.sensory_memory,)))
+
+        #Workspace thread
+        self.workspace_process = Process(target=self.workspace.run,
+                                         args=(self.workspace,))
 
         #CSM thread
         self.csm_thread = Thread(target=self.csm.run_task)
 
+        self.csm_thread.daemon = True
+
         #GlobalWorkspace thread
-        self.global_workspace_thread = (
-                        Thread(target=self.global_workspace.run_task))
+        self.global_workspace_process = (
+                        Process(target=self.global_workspace.run_task,
+                                args=(self.global_workspace,)))
 
         #ProceduralMem thread
-        self.procedural_memory_thread = (
-            Thread(target=self.procedural_memory.run,
-                   args=((["Stay safe", "Seek goal"]), )))
+        self.procedural_memory_process = (
+            Process(target=self.procedural_memory.run,
+                   args=(self.procedural_memory, ["Avoid hole", "Find goal"])))
 
         # SensoryMotorMem thread
-        self.sensory_motor_mem_thread = (
-            Thread(target=self.sensory_motor_mem.run))
-
+        self.sensory_motor_mem_process = (
+            Process(target=self.sensory_motor_mem.run))
 
     def run(self):
-        self.agent_thread.start()
-        self.sensory_memory_thread.start()
-        self.attention_codelets_thread.start()
-        self.csm_thread.start()
-        self.global_workspace_thread.start()
-        self.procedural_memory_thread.start()
-        self.sensory_motor_mem_thread.start()
+        pass
 
     def notify(self, module):
         if isinstance(module, Environment):

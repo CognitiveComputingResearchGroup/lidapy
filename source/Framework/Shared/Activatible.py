@@ -1,4 +1,4 @@
-import threading
+
 
 DEFAULT_INCENTIVE_SALIENCE = 0.0
 DEFAULT_ACTIVATION = 0.0
@@ -9,7 +9,6 @@ class Activatible:
         self.incentiveSalience = DEFAULT_INCENTIVE_SALIENCE
         self.activation = DEFAULT_ACTIVATION
         self.removal_threshold = DEFAULT_ACTIVATIBLE_REMOVAL_THRESHOLD
-        self.lock = threading.Lock()
 
     def setActivation(self, value):
         pass
