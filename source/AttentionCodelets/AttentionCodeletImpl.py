@@ -28,12 +28,15 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.run_task()
 
     def run_task(self):
+        sleep(6)            #Wait for csm content initialization
         if self.bufferContainsSoughtContent(self.buffer):
             csm_content = self.retrieveWorkspaceContent(
                                     self.buffer)
             if csm_content is None:
                 self.logger.warning("Null WorkspaceContent returned."
                                           "Coalition cannot be formed.")
+                sleep(9)
+                self.run_task()
             elif csm_content.getLinkCount() > 0:
                 formed_coalition = CoalitionImpl()
                 formed_coalition.setContent(csm_content)
@@ -41,12 +44,9 @@ class AttentionCodeletImpl(AttentionCodelet):
                 formed_coalition.setActivation(2)
                 self.logger.info("Coalition successfully formed.")
                 self.notify_observers()
-
-            else:
-                sleep(5)
+                sleep(9)
                 self.run_task()
         else:
-            sleep(5)
             self.run_task()
 
     def set_refactory_period(self, ticks):

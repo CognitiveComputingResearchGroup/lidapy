@@ -29,7 +29,7 @@ class PAMImpl(PerceptualAssociativeMemory):
 
 
         """Create node for each cell the agent could visit"""
-        for cell in range(16):
+        for cell in range(64):
             node = NodeImpl()
             """Set the cell identifier to the corresponding state"""
             node.setId(cell)
@@ -106,7 +106,7 @@ class PAMImpl(PerceptualAssociativeMemory):
             # Add links to surrounding cells
             if link not in self.associations.getLinks():
                 self.associations.addDefaultLink(self.current_cell, link,
-                                             {"id": link.getCategory("id"),
-                                              "label": link.getCategory(
-                                                  "label")}
-                                             , link.getActivation(), 0)
+                            category = {"id": link.getCategory("id"),
+                                        "label": link.getCategory("label")},
+                                            activation=link.getActivation(),
+                                            removal_threshold=0.0)

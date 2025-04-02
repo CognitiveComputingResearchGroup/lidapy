@@ -1,54 +1,75 @@
 import pytest
-from unittest.mock import MagicMock
 
-from src.ActionSelection.ActionSelection import ActionSelection
-from src.SensoryMotorMemory.SensoryMotorMemoryImpl import (
-                                                        SensoryMotorMemoryImpl)
+from Configs import Sensors
+from source.Environment.FrozenLakeEnvironment import FrozenLake
+from source.PAM.PAM_Impl import PAMImpl
+from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
+from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
+from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 
-#initializing resources
 @pytest.fixture
-def action_select():
-    return ActionSelection
+def action_selection():
+    return ActionSelectionImpl()
 
-#initializing resources
 @pytest.fixture
-def sensory_motor_mem():
-    return SensoryMotorMemoryImpl
+def env():
+    return FrozenLake()
 
-def test_notify_sensory_motor_mem(action_select, sensory_motor_mem):
-    action_select.notify_sensory_motor_memory =(
-        MagicMock(return_value=["test_state", 0.0, True, False,
-                                {"info": "test_information"}]))
-    action_select.notify_sensory_motor_memory(1,
-                                                      sensory_motor_mem
-                                                      )
-    state, reward, done, truncated, info = (action_select.
-                                            notify_sensory_motor_memory(
-                                                1, sensory_motor_mem
-                                            ))
-    assert state == "test_state"
-    assert reward == 0.0
-    assert done == True
-    assert truncated == False
-    assert info == {'info': 'test_information'}
-    (action_select.notify_sensory_motor_memory.
-     assert_called_with(1, sensory_motor_mem))
+@pytest.fixture
+def sensory_mem(env, pam):
+    return SensoryMemoryImpl()
 
+@pytest.fixture
+def pam():
+    return PAMImpl()
 
-def test_action_selected(action_select, sensory_motor_mem):
-    action_select.select_action = (
-        MagicMock(return_value=["test_state", 0, 0.0, True, False,
-                                {"info": "test_information"}]))
-    action_select.select_action(["state-0"], 0,
-                                        sensory_motor_mem)
-    state, state_id, reward, done, truncated, info = (action_select.
-                                                select_action(
-                                                ['state-0'], 0,
-                                                sensory_motor_mem))
-    assert state == "test_state"
-    assert state_id == 0
-    assert reward == 0
-    assert truncated == 0
-    assert info == {'info': 'test_information'}
-    action_select.select_action.assert_called_with(["state-0"], 0
-                                        , sensory_motor_mem)
+@pytest.fixture
+def procedural_mem():
+    return ProceduralMemoryImpl()
+
+def test_select_action_initiallyEmpty(action_selection):
+    smi = SensoryMemoryImpl()
+    pam = PAMImpl()
+    procedural_mem = ProceduralMemoryImpl()
+    env = FrozenLake()          # Testing with the Frozen Lake Environment
+    env.reset()
+
+    #Setting up sensory memory sensors
+    smi.sensor_dict = {"text": "text_processing"}
+    smi.processor_dict = {"text": "text_processing"}
+    smi.processors["text"] = getattr(Sensors, smi.processor_dict["text"])
+
+    smi.stimuli = env.get_stimuli()
+    smi.state = env.__getstate__()
+    smi.position = env.get_position()
+
+    assert smi.stimuli == env.get_stimuli()
+    assert smi.position == env.get_position()
+    assert smi.state == env.__getstate__()
+    assert smi.processors["text"] is Sensors.text_processing
+
+    smi.run_sensors()
+    cue = smi.get_sensory_content()
+    pam.position = cue["params"]["position"]
+
+    assert cue is not None
+    assert pam.position == cue["params"]["position"]
+
+    pam.learn(cue)
+    procedural_mem.scheme = ["avoid hole", "seek goal"]
+
+    state = pam.__getstate__()
+    schemes = pam.retrieve_association(state)
+
+    assert state is not None
+    assert procedural_mem.scheme == ["avoid hole", "seek goal"]
+    assert schemes is not None
+    assert len(schemes) == 4    #1 for each surrounding cell
+
+    for scheme in schemes:
+        procedural_mem.add_scheme(state, scheme)
+
+    action_schemes = procedural_mem.get_schemes(state)
+
+    #testing that the scheme isn't empty
+    assert action_schemes is not None

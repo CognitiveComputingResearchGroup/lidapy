@@ -1,52 +1,227 @@
-from src.PAM.PAM import PerceptualAssociativeMemory
+import pytest
+import logging
+
+from source.PAM.PAM import PerceptualAssociativeMemory
+from source.PAM.PAM_Impl import PAMImpl
 
 """
-This provided PyTest is for the Perceptual Associative Memory (PAM) ModuleSubject:
-It provides tests for the specific functions: add_associations, retrieve_associations,
-    learn
+This provided PyTest is for the Perceptual Associative Memory (PAM) and PAMImpl.
 As development continues these are subject to change or update as the module does. 
-Test Cases: TC-037, TC-038, and TC-039.
+Test Cases: 
 """
 
-def test_add_associations():
-    pam = PerceptualAssociativeMemory() #instance of PAM
-    #Adding an association with cue1 and pattern1
-    pattern = pam.add_association('cue1', 'pattern1')
-    #assertions that cue1 is now in the association for pattern1
-    assert 'cue1' in pam.associations['pattern1']
-    #assertion that the returned pattern matches pattern1
-    assert pattern == 'pattern1'
+"""
+Generating example classes for the dependencies: NodeImpl and NodeStructureImpl
+NodeImpl: Representing an individual memory node
+NodeStructureImpl: Storing and managing the nodes
+"""
+class exampleNode:
+    #initializing the node with default id, activation and label
+    def __init__(self, id=0):
+        self.id = id
+        self.activation = 0.0
+        self.label = ""
 
-def test_retrieve_associations():
-    pam = PerceptualAssociativeMemory() #instance of pam
-    #adding an association
-    pam.add_association('cue1', 'pattern1')
-    #Retrieving the association for cue1
-    result = pam.retrieve_associations('cue1')
-    #assertion that the result list contains cue1
-    assert result == ['cue1']
-    #Attempting to retrieve association for cue2, expect cue
-    result_default = pam.retrieve_associations('cue2')
-    #Asserting the default list contains cue2
-    assert result_default == ['cue2']
+    def setId(self, id): #Setting the Id for the Node
+        self.id = id
+    def getId(self): #Get the current id for the node
+        return self.id
+    def setActivation(self, a): #Set the activation level for the node
+        self.activation = a
+    def getActivation(self): #Retrieve the current activation of the node
+        return self.activation
+    def setLabel(self, label): #Set the label for the node
+        self.label = label
+    def getLinks(self): #Return an empty list representing no links
+        return [] #Empty list just for testing purposes
+    def decay(self, rate): #Decrease the activation by a given rate
+        self.activation -= rate
+    def isRemovable(self): #Determinr if the node is removable based on activation
+        return self.activation < 0.1 #If low it can be removed
 
-def test_learn_goal():
+from source.Framework.Shared.ActivatibleImpl import ActivatibleImpl
+from source.Framework.Shared.Link import Link
+
+
+class exampleLink:
+    # initializing the link with default id, activation and label
+    def __init__(self):
+        self.grounding_pam_link = None
+        self.id = 0
+        self.source = None
+        self.sink = None
+        self.label = "TestLink"
+        self.category = {"id" : self.id,
+                         "label" : self.label}
+        self.type = None
+
+    def getSource(self):
+        return self.source
+
+    def setSource(self, source):
+        self.source = source
+
+    def getSink(self):
+        return self.sink
+
+    def setType(self, link_type):
+        self.type = link_type
+
+    def getType(self):
+        return self.type
+
+    def setSink(self, sink):
+        self.sink = sink
+
+    def getCategory(self, key):
+        return self.category[key]
+
+    def setCategory(self, id, label):
+        self.category["id"] = id
+        self.category["label"] = label
+
+    def setGroundingPamLink(self, grounding_pam_link):
+        self.grounding_pam_link = grounding_pam_link
+
+    def getGroundingPamLink(self):
+        return self.grounding_pam_link
+
+class exampleNodeStructure:
+   #initializing node structure with empty nodes and links
+    def __init__(self):
+        self.nodes = []
+        self.links = []
+
+    def addNode_(self, node): #add a node to the structure
+        self.nodes.append(node)
+    def getNodes(self): #get all nodes in the structure
+        return self.nodes
+    def remove(self, node): #remove a node from the structure
+        if node in self.nodes:
+            self.nodes.remove(node)
+    def addDefaultLink(self, source, target, meta, a, b):
+        if not source in self.getConnectedSources(target):
+            target.setSource(source.getId())
+            target.setCategory(meta["id"], meta["label"])
+            self.links.append(target)
+    def getConnectedSinks(self, node):
+        links = []
+        for link in self.links:
+            if link.getSource() == node.getId():
+                links.append(link)
+        return links
+    def getConnectedSources(self, link):
+        nodes = []
+        for node in self.nodes:
+            if node.getId() == link.getSource():
+                nodes.append(node)
+        return nodes
+
+#Example logger to avoid excessive testing output
+def getLogger(name):
+    logger = logging.getLogger(name) #Getting a logger instance with a name
+    logger.setLevel(logging.DEBUG) #set the logging level to DEBUG (capturing all levels of messages)
+    if not logger.handlers: #Checking if the logger already contains handlers to avoid additional
+        handler = logging.StreamHandler() #Generating a stream handler to log to console
+        handler.setFormatter(logging.Formatter('%(message)s')) #Set the format (only the message part)
+        logger.addHandler(handler) #Adding the handler to the logger
+    return logger
+
+"""Patching the example dependencies to the PAM and PAMImpl"""
+#Assigning the example node structure to the NodeStructureImpl
+PerceptualAssociativeMemory.NodeStructureImpl = exampleNodeStructure()
+#Assigning the example node structure to the NodeStructureImpl to PAM
+PAMImpl.NodeStructureImpl = exampleNodeStructure()
+#Assigning the example NodeImpl to the PAMImpl
+PAMImpl.NodeImpl = exampleNode()
+#Assigning a logger to the PAM and PAMImpl
+PerceptualAssociativeMemory.getLogger = staticmethod(getLogger)
+PAMImpl.getLogger = staticmethod(getLogger)
+
+"""
+Generating the Test Cases
+"""
+#Add Associations
+def test_add_association():
+    """Testing a new node is stored when this method is called"""
     pam = PerceptualAssociativeMemory()
-    #Learn the association with state 1 leading to goal
-    pam.learn('state1', 'goal')
-    #assert that state1 is in the association
-    assert 'state1' in pam.associations['goalstate1']
+    testNode = exampleNode()
 
-def test_learn_hole():
-    pam = PerceptualAssociativeMemory()
-    #Learn the association with state2
-    pam.learn('state2', 'hole')
-    #Assert that state 2 is in the association
-    assert 'state2' in pam.associations['dangerstate2']
+    #Before adding, ensuring that the node is not present
+    assert testNode not in pam.associations.getNodes()
 
-def test_learn_safe():
+    pam.add_association(testNode)
+
+    #After adding, the test node should be present
+    assert testNode in pam.associations.getNodes()
+
+#Retreiving Association (NOT PASSABLE YET)
+def test_retrieve_association():
+    """ Testing the function retrieve association"""
     pam = PerceptualAssociativeMemory()
-    #learn the association with state 3
-    pam.learn('state3', 'other')
-    #Assert that state 3 is in the association
-    assert 'state3' in pam.associations['safestate3']
+    testNode = exampleNode(id=1)
+    testLink = exampleLink()
+    pam.associations = exampleNodeStructure()
+
+    #Before storing, the retrieval should return the node
+    result = pam.retrieve_association(testNode)
+
+    """Should return None when the node is not within the association"""
+    assert result is None
+
+    pam.add_association(testNode)
+    result = pam.retrieve_association(testNode)
+    """Should return an empty list when the node is within the association
+           but the node is not a source for any links"""
+    assert len(result) == 0
+
+    pam.associations.addDefaultLink(testNode, testLink, {"id": 0,
+                                                         "label": "test"},
+                                                                0,0)
+
+    result = pam.retrieve_association(testNode)
+    assert len(result) > 0
+    assert testLink in result
+
+    """#add the node and simulate the connection
+    pam.add_association(testNode)
+    connected_node = exampleNode(id=2)
+
+    #simulating as association
+    pam.associations.links = {testNode: [connected_node]}
+
+    result = pam.retrieve_association(testNode)
+    assert result == [connected_node] #Linked node should be retrieved"""
+
+#Testing the get_stored_nodes function
+def test_get_stored_nodes():
+    #Testing the PAMImpl initializes with 16 nodes in its memory
+    pamImpl = PAMImpl()
+    storedNodes = pamImpl.get_stored_nodes()
+
+    assert len(storedNodes) == 16 #PAMImpl should create 16 nodes upon initialization
+
+#Testing Learn()
+def test_learn():
+    """ Learn should set the current cell appropriately """
+    pamImpl = PAMImpl()
+
+    #Creating a cue with position
+    cue = {
+        "params" : {
+            "position" : {"row":1,"col":2},
+            "state" : {"state":"active"}
+        },
+        "cue":[] #No surrounding links within this test
+    }
+    pamImpl.position = cue["params"]["position"]
+
+    #before learning, current cell should be None
+    assert pamImpl.current_cell is None
+
+    #Calling learn and verify that the correct node is stored
+    pamImpl.learn(cue)
+
+    current_cell = pamImpl.current_cell
+    assert current_cell is not None
+    assert current_cell.getId() == 6 #Checking to see if the current node is active.

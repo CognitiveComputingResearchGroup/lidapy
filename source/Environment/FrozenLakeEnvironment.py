@@ -1,6 +1,7 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+import threading
 from time import sleep
 
 import gymnasium as gym
@@ -24,7 +25,7 @@ class FrozenLake(Environment):
             'FrozenLake-v1',
             desc=None,
             is_slippery=False,
-            map_name="4x4",
+            map_name="8x8",
             render_mode=render_mode)
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
@@ -34,6 +35,7 @@ class FrozenLake(Environment):
         self.reward = 0
         self.logger = getLogger(__class__.__name__).logger
         self.agent_stimuli = {}
+        self.action_plan = None
         self.logger.debug(f"Initialized {__class__.__name__} Environment")
 
     # Reseting the environment to start a new episode
@@ -62,6 +64,31 @@ class FrozenLake(Environment):
                           f"done: {done}, " + f"action: {action}")
         self.notify_observers()
 
+    def recursive_step(self, action_plan):
+        if action_plan is not None:
+            for action in action_plan:
+                if not self.state["done"] and self.steps < 1000:
+                    if threading.current_thread() != threading.main_thread():
+                        threading.current_thread().join()
+                    state, reward, done, truncated, info = self.env.step(
+                        action)
+                    sleep(1)
+                    self.steps += 1
+                    self.update_position(action)
+                    surrounding_tiles = self.get_surrounding_tiles(
+                        self.row,
+                        self.col)
+                    self.agent_stimuli = {
+                        "text": self.form_stimuli(surrounding_tiles)}
+                    self.state = {"state": state, "info": info,
+                                  "done": done,
+                                  "outcome": surrounding_tiles}
+                    self.logger.info(
+                        f"state: {state}, " + f"info: {info}, " +
+                        f"done: {done}, " + f"action: {action}")
+            self.notify_observers()
+
+
     # render environment's current state:
     def render(self):
         self.env.render()
@@ -74,16 +101,16 @@ class FrozenLake(Environment):
 
     def notify(self, module):
         if isinstance(module, SensoryMotorMemory):
-            action = module.receive_action()
-            if not self.state["done"] and self.steps < 1000:
-                self.step(action)
-                self.reward += 1
+            action = module.send_action_event()
+            if len(module.send_action_execution_command()) > 1:
+                self.action_plan = module.send_action_execution_command()
+                self.recursive_step(self.action_plan)
             else:
-                """self.steps = 0
-                self.col = 0
-                self.row = 0
-                self.reset()"""
-                self.close()
+                if not self.state["done"] and self.steps < 1000:
+                    self.step(action)
+                else:
+                    self.reward += 1
+                    self.close()
 
     def update_position(self, action):
         if action == 3:  # up

@@ -76,11 +76,10 @@ class MinimalConsciousAgent(Agent):
         self.environment_thread = Thread(target=self.environment.reset)
 
         # Attention codelets thread
-        self.attention_codelets_process = Process(
-            target=self.attention_codelets.start,
-            args=(self.attention_codelets,))
+        self.attention_codelets_thread = Thread(
+            target=self.attention_codelets.start)
 
-        self.attention_codelets_process.daemon = True
+        #self.attention_codelets_process.daemon = True
 
         self.pam_process = Process(target=self.pam.run, args=(self.pam,))
 
@@ -94,9 +93,9 @@ class MinimalConsciousAgent(Agent):
                                          args=(self.workspace,))
 
         #CSM thread
-        self.csm_process = Process(target=self.csm.run_task, args=(self.csm,))
+        self.csm_thread = Thread(target=self.csm.run_task)
 
-        self.csm_process.daemon = True
+        self.csm_thread.daemon = True
 
         #GlobalWorkspace thread
         self.global_workspace_process = (

@@ -18,7 +18,8 @@ from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 class SensoryMotorMemoryImpl(SensoryMotorMemory):
     def __init__(self):
         super().__init__()
-        self.event = None
+        self.action_event = None
+        self.action_plan = None
         self.logger = getLogger(__class__.__name__).logger
         #self.logger.debug("Initialized SensoryMotorMemory")
 
@@ -29,6 +30,7 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
         """The selected action from action selection"""
         #Logic to gather information from the environment
         #Example: Reading the current state or rewards
+        self.action_plan = []
         if isinstance(module, SensoryMemory):
             cue = module.get_sensory_content(module)["cue"]
             iterations = random.randint(1, 5)
@@ -37,21 +39,32 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
                 if (link.getCategory("label") == "G" or
                         link.getCategory("label") == "F" or
                         link.getCategory("label") == "S"):
-                    self.event = link.getCategory("id")
+                    self.action_event = link.getCategory("id")
                     if index == iterations:
                         break
                     else:
                         index += 1
-            if self.event is not None:
+            if self.action_event is not None:
                 self.notify_observers()
                 self.logger.debug("Retrieved motor plan(s) from action plan")
+                if isinstance(self.action_event, list):
+                    for action in self.action_event:
+                        self.action_plan.append(action)
+
         elif isinstance(module, ActionSelection):
-            self.event = module.select_action()
-            if self.event is not None:
+            self.action_event = module.select_action()
+            if self.action_event is not None:
                 self.logger.debug("Retrieved motor plan(s) from action plan")
                 self.notify_observers()
+                if isinstance(self.action_event, list):
+                    for action in self.action_event:
+                        self.action_plan.append(action)
+
         elif isinstance(module, GlobalWorkspace):
             winning_coalition = module.__getstate__()
 
-    def receive_action(self):
-        return self.event
+    def send_action_event(self):
+        return self.action_event
+
+    def send_action_execution_command(self):
+        return self.action_plan

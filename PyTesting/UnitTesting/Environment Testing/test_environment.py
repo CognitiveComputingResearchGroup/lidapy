@@ -1,44 +1,52 @@
 import pytest
+from source.Environment.Environment import Environment
 from source.Environment.FrozenLakeEnvironment import FrozenLake
 
-"""
-This provided PyTest is for the Environment ModuleSubject:
-It provides tests for the specific functions: reset, step, render
-As development continues these are subject to change or update as the module does. 
-Test Cases: TC-032, TC-033, and TC-034.
-"""
+#Testing the Generalized Environment
+def test_environment_initialization():
+    env = Environment()
+    assert env is not None
 
-#Defining a fixture function
-#initializing resources
-@pytest.fixture
-def environment():
-    return FrozenLake(render_mode="human")
+def test_environment_reset():
+    env = Environment()
+    env.reset()
+    assert env.get_state() is None
 
-def test_reset(environment):
-    #Calling the reset
-    state, info, col, row = environment.reset()
-    #Asserting initial conditions
-    assert state is not None #State should not be none after reset
-    assert info is not None #Info should be a dictionary
-    assert col == 0 #Column should be reset to 0
-    assert row == 0 #Row should be reset to 0
+def test_environment_step():
+    env = Environment()
+    state = env.step('any_action')
+    assert state is None
 
-def test_step(environment):
-    environment.reset() #ensuring environment is reset
-    action = environment.action_space.sample() #random action
-    new_state, reward, done, truncated, info = environment.step(action)
-    #Assertions
-    assert new_state is not None
-    assert info is not None
-    assert isinstance(reward, (int,float))
-    assert isinstance(done, bool)
-    assert isinstance(truncated, bool)
-    assert isinstance(info, dict)
+def test_environment_close():
+    env = Environment()
+    env.close()
 
-def test_render(environment):
-    environment.reset()
-    try:
-        environment.render()
-    except Exception as e:
-        pytest.fail(f"Rendering failed: {e}")
 
+#Testing the Frozen Lake Environment
+def test_frozenlake_initialization():
+    fl_env = FrozenLake()
+    state = fl_env.reset()
+    assert "state" in fl_env.state
+    assert not fl_env.state["done"]
+
+def test_frozenlake_positionUpdate():
+    fl_env = FrozenLake()
+    initial_position = fl_env.get_position().copy()
+    fl_env.update_position(1)
+    new_position = fl_env.get_position()
+    assert initial_position != new_position
+
+def test_frozenlake_step():
+    fl_env = FrozenLake()
+    fl_env.reset()
+    fl_env.step(1)
+    assert "state" in fl_env.state
+    assert "info" in fl_env.state
+
+def test_frozenlake_get_stimuli():
+    fl_env = FrozenLake()
+    stimuli = fl_env.get_stimuli()
+    assert isinstance(stimuli, dict)
+
+def test_frozenlake_render():
+    fl_env = FrozenLake(render_mode="human")

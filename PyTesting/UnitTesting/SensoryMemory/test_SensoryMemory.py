@@ -1,53 +1,58 @@
-import pytest
-from src.SensoryMemory.SensoryMemory import SensoryMemory
-from unittest.mock import Mock #utilize to mock the dependencies
+from Configs import Sensors
+from source.Environment.FrozenLakeEnvironment import FrozenLake
+from source.SensoryMemory.SensoryMemory import SensoryMemory
+from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 
 """
 This provided PyTest is for the Sensory Memory ModuleSubject:
-It provides tests for the specific functions: run_sensors, add_listener
+It provides tests for the specific functions: 
 As development continues these are subject to change or update as the module does. 
-Test Cases: TC-035, TC-036.
+Test Cases: 
 """
 
-@pytest.fixture
-def environment():
-    #Generating a Mock Environment
-    env = Mock()
-    env.reset.return_value = ('mock_state', 'mock_infor', 'mock-col', 'mock-row')
-    env.action_space.sample.return_value = 'mock_action'
-    return env
+#Testing the Sensory memory & sensory memory impl initialization
+def test_sensoryMemory_initialization():
+    sensory_memory = SensoryMemory()
+    assert sensory_memory is not None
 
-@pytest.fixture
-def mock_pam():
-    #Generating a Mock PAM
-    pam = Mock()
-    pam.retrieve_associations.return_value = 'mock_percept'
-    return pam
+def test_sensoryMemoryImpl_Initialization():
+    smi = SensoryMemoryImpl()
+    assert smi.sensor is None
+    assert smi.processors == {}
+    assert smi.stimuli is None
+    assert smi.position is None
+    assert smi.state is None
+    assert smi.links == []
+    assert smi.sensor_dict == {}
+    assert smi.processor_dict == {}
 
-@pytest.fixture
-def sensory_memory(environment, mock_pam):
-    #initialzing into the sensory memory
-    return SensoryMemory(environment, mock_pam)
+#Tesing the notify function
+def test_notify():
+    smi = SensoryMemoryImpl()
+    env = FrozenLake() #Testing with the Frozen Lake Environment
+    env.reset()
+    env.add_observer(smi)
+    env.notify_observers()
+    smi.sensor_dict = {"text": "text_processing"}
+    smi.processor_dict = {"text": "text_processing"}
+    smi.processors["text"] = getattr(Sensors, smi.processor_dict["text"])
+    assert smi.stimuli == env.get_stimuli()
+    assert smi.position == env.get_position()
+    assert smi.state == env.__getstate__()
+    assert smi.processors["text"] is Sensors.text_processing
 
-def test_add_sensory_listener(sensory_memory):
-    #Testing the listener
-    listener = Mock()
-    sensory_memory.add_sensory_listener(listener)
-    assert listener in sensory_memory.listeners
-
-def test_run_sensors(sensory_memory, environment, mock_pam):
-    #preparing the procedural memory
-    procedural_memory = Mock()
-    procedural_memory.add_scheme = Mock()
-
-    state, percept, action, environment, col, row = sensory_memory.run_sensors(procedural_memory, 0)
-
-    assert state == 'mock_state'
-    assert percept == 'mock_percept'
-    assert action == 'mock_action'
-    assert environment == environment
-    assert col == 'mock-col'
-    assert row == 'mock-row'
-
-    procedural_memory.add_scheme.assert_called_with('state-0', 'mock_action')
-    mock_pam.retrieve_associations.assert_called_with('state-0')
+"""
+implement run sensors test method
+"""
+def test_run_sensors():
+    #preparing the sensors
+    smi = SensoryMemoryImpl()
+    smi.sensor_dict = {"text": "text_processing"}
+    smi.processor_dict = {"text": "text_processing"}
+    smi.processors["text"] = getattr(Sensors, smi.processor_dict["text"])
+    env = FrozenLake()  # Testing with the Frozen Lake Environment
+    env.reset()
+    assert smi.processors["text"] is Sensors.text_processing
+    smi.stimuli = env.get_stimuli()
+    assert smi.stimuli is not None
+    assert smi.links is not None
