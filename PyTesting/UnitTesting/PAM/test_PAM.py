@@ -1,3 +1,7 @@
+#LIDA Cognitive Framework
+#Pennsylvania State University, Course : SWENG481
+#Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+
 import pytest
 import logging
 
@@ -41,7 +45,6 @@ class exampleNode:
 
 from source.Framework.Shared.ActivatibleImpl import ActivatibleImpl
 from source.Framework.Shared.Link import Link
-
 
 class exampleLink:
     # initializing the link with default id, activation and label

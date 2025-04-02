@@ -1,7 +1,16 @@
+#LIDA Cognitive Framework
+#Pennsylvania State University, Course : SWENG481
+#Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+
 import pytest
 from source.Environment.Environment import Environment
 from source.Environment.FrozenLakeEnvironment import FrozenLake
 
+"""
+This generated test case ensures the functions within the generalized environment and 
+frozen lake environment are working properly.
+
+"""
 #Testing the Generalized Environment
 def test_environment_initialization():
     env = Environment()
@@ -20,7 +29,6 @@ def test_environment_step():
 def test_environment_close():
     env = Environment()
     env.close()
-
 
 #Testing the Frozen Lake Environment
 def test_frozenlake_initialization():

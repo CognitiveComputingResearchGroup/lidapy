@@ -1,3 +1,7 @@
+#LIDA Cognitive Framework
+#Pennsylvania State University, Course : SWENG481
+#Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+
 from Configs import Sensors
 from source.Environment.FrozenLakeEnvironment import FrozenLake
 from source.SensoryMemory.SensoryMemory import SensoryMemory
@@ -41,9 +45,6 @@ def test_notify():
     assert smi.state == env.__getstate__()
     assert smi.processors["text"] is Sensors.text_processing
 
-"""
-implement run sensors test method
-"""
 def test_run_sensors():
     #preparing the sensors
     smi = SensoryMemoryImpl()

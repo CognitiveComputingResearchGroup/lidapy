@@ -1,3 +1,7 @@
+#LIDA Cognitive Framework
+#Pennsylvania State University, Course : SWENG481
+#Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+
 from unittest.mock import Mock
 
 from source.Environment.FrozenLakeEnvironment import FrozenLake

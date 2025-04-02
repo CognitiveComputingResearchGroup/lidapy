@@ -1,7 +1,10 @@
+#LIDA Cognitive Framework
+#Pennsylvania State University, Course : SWENG481
+#Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+
 import pytest
 
 from unittest.mock import Mock
-
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM_Impl import PAMImpl
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl

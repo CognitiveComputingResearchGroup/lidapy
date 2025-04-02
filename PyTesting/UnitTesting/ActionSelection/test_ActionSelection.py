@@ -1,11 +1,22 @@
+#LIDA Cognitive Framework
+#Pennsylvania State University, Course : SWENG481
+#Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+
 import pytest
 
+from unittest.mock import Mock
 from Configs import Sensors
 from source.Environment.FrozenLakeEnvironment import FrozenLake
+from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
 from source.PAM.PAM_Impl import PAMImpl
+from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
+
+"""
+This generated test case will ensure that all functions within the Action Selection are functioning properly.
+"""
 
 @pytest.fixture
 def action_selection():
@@ -26,6 +37,14 @@ def pam():
 @pytest.fixture
 def procedural_mem():
     return ProceduralMemoryImpl()
+
+def test_initialization(action_selection):
+    assert isinstance(action_selection.scheme, dict)
+    assert action_selection.scheme == {}
+
+def test_select_action(action_selection):
+    action_selection.scheme = {"test_key":"test_value"}
+    assert action_selection.select_action() == {"test_key":"test_value"}
 
 def test_select_action_initiallyEmpty(action_selection):
     smi = SensoryMemoryImpl()
@@ -73,3 +92,17 @@ def test_select_action_initiallyEmpty(action_selection):
 
     #testing that the scheme isn't empty
     assert action_schemes is not None
+
+"""NOT YET PASSABLE, AS CURRENTLY HAVE A MOCK PROCEDURAL BUT STILL WORKING"""
+def test_notify_with_proceduralMemory(action_selection):
+    mock_procedural = Mock(spec=ProceduralMemory)
+    mock_procedural.__getstate__.return_value = {"state":"example_state","scheme":"example_scheme"}
+
+    mock_procedural.get_action.return_value ={"action":"chosen_action"}
+
+    action_selection.notify(mock_procedural)
+    assert action_selection.scheme == {"action":"chosen_action"} #Ensuring the scheme is updated
+
+def test_notify_with_globalWorkspace(action_selection):
+    mock_workspace = Mock(spec=GlobalWorkspace)
+    action_selection.notify(mock_workspace)

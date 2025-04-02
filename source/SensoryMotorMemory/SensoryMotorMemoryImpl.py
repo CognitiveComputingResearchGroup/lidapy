@@ -1,5 +1,5 @@
 #LIDA Cognitive Framework
-#Pennsylvania State University, Course : SWENG480
+#Pennsylvania State University, Course : SWENG481
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 """
