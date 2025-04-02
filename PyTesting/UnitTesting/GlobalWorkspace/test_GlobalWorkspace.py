@@ -12,7 +12,7 @@ from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 
 """
 This generated test case will test the functions within the Global Workspace. These are to ensure each function is 
-working properly for a functional LIDA cognitive framework. 
+working properly. This module contains a conscious broadcast.
 """
 
 #Mocking the Coalition
