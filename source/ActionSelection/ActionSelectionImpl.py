@@ -14,6 +14,10 @@ class ActionSelectionImpl(ActionSelection):
         self.logger = getLogger(self.__class__.__name__).logger
         self.logger.debug(f"Initialized ActionSelection")
 
+    def run(self):
+        pass
+        #self.logger.debug(f"Initialized ActionSelection")
+
     def select_action(self):
         return self.scheme
 

@@ -1,5 +1,7 @@
 import importlib
+import multiprocessing
 from importlib import util
+from multiprocessing import Process
 from threading import Thread
 from yaml import YAMLError, safe_load
 
@@ -39,33 +41,52 @@ class AlarmsControlAgent(Agent):
         self.sensory_memory.sensor = self.load_sensors_from_file("Sensors")
         self.sensory_memory.processor_dict = self.get_agent_processors()
 
-        # Add procedural_mem schemes
-        self.procedural_memory.scheme = ["Stay safe", "Seek goal"]
+        # Add procedural memory schemes
+        self.procedural_memory.scheme = ["Avoid hole", "Find goal"]
 
-        # Agent thread
-        self.agent_thread = Thread(target=self.environment.reset)
+        # Environment thread
+        self.environment_thread = Thread(target=self.environment.reset)
 
-        """# Sensory memory thread
-        self.sensory_memory_thread = (
-            Thread(target=self.sensory_memory.run_sensors))
+        # Sensory memory process
+        self.sensory_memory_process = (
+            Process(target=self.sensory_memory.run_sensors,
+                    args=(self.sensory_memory,)))
 
-        # PAM thread
-        self.pam_thread = Thread(target=self.pam.run)
+        # PAM process
+        self.pam_process = Process(target=self.pam.run, args=(self.pam,))
 
-        # ProceduralMem thread
-        self.procedural_memory_thread = (
-            Thread(target=self.procedural_memory.run,
-                   args=((["Stay safe", "Seek goal"]),)))"""
+        # ProceduralMem process
+        self.procedural_memory_process = (
+            Process(target=self.procedural_memory.run,
+                    args=(
+                        self.procedural_memory, ["Avoid hole", "Find goal"])))
+
+        # ActionSelection process
+        self.action_selection_process = (
+            Process(target=self.action_selection.run))
+
+        # SensoryMotorMem process
+        self.sensory_motor_mem_process = (
+            Process(target=self.sensory_motor_mem.run))
 
     def run(self):
-        self.agent_thread.start()
-        """self.sensory_memory_thread.start()
-        self.pam_thread.start()
-        self.procedural_memory_thread.start()"""
+        multiprocessing.set_start_method("spawn")
+        self.environment_thread.start()
+        self.environment_thread.join()
+        self.sensory_memory_process.start()
+        self.sensory_memory_process.join()
+        self.pam_process.start()
+        self.pam_process.join()
+        self.procedural_memory_process.start()
+        self.procedural_memory_process.join()
+        """self.action_selection_process.start()
+        self.action_selection_process.join()"""
+        self.sensory_motor_mem_process.start()
+        self.sensory_motor_mem_process.join()
 
     def notify(self, module):
         if isinstance(module, Environment):
-            state = module.get_state()
+            stimuli = module.get_stimuli()
 
     def load_sensors_from_file(self, type):
         with open(
@@ -109,4 +130,4 @@ class AlarmsControlAgent(Agent):
         return DEFAULT_PROCESSORS
 
     def __getstate__(self):
-        return self.environment.get_stimuli()
+        return self.environment.__getstate__()

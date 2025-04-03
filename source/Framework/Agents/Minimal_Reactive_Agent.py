@@ -1,5 +1,7 @@
 import importlib
+import multiprocessing
 from importlib import util
+from multiprocessing import Process
 from threading import Thread
 from yaml import YAMLError, safe_load
 
@@ -30,19 +32,25 @@ class MinimalReactiveAgent(Agent):
         self.sensory_memory.sensor = self.load_sensors_from_file("Sensors")
         self.sensory_memory.processor_dict = self.get_agent_processors()
 
-        # Agent thread
-        self.agent_thread = Thread(target=self.environment.reset)
+        # Environment thread
+        self.environment_thread = Thread(target=self.environment.reset)
 
         # Sensory memory thread
-        self.sensory_memory_thread = (
-            Thread(target=self.sensory_memory.run_sensors))
+        self.sensory_memory_process = (
+            Process(target=self.sensory_memory.run_sensors))
 
-        #Add observers
-        self.add_observer(self.sensory_memory)
+        # SensoryMotorMem process
+        self.sensory_motor_mem_process = (
+            Process(target=self.sensory_motor_mem.run))
 
     def run(self):
-        self.agent_thread.start()
-        self.sensory_memory_thread.start()
+        multiprocessing.set_start_method("spawn")
+        self.environment_thread.start()
+        self.environment_thread.join()
+        self.sensory_memory_process.start()
+        self.sensory_motor_mem_process.join()
+        self.sensory_motor_mem_process.start()
+        self.sensory_motor_mem_process.join()
 
     def notify(self, module):
         if isinstance(module, Environment):

@@ -1,4 +1,5 @@
 import importlib
+import multiprocessing
 from importlib import util
 from multiprocessing import Process
 from threading import Thread
@@ -63,60 +64,85 @@ class MinimalConsciousAgent(Agent):
         self.sensory_memory.sensor = self.load_sensors_from_file("Sensors")
         self.sensory_memory.processor_dict = self.get_agent_processors()
 
-        #Add procedural_mem schemes
-        self.procedural_memory.scheme = ["Avoid hole", "Find goal"]
-
         #Add workspace csm
         self.workspace.csm = self.csm
 
         #Add attention codelets buffer
         self.attention_codelets.buffer = self.csm
 
-        #Agent thread
+        # Add procedural memory schemes
+        self.procedural_memory.scheme = ["Avoid hole", "Find goal"]
+
+        #Environment thread
         self.environment_thread = Thread(target=self.environment.reset)
+
+        # Sensory memory process
+        self.sensory_memory_process = (
+            Process(target=self.sensory_memory.run_sensors,
+                    args=(self.sensory_memory,)))
+
+        # PAM process
+        self.pam_process = Process(target=self.pam.run, args=(self.pam,))
+
+        # Workspace thread
+        self.workspace_process = Process(target=self.workspace.run,
+                                         args=(self.workspace,))
+
+        # CSM thread
+        self.csm_thread = Thread(target=self.csm.run_task)
+
+        self.csm_thread.daemon = True
 
         # Attention codelets thread
         self.attention_codelets_thread = Thread(
             target=self.attention_codelets.start)
 
-        #self.attention_codelets_process.daemon = True
-
-        self.pam_process = Process(target=self.pam.run, args=(self.pam,))
-
-        #Sensory memory thread
-        self.sensory_memory_process = (
-                        Process(target=self.sensory_memory.run_sensors,
-                                args=(self.sensory_memory,)))
-
-        #Workspace thread
-        self.workspace_process = Process(target=self.workspace.run,
-                                         args=(self.workspace,))
-
-        #CSM thread
-        self.csm_thread = Thread(target=self.csm.run_task)
-
-        self.csm_thread.daemon = True
-
-        #GlobalWorkspace thread
+        # GlobalWorkspace process
         self.global_workspace_process = (
-                        Process(target=self.global_workspace.run_task,
-                                args=(self.global_workspace,)))
+            Process(target=self.global_workspace.run_task,
+                    args=(self.global_workspace,)))
 
-        #ProceduralMem thread
+        # ProceduralMem process
         self.procedural_memory_process = (
             Process(target=self.procedural_memory.run,
-                   args=(self.procedural_memory, ["Avoid hole", "Find goal"])))
+                    args=(
+                    self.procedural_memory, ["Avoid hole", "Find goal"])))
 
-        # SensoryMotorMem thread
+        # ActionSelection process
+        self.action_selection_process = (
+            Process(target=self.action_selection.run))
+
+        # SensoryMotorMem process
         self.sensory_motor_mem_process = (
             Process(target=self.sensory_motor_mem.run))
 
+
     def run(self):
-        pass
+        multiprocessing.set_start_method("spawn")
+        self.environment_thread.start()
+        self.environment_thread.join()
+        self.sensory_memory_process.start()
+        self.sensory_memory_process.join()
+        self.pam_process.start()
+        self.pam_process.join()
+        self.csm_thread.start()
+        self.csm_thread.join()
+        self.workspace_process.start()
+        self.workspace_process.join()
+        self.attention_codelets_thread.start()
+        self.attention_codelets_thread.join()
+        self.global_workspace_process.start()
+        self.global_workspace_process.join()
+        self.procedural_memory_process.start()
+        self.procedural_memory_process.join()
+        self.action_selection_process.start()
+        self.action_selection_process.join()
+        self.sensory_motor_mem_process.start()
+        self.sensory_motor_mem_process.join()
 
     def notify(self, module):
         if isinstance(module, Environment):
-            state = module.get_state()
+            stimuli = module.get_stimuli()
 
     def load_sensors_from_file(self, type):
         with open(
@@ -160,4 +186,4 @@ class MinimalConsciousAgent(Agent):
         return DEFAULT_PROCESSORS
 
     def __getstate__(self):
-        return self.environment.get_stimuli()
+        return self.environment.__getstate__()
