@@ -25,7 +25,7 @@ class FrozenLake(Environment):
             'FrozenLake-v1',
             desc=None,
             is_slippery=False,
-            map_name="8x8",
+            map_name="4x4",
             render_mode=render_mode)
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
@@ -72,7 +72,7 @@ class FrozenLake(Environment):
                         threading.current_thread().join()
                     state, reward, done, truncated, info = self.env.step(
                         action)
-                    sleep(1)
+                    sleep(0.5)
                     self.steps += 1
                     self.update_position(action)
                     surrounding_tiles = self.get_surrounding_tiles(

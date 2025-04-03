@@ -54,11 +54,11 @@ def test_send_action_execution_command():
     reward = 0
     done = False
     truncated = False
-    info = "0.33333"
+    info = {"prob" : 1}
 
     # Assertions
     assert environment.state != state
     assert environment.reward != 'reward'
     assert done == False
     assert truncated == False
-    assert info != 0.33333
+    assert info != {"prob" : 1/3}

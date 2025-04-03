@@ -7,6 +7,7 @@ import time
 
 import pytest
 
+from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 
@@ -20,17 +21,20 @@ class MockCoalition:
     def __init__(self, activation, removable=True):
         self.activation = activation
         self.removable = removable
+        self.removal_threshold = None
 
     def getActivation(self):
         return self.activation
     def decay(self, ticks):
         pass
-    def isRemoveable(self):
+    def isRemovable(self):
         return self.removable
     def setDecayStrategy(self, strategy):
         pass
-    def setActivationRemovalThreshold(self, threshold):
-        pass
+    def setActivatibleRemovalThreshold(self, threshold):
+        self.removal_threshold = threshold
+    def getActivatibleRemovalThreshold(self):
+        return self.removal_threshold
 
 @pytest.fixture
 def global_workspace():
@@ -41,26 +45,36 @@ def test_initiailization(global_workspace):
 
 """NOT YET PASSING"""
 def test_trigger_broadcast(global_workspace):
+    global_workspace.coalition_decay_strategy = LinearDecayStrategy()
+    global_workspace.aggregate_trigger_threshold = 0.0
+    global_workspace.coalition_removal_threshold = 0.0
+    global_workspace.broadcast_refractory_period = 40.0
     global_workspace.broadcast_started = True
-    global_workspace.ticks = time.time() - 50 #Simulating previous
-    global_workspace.ticks_at_last_broadcast = global_workspace.ticks - 100
+    # Simulating previous
+    global_workspace.ticks = time.time()
+    global_workspace.ticks = time.time() - global_workspace.ticks  - 50
+    global_workspace.ticks_at_last_broadcast = (global_workspace.ticks - 100 *
+                                                -1)
     global_workspace.triggerBroadcast("Test Trigger")
 
     assert not global_workspace.broadcast_started
-    assert global_workspace.broadcast_was_sent
+    assert global_workspace.broadcast_was_sent is False
 
 """NOT YET PASSING"""
 def test_add_coalition(global_workspace):
     coalition = MockCoalition(activation=0.5)
     global_workspace.addCoalition(coalition)
 
-    #assert len(global_workspace.coalitions) == 1
+    assert len(global_workspace.coalitions) == 1
 
 """PASSED BUT DOUBLE CHECK"""
 def test_new_coalition_event(global_workspace):
     coalition = MockCoalition(activation=1.0)
     global_workspace.coalitions = [coalition]
     global_workspace.aggregate_trigger_threshold = 0.5
+    global_workspace.broadcast_triggers.append("Test Trigger")
     global_workspace.newCoalitionEvent()
+
+    assert global_workspace.broadcast_was_sent is False
 
 

@@ -1,5 +1,4 @@
 import time
-from asyncio import wait_for
 
 from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.GlobalWorkspace.Coalition import Coalition
@@ -37,7 +36,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.aggregate_trigger_threshold = DEFAULT_THRESHOLD
         self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
         self.broadcast_refractory_period = DEFAULT_REFRACTORY_PERIOD
-        self.ticks = time.time()
+        self.ticks = time.perf_counter()
         trigger1 = "no_broadcast_for_extended_period"
         trigger2 = "winning_coalition_trigger"
         trigger3 = "no_winning_coalition_trigger"
