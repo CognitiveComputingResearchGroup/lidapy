@@ -7,6 +7,8 @@ import pytest
 from unittest.mock import Mock
 from Configs import Sensors
 from source.Environment.FrozenLakeEnvironment import FrozenLake
+from source.Framework.Shared.LinkImpl import LinkImpl
+from source.Framework.Shared.NodeImpl import NodeImpl
 from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
 from source.PAM.PAM_Impl import PAMImpl
 from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
@@ -96,7 +98,12 @@ def test_select_action_initiallyEmpty(action_selection):
 """NOT YET PASSABLE, AS CURRENTLY HAVE A MOCK PROCEDURAL BUT STILL WORKING"""
 def test_notify_with_proceduralMemory(action_selection):
     mock_procedural = Mock(spec=ProceduralMemory)
-    mock_procedural.__getstate__.return_value = {"state":"example_state","scheme":"example_scheme"}
+    #mock_procedural.__getstate__.return_value = Mock(spec=NodeImpl)
+    link1 = LinkImpl()
+    link2 = LinkImpl()
+    link1.setActivation(1.0)
+    link2.setActivation(0.3)
+    mock_procedural.get_schemes.return_value = [link1, link2]
 
     mock_procedural.get_action.return_value ={"action":"chosen_action"}
 

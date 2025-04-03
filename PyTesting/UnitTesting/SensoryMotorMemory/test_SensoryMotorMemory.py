@@ -27,8 +27,8 @@ def test_receive_action():
     environment.reset()
     sensory_motor_memory = SensoryMotorMemoryImpl()
     action = 1
-    sensory_motor_memory.event = action
-    action = sensory_motor_memory.receive_action()
+    sensory_motor_memory.action_event = action
+    action = sensory_motor_memory.send_action_event()
     state, reward, done, truncated, info = environment.env.step(action)
 
     #Assertions
