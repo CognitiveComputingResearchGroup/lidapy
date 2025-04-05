@@ -5,10 +5,11 @@
 import argparse
 import sys
 
+
 from source.Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
 
-DEFAULT_AGENT_ID = 2
+DEFAULT_AGENT_ID = 3
 DEFAULT_AGENT_TYPE = "AlarmsControlAgent"
 
 

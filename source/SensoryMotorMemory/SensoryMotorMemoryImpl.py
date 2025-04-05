@@ -7,6 +7,7 @@ This module can temporarily store sensory data from the environment and then
 process and transfer to further working memory.
 """
 import random
+from time import sleep
 
 from source.ActionSelection.ActionSelection import ActionSelection
 from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
@@ -25,6 +26,8 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
 
     def run(self):
         self.logger.debug("Initialized SensoryMotorMemory")
+        while self.action_event is None:
+            sleep(45)
 
     def notify(self, module):
         """The selected action from action selection"""

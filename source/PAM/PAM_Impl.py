@@ -10,6 +10,7 @@ Output: Local Associations, passed to others
 """
 from time import sleep
 
+from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
@@ -29,7 +30,7 @@ class PAMImpl(PerceptualAssociativeMemory):
 
 
         """Create node for each cell the agent could visit"""
-        for cell in range(16):
+        for cell in range(64):
             node = NodeImpl()
             """Set the cell identifier to the corresponding state"""
             node.setId(cell)
@@ -37,7 +38,8 @@ class PAMImpl(PerceptualAssociativeMemory):
             self.memory.addNode_(node)
 
     def run(self):
-        pass
+        while self.current_cell is None:
+            sleep(45)
 
     def __getstate__(self):
         return self.current_cell
@@ -51,12 +53,11 @@ class PAMImpl(PerceptualAssociativeMemory):
             self.position = cue["params"]["position"]
             self.learn(cue)
         elif isinstance(module, WorkspaceImpl):
-            cue = module.get_module_content(module)
-            if isinstance(cue.getNodes(), dict):
-                self.current_cell = cue.getNodes()
-                self.position["row"] = int(cue.getNodes().getLabel()[0])
-                self.position["col"] = int(cue.getNodes().getLabel()[1])
-            self.learn(cue.getLinks())
+            cue = module.csm.getBufferContent()
+            if isinstance(cue.getLinks(), LinkImpl):
+                self.logger.debug(f"Cue received from Workspace, "
+                                  f"forming associations")
+                self.learn(cue.getLinks())
         elif isinstance(module, GlobalWorkSpaceImpl):
             winning_coalition = module.__getstate__()
 
@@ -83,8 +84,6 @@ class PAMImpl(PerceptualAssociativeMemory):
                 self.current_cell = node
                 self.add_association(self.current_cell)
         self.form_associations(cue["cue"])
-        sleep(0.5)
-        self.notify_observers()
 
     def form_associations(self, cue):
         # Set links to surrounding cell nodes if none exist
@@ -110,3 +109,4 @@ class PAMImpl(PerceptualAssociativeMemory):
                                         "label": link.getCategory("label")},
                                             activation=link.getActivation(),
                                             removal_threshold=0.0)
+        self.notify_observers()

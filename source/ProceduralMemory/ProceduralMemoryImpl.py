@@ -2,7 +2,10 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 import difflib
+from time import sleep
+
 import numpy as np
+from numpy import broadcast
 
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
@@ -29,11 +32,15 @@ class ProceduralMemoryImpl(ProceduralMemory):
             """Get the closest_match to the scheme from surrounding
             link nodes"""
             self.activate_schemes(associations)
+            sleep(0.2)
             self.notify_observers()
 
         elif isinstance(module, GlobalWorkspace):
             winning_coalition = module.__getstate__()
-            self.learn(winning_coalition)
+            broadcast = winning_coalition.getContent()
+            self.logger.debug(
+                f"Received conscious broadcast: {broadcast}")
+            self.learn(broadcast)
 
     def activate_schemes(self, associations):
         schemes = None
@@ -52,7 +59,7 @@ class ProceduralMemoryImpl(ProceduralMemory):
             self.logger.debug("Instantiated single action scheme")
 
     def learn(self, broadcast):
-        result = self.get_closest_match(broadcast)
+        result = self.get_closest_match(broadcast.getLinks())
         current_scheme = None
 
         """If closest match returns more than one link, optimize results"""

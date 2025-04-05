@@ -18,9 +18,14 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
 
     def run_task(self):
         self.node_structure = NodeStructureImpl()
+        """while (len(self.node_structure.getLinks()) == 0 or
+               len(self.node_structure.getNodes()) == 0):
+            """
+        sleep(5)
 
     def addBufferContent(self, workspace_content):
         self.node_structure.mergeWith(workspace_content)
+        #self.notify_observers()
 
     def getBufferContent(self):
         return self.node_structure
@@ -30,14 +35,12 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
 
     def receiveVentralStream(self, stream):
         self.addBufferContent(stream)
-        """sleep(0.5)  # Seed control to other modules"""
 
     def getModuleContent(self):
         return self.formed_coalition
 
     def receiveCoalition(self, coalition):
         self.formed_coalition = coalition
-        self.logger.debug(f"Received new coalition")
         self.notify_observers()
 
     def notify(self, module):
@@ -50,4 +53,5 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
                               f"stream")
             self.receiveVentralStream(stream)
         elif isinstance(module, AttentionCodelet):
+            self.logger.debug(f"Received new coalition")
             self.receiveCoalition(module.getModuleContent())

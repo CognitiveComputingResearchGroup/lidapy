@@ -1,3 +1,9 @@
+from multiprocessing import Process, Value
+from threading import Thread
+
+from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
+from source.Framework.Strategies.LinearExciteStrategy import \
+    LinearExciteStrategy
 from source.ModuleInitialization.DefaultLogger import getLogger
 from source.Framework.Shared.Activatible import Activatible
 
@@ -10,8 +16,8 @@ EXCITE_DEFAULT_LOWER_BOUND = 0.0
 class ActivatibleImpl(Activatible):
     def __init__(self):
         super().__init__()
-        self.decayStrategy = None
-        self.exciteStrategy = None
+        self.decayStrategy = LinearDecayStrategy()
+        self.exciteStrategy = LinearExciteStrategy()
         self.incentiveSalienceDecayStrategy = None
         self.activation = 0.0
         self.logger = getLogger(self.__class__.__name__).logger
@@ -50,39 +56,42 @@ class ActivatibleImpl(Activatible):
 
     def decay(self, ticks):
         if self.decayStrategy is not None:
-            self.logger.debug(f"Before decaying {self} has current "
-                              f"activation: {self.getActivation()}")
-            self.activation = self.calcActivationLinearDecay(
-                    self.activation, ticks)
-            self.incentiveSalience = self.calcActivationLinearDecay(
-                    self.incentiveSalience, ticks)
-            self.logger.debug(f"After decaying {self} has current "
-                                  f"activation: {self.getActivation()}")
-        else:
             """self.logger.debug(f"Before decaying {self} has current "
                               f"activation: {self.getActivation()}")"""
-            self.setActivation(self.calcActivationLinearDecay(
-                self.getActivation(), ticks))
-            self.setIncentiveSalience(self.calcActivationLinearDecay(
-                self.incentiveSalience, ticks))
 
+            """Sharing of values between threads, d stands for float (double)
+            Otherwise LinearDecayStrategy returns none without sharing"""
+            activation = Value("d", self.getActivation())
+            _ticks = Value("d", ticks)
+            t = Thread(target=self.decayStrategy.decay, args=(activation,
+                                                               _ticks))
+            t.start()
+            t.join()
+            self.activation = activation.value
+            incentiveSalience = Value("d", self.getIncentiveSalience())
+            t = Thread(target=self.decayStrategy.decay,
+                        args=(incentiveSalience, _ticks))
+            t.start()
+            t.join()
+
+            self.incentiveSalience = incentiveSalience.value
             """self.logger.debug(f"After decaying {self} has current "
-                              f"activation: {self.getActivation()}")"""
+                                  f"activation: {self.getActivation()}")"""
 
     def exciteActivation(self, amount):
         if self.exciteStrategy is not None:
-            self.logger.debug(f"Before excitation {self} has current "
-                              f"activation: {self.getActivation()}")
-            self.activation = self.calcActivationLinearExcite(
-                    self.getActivation(), amount)
-
-            self.logger.debug(f"After excitation {self} has current "
-                              f"activation: {self.getActivation()}")
-        else:
             """self.logger.debug(f"Before excitation {self} has current "
                               f"activation: {self.getActivation()}")"""
-            self.activation = self.calcActivationLinearExcite(
-                    self.getActivation(), amount)
+
+            """Sharing of values between threads, d stands for float (double)
+               Otherwise LinearDecayStrategy returns none without sharing"""
+            activation = Value("d", self.getActivation())
+            _amount = Value("d", amount)
+            t = Thread(target=self.exciteStrategy.excite, args=(activation,
+                                                               _amount))
+            t.start()
+            t.join()
+            self.activation = activation.value
 
             """self.logger.debug(f"After excitation {self} has current "
                               f"activation: {self.getActivation()}")"""
@@ -92,32 +101,22 @@ class ActivatibleImpl(Activatible):
             self.logger.debug(f"Before excitation {self} has current "
                               f"incentive salience: "
                               f"{self.getIncentiveSalience()}")
-            self.activation = self.calcActivationLinearExcite(
-                    self.getIncentiveSalience(), amount)
+
+            """Sharing of values between threads, d stands for float (double)
+                Otherwise LinearDecayStrategy returns none without sharing"""
+            incentiveSalience = Value("d", self.getIncentiveSalience())
+            _amount = Value("d", amount)
+
+            t = Thread(target=self.exciteStrategy.excite,
+                       args=(incentiveSalience, _amount))
+            t.start()
+            t.join()
+
+            self.incentiveSalience = incentiveSalience.value
 
             self.logger.debug(f"After excitation {self} has current "
                               f"incentive salience: "
                               f"{self.getIncentiveSalience()}")
-
-    def calcActivationLinearDecay(self, current_activation, ticks):
-        slope = DECAY_DEFAULT_SLOPE
-        lower_bound = DECAY_DEFAULT_LOWER_BOUND
-        current_activation -= slope * ticks
-        if current_activation > lower_bound:
-            return current_activation
-        else:
-            return lower_bound
-
-    def calcActivationLinearExcite(self, current_activation, ticks):
-        slope = EXCITE_DEFAULT_SLOPE
-        upper_bound = EXCITE_DEFAULT_UPPER_BOUND
-        lower_bound = EXCITE_DEFAULT_LOWER_BOUND
-        current_activation += slope * ticks
-        if current_activation > upper_bound:
-                return upper_bound
-        elif current_activation < lower_bound:
-            return lower_bound
-        return current_activation
 
     def setExciteStrategy(self, strategy):
         self.exciteStrategy = strategy

@@ -1,6 +1,8 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+from time import sleep
+
 from source.ModuleInitialization.DefaultLogger import getLogger
 from source.ModuleInitialization.ModuleInterface import Module
 
@@ -15,6 +17,8 @@ class ProceduralMemory(Module):
 
     def run(self, scheme):
         self.scheme = scheme
+        while self.state is None:
+            sleep(45)
 
     def add_scheme(self, state, percept):
         if not self.schemes or state not in self.schemes:

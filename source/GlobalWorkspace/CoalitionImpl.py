@@ -9,10 +9,6 @@ class CoalitionImpl(Coalition, ActivatibleImpl):
         self.ID = self.id_counter + 1
         self.broadcastContent = None
         self.attention_codelet = None
-        self.Activation = 0
-
-    def setCoalitionActivation(self, activation):
-        self.activation = activation
 
     def getContent(self):
         return self.broadcastContent

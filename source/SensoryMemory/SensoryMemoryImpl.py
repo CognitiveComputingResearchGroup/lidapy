@@ -63,7 +63,7 @@ class SensoryMemoryImpl(SensoryMemory):
                             for link in sensory_cue.getLinks():
                                 self.links.append(link)
             self.logger.debug(f"Processed {len(self.links)} sensory cue(s)")
-            sleep(0.5)       #Wait for previous sensory cue processing
+            sleep(0.5)
             self.notify_observers()
         else:
             self.logger.debug("Waiting for stimuli from the environment")

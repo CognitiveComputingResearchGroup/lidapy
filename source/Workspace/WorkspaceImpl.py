@@ -1,4 +1,5 @@
-from time import sleep
+import time
+
 
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
@@ -18,10 +19,12 @@ class WorkspaceImpl(Workspace):
         self.coalition = None
         self.logger = getLogger(self.__class__.__name__).logger
         self.episodic_memory = None
-        self.logger.debug("Initialized Workspace")
 
     def run(self):
+        self.logger.debug("Initialized Workspace")
         self.nodes = []
+        while self.coalition is None:
+            time.sleep(25)
 
     def cueEpisodicMemories(self, node_structure):
         self.episodic_memory = node_structure
@@ -41,11 +44,12 @@ class WorkspaceImpl(Workspace):
         workspace_buffer = NodeStructureImpl()
         workspace_buffer.addLinks(percept, "Adjacent node")
         self.csm.addBufferContent(workspace_buffer)
+        self.notify_observers()
 
     def receiveLocalAssociation(self, node_structure):
         self.csm.addBufferContent(node_structure)
 
-    def decayModule(self, time):
+    def decayModule(self, ticks):
         pass
 
     def notify(self, module):
@@ -56,5 +60,4 @@ class WorkspaceImpl(Workspace):
                 percept = module.retrieve_association(state)
             self.receive_percept(percept)
         elif isinstance(module, CurrentSituationalModel):
-            cue = module.getBufferContent()
-            self.cueEpisodicMemories(cue)
+            self.notify_observers()

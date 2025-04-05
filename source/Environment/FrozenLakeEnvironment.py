@@ -25,7 +25,7 @@ class FrozenLake(Environment):
             'FrozenLake-v1',
             desc=None,
             is_slippery=False,
-            map_name="4x4",
+            map_name="8x8",
             render_mode=render_mode)
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
@@ -40,20 +40,23 @@ class FrozenLake(Environment):
 
     # Reseting the environment to start a new episode
     def reset(self):
-        # interacting with the environment by using Reset()
-        state, info = self.env.reset()
+        with threading.Lock():
+            # interacting with the environment by using Reset()
+            state, info = self.env.reset()
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
         self.agent_stimuli = {"text": self.form_stimuli(surrounding_tiles)}
         self.state = {"state": state, "info": info, "done": False,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                          f"done: False")
+        sleep(0.3)
         self.notify_observers()
 
     # perform an action in environment:
     def step(self, action):
-        # perform and update
-        state, reward, done, truncated, info = self.env.step(action)
+        with threading.Lock():
+            # perform and update
+            state, reward, done, truncated, info = self.env.step(action)
         self.steps += 1
         self.update_position(action)
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
@@ -62,14 +65,13 @@ class FrozenLake(Environment):
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                           f"done: {done}, " + f"action: {action}")
+        sleep(0.3)
         self.notify_observers()
 
     def recursive_step(self, action_plan):
         if action_plan is not None:
             for action in action_plan:
                 if not self.state["done"] and self.steps < 1000:
-                    if threading.current_thread() != threading.main_thread():
-                        threading.current_thread().join()
                     state, reward, done, truncated, info = self.env.step(
                         action)
                     sleep(0.5)

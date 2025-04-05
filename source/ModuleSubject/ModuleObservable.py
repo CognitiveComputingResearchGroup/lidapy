@@ -1,5 +1,4 @@
-import threading
-from threading import Thread
+import concurrent.futures
 from time import sleep
 
 
@@ -16,14 +15,18 @@ class ModuleSubject:
 
     def notify_observers(self):
         for observer in self.observers:
-            observer.notify(self)
-            thread = Thread(target=observer.notify, args=(self,))
-            self.observer_threads.append(thread)
-            thread.name = observer.__class__.__name__
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.submit(observer.notify, self)
+                sleep(0.5)
+
+            """thread = Thread(target=observer.notify, args=(self,))
+            with threading.Lock():
+                thread.name = observer.__class__.__name__
+                self.observer_threads.append(thread)
             thread.start()
-            sleep(5)
-            #thread.join()
+            sleep(25)
         for thread in self.observer_threads:
             event = threading.Event()
             event.set()
-            thread.join(15)
+            thread.join()"""
+

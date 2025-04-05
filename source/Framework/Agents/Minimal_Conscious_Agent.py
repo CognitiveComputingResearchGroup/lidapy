@@ -1,3 +1,4 @@
+import concurrent.futures
 import importlib
 import multiprocessing
 from importlib import util
@@ -48,16 +49,18 @@ class MinimalConsciousAgent(Agent):
         self.pam.add_observer(self.workspace)
         self.procedural_memory.add_observer(self.action_selection)
         self.workspace.add_observer(self.pam)
-        self.workspace.add_observer(self.global_workspace)
-        self.sensory_memory.add_observer(self.pam)
         self.sensory_memory.add_observer(self.csm)
+        self.sensory_memory.add_observer(self.pam)
         self.sensory_memory.add_observer(self.sensory_motor_mem)
-        self.global_workspace.add_observer(self.pam)
         self.global_workspace.add_observer(self.procedural_memory)
+        self.global_workspace.add_observer(self.pam)
         self.global_workspace.add_observer(self.action_selection)
         self.global_workspace.add_observer(self.sensory_motor_mem)
         self.global_workspace.add_observer(self.attention_codelets)
         self.csm.add_observer(self.global_workspace)
+
+        #Global Workspace Ticks
+        self.global_workspace.ticks = 0
 
         #Sensory Memory Sensors
         self.sensory_memory.sensor_dict = self.get_agent_sensors()
@@ -78,20 +81,16 @@ class MinimalConsciousAgent(Agent):
 
         # Sensory memory process
         self.sensory_memory_process = (
-            Process(target=self.sensory_memory.run_sensors,
-                    args=(self.sensory_memory,)))
+            Thread(target=self.sensory_memory.run_sensors))
 
         # PAM process
-        self.pam_process = Process(target=self.pam.run, args=(self.pam,))
+        self.pam_process = Thread(target=self.pam.run)
 
         # Workspace thread
-        self.workspace_process = Process(target=self.workspace.run,
-                                         args=(self.workspace,))
+        self.workspace_process = Thread(target=self.workspace.run)
 
         # CSM thread
         self.csm_thread = Thread(target=self.csm.run_task)
-
-        self.csm_thread.daemon = True
 
         # Attention codelets thread
         self.attention_codelets_thread = Thread(
@@ -99,27 +98,50 @@ class MinimalConsciousAgent(Agent):
 
         # GlobalWorkspace process
         self.global_workspace_process = (
-            Process(target=self.global_workspace.run_task,
-                    args=(self.global_workspace,)))
+            Thread(target=self.global_workspace.run_task))
 
         # ProceduralMem process
         self.procedural_memory_process = (
-            Process(target=self.procedural_memory.run,
-                    args=(
-                    self.procedural_memory, ["Avoid hole", "Find goal"])))
+            Thread(target=self.procedural_memory.run,
+                    args=(["Avoid hole", "Find goal"],)))
 
         # ActionSelection process
         self.action_selection_process = (
-            Process(target=self.action_selection.run))
+            Thread(target=self.action_selection.run))
 
         # SensoryMotorMem process
         self.sensory_motor_mem_process = (
-            Process(target=self.sensory_motor_mem.run))
+            Thread(target=self.sensory_motor_mem.run))
+
+        """self.processes = [
+            self.sensory_memory_process,
+            self.pam_process,
+            self.workspace_process,
+            self.global_workspace_process,
+            self.procedural_memory_process,
+            self.action_selection_process,
+            self.sensory_motor_mem_process
+        ]"""
+        self.threads = [
+            self.environment_thread,
+            self.sensory_memory_process,
+            self.csm_thread,
+            self.attention_codelets_thread,
+            self.pam_process,
+            self.workspace_process,
+            self.global_workspace_process,
+            self.procedural_memory_process,
+            self.action_selection_process,
+            self.sensory_motor_mem_process
+        ]
 
 
     def run(self):
         multiprocessing.set_start_method("spawn")
-        self.environment_thread.start()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(self.start, self.threads)
+
+        """self.environment_thread.start()
         self.environment_thread.join()
         self.sensory_memory_process.start()
         self.sensory_memory_process.join()
@@ -138,7 +160,12 @@ class MinimalConsciousAgent(Agent):
         self.action_selection_process.start()
         self.action_selection_process.join()
         self.sensory_motor_mem_process.start()
-        self.sensory_motor_mem_process.join()
+        self.sensory_motor_mem_process.join()"""
+
+    def start(self, worker):
+        worker.start()
+        sleep(5)
+        worker.join()
 
     def notify(self, module):
         if isinstance(module, Environment):

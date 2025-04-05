@@ -21,8 +21,8 @@ class LinearDecayStrategy(DecayStrategy):
         self.calcActivation(current_activation, ticks, slope)
 
     def calcActivation(self, current_activation, ticks, slope):
-        current_activation -= slope * ticks
-        if current_activation > self.lower_bound:
+        current_activation.value -= slope * ticks.value
+        if current_activation.value > self.lower_bound:
             return current_activation
         else:
             return self.lower_bound

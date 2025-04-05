@@ -1,3 +1,5 @@
+import time
+from threading import current_thread, main_thread
 from time import sleep
 
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
@@ -28,26 +30,32 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.run_task()
 
     def run_task(self):
-        sleep(6)            #Wait for csm content initialization
         if self.bufferContainsSoughtContent(self.buffer):
             csm_content = self.retrieveWorkspaceContent(
                                     self.buffer)
             if csm_content is None:
                 self.logger.warning("Null WorkspaceContent returned."
                                           "Coalition cannot be formed.")
-                sleep(9)
-                self.run_task()
             elif csm_content.getLinkCount() > 0:
-                formed_coalition = CoalitionImpl()
-                formed_coalition.setContent(csm_content)
-                formed_coalition.setCreatingAttentionCodelet(self)
-                formed_coalition.setActivation(2)
+                self.formed_coalition = CoalitionImpl()
+                self.formed_coalition.setContent(csm_content)
+                self.formed_coalition.setCreatingAttentionCodelet(self)
+                self.formed_coalition.setActivation(1.0)
                 self.logger.info("Coalition successfully formed.")
                 self.notify_observers()
-                sleep(9)
+                sleep(30)
                 self.run_task()
-        else:
-            self.run_task()
+            else:
+                while csm_content.getLinkCount() == 0:
+                    time.sleep(10)
+                self.formed_coalition = CoalitionImpl()
+                self.formed_coalition.setContent(csm_content)
+                self.formed_coalition.setCreatingAttentionCodelet(self)
+                self.formed_coalition.setActivation(1.0)
+                self.logger.info("Coalition successfully formed.")
+                self.notify_observers()
+                sleep(30)
+                self.run_task()
 
     def set_refactory_period(self, ticks):
         if ticks > 0:

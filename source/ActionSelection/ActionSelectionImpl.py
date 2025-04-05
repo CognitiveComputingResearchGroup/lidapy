@@ -1,4 +1,5 @@
 import random
+from time import sleep
 
 from source.ActionSelection.ActionSelection import ActionSelection
 from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
@@ -12,11 +13,10 @@ class ActionSelectionImpl(ActionSelection):
         # Add modules relevant to action selection
         self.scheme = {}
         self.logger = getLogger(self.__class__.__name__).logger
-        self.logger.debug(f"Initialized ActionSelection")
+        #self.logger.debug(f"Initialized ActionSelection")
 
     def run(self):
-        pass
-        #self.logger.debug(f"Initialized ActionSelection")
+        self.logger.debug(f"Initialized ActionSelection")
 
     def select_action(self):
         return self.scheme
@@ -38,6 +38,7 @@ class ActionSelectionImpl(ActionSelection):
                 self.logger.debug(
                     f"Action plan retrieved from instantiated "
                     f"schemes")
+                sleep(0.2)
                 self.notify_observers()
             else:
                 self.logger.debug("No action found plan for the selected "

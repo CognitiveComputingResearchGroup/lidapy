@@ -21,10 +21,10 @@ class LinearExciteStrategy(ExciteStrategy):
         self.calcActivation(current_activation, ticks)
 
     def calcActivation(self, current_activation, ticks):
-        current_activation += self.slope * ticks
-        if current_activation > self.upper_bound:
+        current_activation.value += self.slope * ticks
+        if current_activation.value > self.upper_bound:
                 return self.upper_bound
-        elif current_activation < self.lower_bound:
+        elif current_activation.value < self.lower_bound:
             return self.lower_bound
 
         return current_activation
