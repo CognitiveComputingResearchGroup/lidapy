@@ -1,4 +1,4 @@
-from source.ModuleInitialization.ModuleInterface import Module
+from source.Module.Initialization.ModuleInterface import Module
 
 
 class Codelet(Module):

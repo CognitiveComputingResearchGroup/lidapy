@@ -1,13 +1,8 @@
-import time
-
-
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
-from source.Workspace.CurrentSituationModel.CurrentSituationalModel import \
-    CurrentSituationalModel
 from source.Workspace.Workspace import Workspace
-from source.ModuleInitialization.DefaultLogger import getLogger
+from source.Module.Initialization.DefaultLogger import getLogger
 
 
 class WorkspaceImpl(Workspace):
@@ -19,18 +14,20 @@ class WorkspaceImpl(Workspace):
         self.coalition = None
         self.logger = getLogger(self.__class__.__name__).logger
         self.episodic_memory = None
+        self.state = None
 
     def run(self):
         self.logger.debug("Initialized Workspace")
         self.nodes = []
-        while self.coalition is None:
-            time.sleep(25)
 
     def cueEpisodicMemories(self, node_structure):
         self.episodic_memory = node_structure
         self.logger.info(f"{len(self.episodic_memory.getLinks())} episodic "
                          f"memories cued")
         self.notify_observers()
+
+    def get_state(self):
+        return self.state
 
     def get_module_content(self , params=None):
         return self.episodic_memory
@@ -54,10 +51,9 @@ class WorkspaceImpl(Workspace):
 
     def notify(self, module):
         if isinstance(module, PerceptualAssociativeMemory):
-            state = module.__getstate__()
+            self.state = module.get_state()
+            self.csm.set_state(self.state)
             percept = None
-            if isinstance(state, NodeImpl):
-                percept = module.retrieve_association(state)
+            if isinstance(self.state, NodeImpl):
+                percept = module.retrieve_association(self.state)
             self.receive_percept(percept)
-        elif isinstance(module, CurrentSituationalModel):
-            self.notify_observers()

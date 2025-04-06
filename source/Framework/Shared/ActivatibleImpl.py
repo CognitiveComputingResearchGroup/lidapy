@@ -1,10 +1,10 @@
-from multiprocessing import Process, Value
+from multiprocessing import Value
 from threading import Thread
 
 from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.Framework.Strategies.LinearExciteStrategy import \
     LinearExciteStrategy
-from source.ModuleInitialization.DefaultLogger import getLogger
+from source.Module.Initialization.DefaultLogger import getLogger
 from source.Framework.Shared.Activatible import Activatible
 
 DECAY_DEFAULT_SLOPE = 0.1

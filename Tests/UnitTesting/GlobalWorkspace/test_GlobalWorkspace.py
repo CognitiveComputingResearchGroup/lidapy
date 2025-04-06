@@ -2,14 +2,12 @@
 #Pennsylvania State University, Course : SWENG481
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
-import unittest
 import time
 
 import pytest
 
 from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
-from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 
 """
 This generated test case will test the functions within the Global Workspace. These are to ensure each function is 

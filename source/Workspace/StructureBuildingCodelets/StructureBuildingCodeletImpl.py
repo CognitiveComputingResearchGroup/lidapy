@@ -1,4 +1,4 @@
-from source.ModuleInitialization.CodeletImpl import CodeletImpl
+from source.Framework.Tasks.CodeletImpl import CodeletImpl
 from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
     CurrentSituationalModelImpl
 from source.Workspace.StructureBuildingCodelets.StructureBuildingCodelet import \

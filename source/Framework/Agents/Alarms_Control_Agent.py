@@ -1,8 +1,9 @@
+import concurrent.futures
 import importlib
 import multiprocessing
 from importlib import util
-from multiprocessing import Process
 from threading import Thread
+from time import sleep
 from yaml import YAMLError, safe_load
 
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
@@ -47,42 +48,46 @@ class AlarmsControlAgent(Agent):
         # Environment thread
         self.environment_thread = Thread(target=self.environment.reset)
 
-        # Sensory memory process
-        self.sensory_memory_process = (
-            Process(target=self.sensory_memory.run_sensors,
-                    args=(self.sensory_memory,)))
+        # Sensory memory thread
+        self.sensory_memory_thread = (
+            Thread(target=self.sensory_memory.run_sensors))
 
-        # PAM process
-        self.pam_process = Process(target=self.pam.run, args=(self.pam,))
+        # PAM thread
+        self.pam_thread = Thread(target=self.pam.run)
 
-        # ProceduralMem process
-        self.procedural_memory_process = (
-            Process(target=self.procedural_memory.run,
-                    args=(
-                        self.procedural_memory, ["Avoid hole", "Find goal"])))
+        # ProceduralMem thread
+        self.procedural_memory_thread = (
+            Thread(target=self.procedural_memory.run,
+                   args=(["Avoid hole", "Find goal"],)))
 
-        # ActionSelection process
-        self.action_selection_process = (
-            Process(target=self.action_selection.run))
+        # ActionSelection thread
+        self.action_selection_thread = (
+            Thread(target=self.action_selection.run))
 
-        # SensoryMotorMem process
-        self.sensory_motor_mem_process = (
-            Process(target=self.sensory_motor_mem.run))
+        # SensoryMotorMem thread
+        self.sensory_motor_mem_thread = (
+            Thread(target=self.sensory_motor_mem.run))
+
+        self.threads = [
+            self.environment_thread,
+            self.sensory_memory_thread,
+            self.pam_thread,
+            self.procedural_memory_thread,
+            self.action_selection_thread,
+            self.sensory_motor_mem_thread
+        ]
 
     def run(self):
         multiprocessing.set_start_method("spawn")
-        self.environment_thread.start()
-        self.environment_thread.join()
-        self.sensory_memory_process.start()
-        self.sensory_memory_process.join()
-        self.pam_process.start()
-        self.pam_process.join()
-        self.procedural_memory_process.start()
-        self.procedural_memory_process.join()
-        """self.action_selection_process.start()
-        self.action_selection_process.join()"""
-        self.sensory_motor_mem_process.start()
-        self.sensory_motor_mem_process.join()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(self.start, self.threads)
+            executor.shutdown(wait=True)
+
+
+    def start(self, worker):
+        worker.start()
+        sleep(5)
+        worker.join()
 
     def notify(self, module):
         if isinstance(module, Environment):

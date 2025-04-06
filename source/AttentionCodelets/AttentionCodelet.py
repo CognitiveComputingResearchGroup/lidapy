@@ -1,5 +1,4 @@
-from source.ModuleInitialization.Codelet import Codelet
-from source.ModuleInitialization.ModuleInterface import Module
+from source.Framework.Tasks.Codelet import Codelet
 
 
 class AttentionCodelet(Codelet):

@@ -1,12 +1,11 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-import threading
 from time import sleep
 
 import gymnasium as gym
 from source.Environment.Environment import Environment
-from source.ModuleInitialization.DefaultLogger import getLogger
+from source.Module.Initialization.DefaultLogger import getLogger
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 
 """
@@ -25,7 +24,7 @@ class FrozenLake(Environment):
             'FrozenLake-v1',
             desc=None,
             is_slippery=False,
-            map_name="8x8",
+            map_name="Ux4",
             render_mode=render_mode)
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
@@ -40,9 +39,8 @@ class FrozenLake(Environment):
 
     # Reseting the environment to start a new episode
     def reset(self):
-        with threading.Lock():
-            # interacting with the environment by using Reset()
-            state, info = self.env.reset()
+        # interacting with the environment by using Reset()
+        state, info = self.env.reset()
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
         self.agent_stimuli = {"text": self.form_stimuli(surrounding_tiles)}
         self.state = {"state": state, "info": info, "done": False,
@@ -54,9 +52,8 @@ class FrozenLake(Environment):
 
     # perform an action in environment:
     def step(self, action):
-        with threading.Lock():
-            # perform and update
-            state, reward, done, truncated, info = self.env.step(action)
+        # perform and update
+        state, reward, done, truncated, info = self.env.step(action)
         self.steps += 1
         self.update_position(action)
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
@@ -95,7 +92,7 @@ class FrozenLake(Environment):
     def render(self):
         self.env.render()
 
-    def __getstate__(self):
+    def get_state(self):
         return self.state
 
     def get_stimuli(self):
@@ -111,7 +108,6 @@ class FrozenLake(Environment):
                 if not self.state["done"] and self.steps < 1000:
                     self.step(action)
                 else:
-                    self.reward += 1
                     self.close()
 
     def update_position(self, action):

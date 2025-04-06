@@ -6,7 +6,7 @@ from source.Environment.Environment import FrozenLakeEnvironment
 from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 
 """
-This provided PyTest is for an integration test of the Sensory Memory ModuleSubject:
+This provided PyTest is for an integration test of the Sensory Memory Module:
 It provides the specific integration test for:
     environment, procedural memory, PAM, and accepting modalities 
 As development continues these are subject to change or update as the module does. 

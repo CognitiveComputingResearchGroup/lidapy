@@ -1,11 +1,11 @@
 import time
-from threading import current_thread, main_thread
 from time import sleep
 
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
+from source.Framework.Tasks.TaskManager import TaskManager
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
-from source.ModuleInitialization.DefaultLogger import getLogger
+from source.Module.Initialization.DefaultLogger import getLogger
 from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
     CurrentSituationalModelImpl
 
@@ -22,6 +22,7 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.codeletRefractoryPeriod = DEFAULT_CODELET_REFRACTORY_PERIOD
         self.formed_coalition = None
         self.codelet_reinforcement = DEFAULT_CODELET_REINFORCEMENT
+        self.shutdown = False
         self.logger = getLogger(self.__class__.__name__).logger
         self.logger.debug("Initialized attention codelets")
 
@@ -43,18 +44,12 @@ class AttentionCodeletImpl(AttentionCodelet):
                 self.formed_coalition.setActivation(1.0)
                 self.logger.info("Coalition successfully formed.")
                 self.notify_observers()
-                sleep(30)
-                self.run_task()
+                while not self.shutdown:
+                    sleep(25)
+                    self.run_task()
             else:
                 while csm_content.getLinkCount() == 0:
                     time.sleep(10)
-                self.formed_coalition = CoalitionImpl()
-                self.formed_coalition.setContent(csm_content)
-                self.formed_coalition.setCreatingAttentionCodelet(self)
-                self.formed_coalition.setActivation(1.0)
-                self.logger.info("Coalition successfully formed.")
-                self.notify_observers()
-                sleep(30)
                 self.run_task()
 
     def set_refactory_period(self, ticks):

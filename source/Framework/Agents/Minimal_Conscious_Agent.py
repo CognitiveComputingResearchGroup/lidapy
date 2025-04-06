@@ -2,10 +2,8 @@ import concurrent.futures
 import importlib
 import multiprocessing
 from importlib import util
-from multiprocessing import Process
 from threading import Thread
 from time import sleep
-
 from yaml import YAMLError, safe_load
 
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
@@ -52,8 +50,8 @@ class MinimalConsciousAgent(Agent):
         self.sensory_memory.add_observer(self.csm)
         self.sensory_memory.add_observer(self.pam)
         self.sensory_memory.add_observer(self.sensory_motor_mem)
-        self.global_workspace.add_observer(self.procedural_memory)
         self.global_workspace.add_observer(self.pam)
+        self.global_workspace.add_observer(self.procedural_memory)
         self.global_workspace.add_observer(self.action_selection)
         self.global_workspace.add_observer(self.sensory_motor_mem)
         self.global_workspace.add_observer(self.attention_codelets)
@@ -79,15 +77,15 @@ class MinimalConsciousAgent(Agent):
         #Environment thread
         self.environment_thread = Thread(target=self.environment.reset)
 
-        # Sensory memory process
-        self.sensory_memory_process = (
+        # Sensory memory thread
+        self.sensory_memory_thread = (
             Thread(target=self.sensory_memory.run_sensors))
 
-        # PAM process
-        self.pam_process = Thread(target=self.pam.run)
+        # PAM thread
+        self.pam_thread = Thread(target=self.pam.run)
 
         # Workspace thread
-        self.workspace_process = Thread(target=self.workspace.run)
+        self.workspace_thread = Thread(target=self.workspace.run)
 
         # CSM thread
         self.csm_thread = Thread(target=self.csm.run_task)
@@ -96,71 +94,45 @@ class MinimalConsciousAgent(Agent):
         self.attention_codelets_thread = Thread(
             target=self.attention_codelets.start)
 
-        # GlobalWorkspace process
-        self.global_workspace_process = (
+        # GlobalWorkspace thread
+        self.global_workspace_thread = (
             Thread(target=self.global_workspace.run_task))
 
-        # ProceduralMem process
-        self.procedural_memory_process = (
+        # ProceduralMem thread
+        self.procedural_memory_thread = (
             Thread(target=self.procedural_memory.run,
                     args=(["Avoid hole", "Find goal"],)))
 
-        # ActionSelection process
-        self.action_selection_process = (
+        # ActionSelection thread
+        self.action_selection_thread = (
             Thread(target=self.action_selection.run))
 
-        # SensoryMotorMem process
-        self.sensory_motor_mem_process = (
+        # SensoryMotorMem thread
+        self.sensory_motor_mem_thread = (
             Thread(target=self.sensory_motor_mem.run))
 
-        """self.processes = [
-            self.sensory_memory_process,
-            self.pam_process,
-            self.workspace_process,
-            self.global_workspace_process,
-            self.procedural_memory_process,
-            self.action_selection_process,
-            self.sensory_motor_mem_process
-        ]"""
         self.threads = [
             self.environment_thread,
-            self.sensory_memory_process,
+            self.sensory_memory_thread,
             self.csm_thread,
             self.attention_codelets_thread,
-            self.pam_process,
-            self.workspace_process,
-            self.global_workspace_process,
-            self.procedural_memory_process,
-            self.action_selection_process,
-            self.sensory_motor_mem_process
+            self.pam_thread,
+            self.workspace_thread,
+            self.global_workspace_thread,
+            self.procedural_memory_thread,
+            self.action_selection_thread,
+            self.sensory_motor_mem_thread,
         ]
 
 
     def run(self):
-        multiprocessing.set_start_method("spawn")
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(self.start, self.threads)
+            executor.shutdown(wait=True, cancel_futures=False)
 
-        """self.environment_thread.start()
-        self.environment_thread.join()
-        self.sensory_memory_process.start()
-        self.sensory_memory_process.join()
-        self.pam_process.start()
-        self.pam_process.join()
-        self.csm_thread.start()
-        self.csm_thread.join()
-        self.workspace_process.start()
-        self.workspace_process.join()
-        self.attention_codelets_thread.start()
-        self.attention_codelets_thread.join()
-        self.global_workspace_process.start()
-        self.global_workspace_process.join()
-        self.procedural_memory_process.start()
-        self.procedural_memory_process.join()
-        self.action_selection_process.start()
-        self.action_selection_process.join()
-        self.sensory_motor_mem_process.start()
-        self.sensory_motor_mem_process.join()"""
+        if self.get_state()["done"]:
+            self.global_workspace.task_manager.set_shutdown(True)
+            self.attention_codelets.shutdown = True
 
     def start(self, worker):
         worker.start()

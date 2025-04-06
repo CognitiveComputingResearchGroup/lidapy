@@ -17,13 +17,6 @@ the Frozen Lake Environment and the Alarms Control Agent classes.
 def test_agent_integration():
     agent = AlarmsControlAgent()
 
-    agent.environment = FrozenLake()
-    agent.pam = PAMImpl()
-    agent.sensory_memory = SensoryMemoryImpl()
-    agent.procedural_memory = ProceduralMemoryImpl()
-    agent.action_selection = ActionSelectionImpl()
-    agent.sensory_motor_mem = SensoryMotorMemoryImpl()
-
     #Testing if the agent components are initialized
     assert agent.environment is not None
     assert agent.pam is not None
@@ -37,4 +30,10 @@ def test_agent_integration():
     assert agent.environment.get_stimuli() is not None
     assert agent.__getstate__()["done"] is True
     assert hasattr(agent.environment, 'action_space')
-    assert agent.procedural_memory #Checking to see if it initializes without error
+    # Checking to see if it initializes without error
+    assert isinstance(agent.pam, PAMImpl) is True
+    assert isinstance(agent.sensory_memory, SensoryMemoryImpl) is True
+    assert isinstance(agent.procedural_memory, ProceduralMemoryImpl) is True
+    assert isinstance(agent.action_selection, ActionSelectionImpl) is True
+    assert (isinstance(agent.sensory_motor_mem_thread, SensoryMotorMemoryImpl)
+            is True)

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from source.ModuleSubject.ModuleObservable import ModuleSubject
-from source.ModuleSubject.ModuleObserver import ModuleObserver
+from source.Module.ModuleSubject import ModuleSubject
+from source.Module.ModuleObserver import ModuleObserver
 
 
 class Module(ModuleObserver, ModuleSubject, ABC):

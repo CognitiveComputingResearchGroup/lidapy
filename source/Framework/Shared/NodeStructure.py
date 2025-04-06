@@ -1,4 +1,4 @@
-from source.ModuleInitialization.DefaultLogger import getLogger
+from source.Module.Initialization.DefaultLogger import getLogger
 
 
 class NodeStructure:

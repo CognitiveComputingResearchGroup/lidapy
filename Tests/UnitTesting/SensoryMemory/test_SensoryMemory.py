@@ -8,7 +8,7 @@ from source.SensoryMemory.SensoryMemory import SensoryMemory
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 
 """
-This provided PyTest is for the Sensory Memory ModuleSubject:
+This provided PyTest is for the Sensory Memory Module:
 It provides tests for the specific functions: 
 As development continues these are subject to change or update as the module does. 
 Test Cases: 

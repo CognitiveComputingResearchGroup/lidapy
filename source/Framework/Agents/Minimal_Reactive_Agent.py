@@ -1,8 +1,9 @@
+import concurrent.futures
 import importlib
 import multiprocessing
 from importlib import util
-from multiprocessing import Process
 from threading import Thread
+from time import sleep
 from yaml import YAMLError, safe_load
 
 from source.Environment.Environment import Environment
@@ -36,21 +37,28 @@ class MinimalReactiveAgent(Agent):
         self.environment_thread = Thread(target=self.environment.reset)
 
         # Sensory memory thread
-        self.sensory_memory_process = (
-            Process(target=self.sensory_memory.run_sensors))
+        self.sensory_memory_thread = (
+            Thread(target=self.sensory_memory.run_sensors))
 
-        # SensoryMotorMem process
-        self.sensory_motor_mem_process = (
-            Process(target=self.sensory_motor_mem.run))
+        # SensoryMotorMem thread
+        self.sensory_motor_mem_thread = (
+            Thread(target=self.sensory_motor_mem.run))
+
+        self.threads = [
+            self.environment_thread,
+            self.sensory_memory_thread,
+            self.sensory_motor_mem_thread
+        ]
 
     def run(self):
         multiprocessing.set_start_method("spawn")
-        self.environment_thread.start()
-        self.environment_thread.join()
-        self.sensory_memory_process.start()
-        self.sensory_motor_mem_process.join()
-        self.sensory_motor_mem_process.start()
-        self.sensory_motor_mem_process.join()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(self.start, self.threads)
+
+    def start(self, worker):
+        worker.start()
+        sleep(5)
+        worker.join()
 
     def notify(self, module):
         if isinstance(module, Environment):

@@ -1,10 +1,13 @@
-from source.ModuleInitialization.ModuleInterface import Module
+from abc import abstractmethod
+
+from source.Module.Initialization.ModuleInterface import Module
 
 
 class Environment(Module):
     def __init__(self):
         super().__init__()
 
+    @abstractmethod
     def notify(self, module):
         pass
 

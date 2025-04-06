@@ -8,7 +8,8 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
-from time import sleep
+from threading import Lock
+
 
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
@@ -30,7 +31,7 @@ class PAMImpl(PerceptualAssociativeMemory):
 
 
         """Create node for each cell the agent could visit"""
-        for cell in range(64):
+        for cell in range(16):
             node = NodeImpl()
             """Set the cell identifier to the corresponding state"""
             node.setId(cell)
@@ -38,10 +39,9 @@ class PAMImpl(PerceptualAssociativeMemory):
             self.memory.addNode_(node)
 
     def run(self):
-        while self.current_cell is None:
-            sleep(45)
+        pass
 
-    def __getstate__(self):
+    def get_state(self):
         return self.current_cell
 
     def get_stored_nodes(self):
@@ -59,14 +59,18 @@ class PAMImpl(PerceptualAssociativeMemory):
                                   f"forming associations")
                 self.learn(cue.getLinks())
         elif isinstance(module, GlobalWorkSpaceImpl):
-            winning_coalition = module.__getstate__()
+            winning_coalition = module.get_broadcast()
+            broadcast = winning_coalition.getContent()
+            self.logger.debug(
+                f"Received conscious broadcast: {broadcast}")
+            self.learn(broadcast.getConnectedSinks())
 
     def learn(self, cue):
         #Check all cells for the corresponding node
         for node in self.memory.getNodes():
             if (node.getActivation() is not None and
-                                            node.getActivation() >= 0.05):
-                node.decay(0.05)
+                                            node.getActivation() >= 0.01):
+                node.decay(0.01)
                 if node.isRemovable():
                     self.associations.remove(node)
             """If the result of the function to obtain the cell state 
@@ -86,6 +90,8 @@ class PAMImpl(PerceptualAssociativeMemory):
         self.form_associations(cue["cue"])
 
     def form_associations(self, cue):
+        lock = Lock()
+        lock.acquire(blocking=True)
         # Set links to surrounding cell nodes if none exist
         for link in cue:
             # Priming data for scheme instantiation
@@ -102,6 +108,8 @@ class PAMImpl(PerceptualAssociativeMemory):
                 link.setCategory(link.getCategory("id"), "hole")
                 link.setActivation(0.1)
 
+            link.setSource(self.current_cell)
+
             # Add links to surrounding cells
             if link not in self.associations.getLinks():
                 self.associations.addDefaultLink(self.current_cell, link,
@@ -109,4 +117,6 @@ class PAMImpl(PerceptualAssociativeMemory):
                                         "label": link.getCategory("label")},
                                             activation=link.getActivation(),
                                             removal_threshold=0.0)
+
+        lock.release()
         self.notify_observers()

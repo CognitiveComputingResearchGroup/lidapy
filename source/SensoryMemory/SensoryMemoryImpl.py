@@ -6,7 +6,7 @@ from time import sleep
 from source.Environment.Environment import Environment
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
-from source.ModuleInitialization.DefaultLogger import getLogger
+from source.Module.Initialization.DefaultLogger import getLogger
 from source.SensoryMemory.SensoryMemory import SensoryMemory
 
 
@@ -38,7 +38,7 @@ class SensoryMemoryImpl(SensoryMemory):
         if isinstance(module, Environment):
             self.stimuli = module.get_stimuli()
             self.position = module.get_position()
-            self.state = module.__getstate__()
+            self.state = module.get_state()
 
             #Initialize sensors
             for key, processor in self.processor_dict.items():
@@ -63,7 +63,7 @@ class SensoryMemoryImpl(SensoryMemory):
                             for link in sensory_cue.getLinks():
                                 self.links.append(link)
             self.logger.debug(f"Processed {len(self.links)} sensory cue(s)")
-            sleep(0.5)
+            sleep(1)
             self.notify_observers()
         else:
             self.logger.debug("Waiting for stimuli from the environment")

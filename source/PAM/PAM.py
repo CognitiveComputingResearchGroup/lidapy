@@ -10,8 +10,8 @@ Output: Local Associations, passed to others
 """
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
-from source.ModuleInitialization.DefaultLogger import getLogger
-from source.ModuleInitialization.ModuleInterface import Module
+from source.Module.Initialization.DefaultLogger import getLogger
+from source.Module.Initialization.ModuleInterface import Module
 
 
 class PerceptualAssociativeMemory(Module):

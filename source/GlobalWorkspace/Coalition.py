@@ -1,7 +1,5 @@
-import threading
-
 from source.Framework.Shared.Activatible import Activatible
-from source.ModuleInitialization.ModuleInterface import Module
+from source.Module.Initialization.ModuleInterface import Module
 
 
 class Coalition(Module, Activatible):

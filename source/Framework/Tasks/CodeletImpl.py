@@ -1,5 +1,5 @@
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
-from source.ModuleInitialization.Codelet import Codelet
+from source.Framework.Tasks.Codelet import Codelet
 
 
 class CodeletImpl(Codelet):

@@ -14,7 +14,7 @@ from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.LinkImpl import LinkImpl
 
 """
-This provided PyTest is for the Procedural Memory ModuleSubject:
+This provided PyTest is for the Procedural Memory Module:
 It provides tests for the specific functions: add_scheme, get_action
 As development continues these are subject to change or update as the module does. 
 Test Cases: 

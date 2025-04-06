@@ -1,7 +1,7 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-from source.ModuleInitialization.ModuleInterface import Module
+from source.Module.Initialization.ModuleInterface import Module
 
 
 """

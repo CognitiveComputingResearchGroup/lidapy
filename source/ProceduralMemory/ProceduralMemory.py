@@ -1,10 +1,9 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-from time import sleep
 
-from source.ModuleInitialization.DefaultLogger import getLogger
-from source.ModuleInitialization.ModuleInterface import Module
+from source.Module.Initialization.DefaultLogger import getLogger
+from source.Module.Initialization.ModuleInterface import Module
 
 
 class ProceduralMemory(Module):
@@ -17,13 +16,16 @@ class ProceduralMemory(Module):
 
     def run(self, scheme):
         self.scheme = scheme
-        while self.state is None:
-            sleep(45)
 
     def add_scheme(self, state, percept):
         if not self.schemes or state not in self.schemes:
             self.schemes[state] = []  # add new scheme to memory
         self.schemes[state].append(percept)
+
+    def add_scheme_(self, state, percept, schemes):
+        if not schemes or state not in schemes:
+            schemes[state] = []  # add new scheme to memory
+        schemes[state].append(percept)
 
     def receive_broadcast(self, coalition):
         self.logger.debug(f"Received broadcast coalition {coalition}")
@@ -38,7 +40,11 @@ class ProceduralMemory(Module):
         if self.schemes and state in self.schemes:
             return self.schemes[state]
 
-    def __getstate__(self):
+    def get_schemes_(self, state, schemes):
+        if schemes and state in schemes:
+            return schemes[state]
+
+    def get_state(self):
         return self.state
 
     def notify(self, module):
