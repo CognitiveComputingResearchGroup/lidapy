@@ -19,3 +19,6 @@ def audio_processing(audio):
 
 def video_processing(video):
     pass
+
+def internal_state_processing(internal_state):
+    pass

@@ -1,6 +1,8 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
+import sys
+from threading import Lock
 from time import sleep
 
 import gymnasium as gym
@@ -26,6 +28,7 @@ class FrozenLake(Environment):
             is_slippery=False,
             map_name="4x4",
             render_mode=render_mode)
+
         self.action_space = self.env.action_space  # action_space attribute
         self.state = None
         self.row = 0
@@ -47,7 +50,7 @@ class FrozenLake(Environment):
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                          f"done: False")
-        sleep(0.3)
+        sleep(0.5)
         self.notify_observers()
 
     # perform an action in environment:
@@ -68,7 +71,7 @@ class FrozenLake(Environment):
     def recursive_step(self, action_plan):
         if action_plan is not None:
             for action in action_plan:
-                if not self.state["done"] and self.steps < 1000:
+                if not self.state["done"] and self.steps < 100:
                     state, reward, done, truncated, info = self.env.step(
                         action)
                     sleep(0.5)
@@ -99,6 +102,13 @@ class FrozenLake(Environment):
         return self.agent_stimuli
 
     def notify(self, module):
+        user_in = input("Press (Q) or (q) to quit: ")
+        lock = Lock()
+        lock.acquire()
+        if user_in.lower() == 'q':
+            self.done = True
+            sys.exit(0)
+        lock.release()
         if isinstance(module, SensoryMotorMemory):
             action = module.send_action_event()
             if len(module.send_action_execution_command()) > 1:

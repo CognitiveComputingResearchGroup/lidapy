@@ -107,6 +107,8 @@ class PAMImpl(PerceptualAssociativeMemory):
             elif link.getCategory("label") == 'H':
                 link.setCategory(link.getCategory("id"), "hole")
                 link.setActivation(0.1)
+            else:
+                link.setActivation(1.0)
 
             link.setSource(self.current_cell)
 

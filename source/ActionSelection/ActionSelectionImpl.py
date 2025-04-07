@@ -1,12 +1,10 @@
 import random
 from time import sleep
 
-from numpy import broadcast
 
 from source.ActionSelection.ActionSelection import ActionSelection
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.Module.Initialization.DefaultLogger import getLogger
-from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 
 

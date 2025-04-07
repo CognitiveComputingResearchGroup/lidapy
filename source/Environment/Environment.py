@@ -6,6 +6,7 @@ from source.Module.Initialization.ModuleInterface import Module
 class Environment(Module):
     def __init__(self):
         super().__init__()
+        self.args = None
 
     @abstractmethod
     def notify(self, module):

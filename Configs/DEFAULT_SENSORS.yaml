@@ -10,3 +10,6 @@
 - modality: video
   name: video
   processor: video_processing
+- modality: internal_state
+  name: internal_state
+  processor: internal_state_processing

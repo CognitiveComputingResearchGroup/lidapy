@@ -1,35 +1,33 @@
 from yaml import load, dump
 
 module_locations = {
-    "godot_client" :
+    "GodotEnvironment" :
         r"C:\Users\brian\Documents\Fall 2024\SWENG 480\lidapy"
-        r"\source\Godot_command_line\Godot_client.py",
-    "godot_subscriber" :
+        r"\source\Environment\GodotEnvironment.py",
+    "FrozenLakeEnvironment" :
         r"C:\Users\brian\Documents\Fall 2024\SWENG 480\lidapy"
-        r"\source\Godot_command_line\Godot_subscriber.py",
+        r"\source\Environment\FrozenLakeEnvironment.py",
     "Sensors" :
         r'C:\Users\brian\Documents\Fall 2024\SWENG 480\lidapy'
         r'\Configs\Sensors.py'
 }
-DEFAULT_PROCESSORS = {"text": "_process_text",
-                    "image": "_process_image",
-                    "audio": "_process_audio",
-                    "touch": "_process_touch",
-                    "internal_state": "_process_internal_state",
+DEFAULT_PROCESSORS = {"text": "text_processing",
+                    "image": "image_processing",
+                    "audio": "audio_processing",
+                    "video": "video_processing",
+                    "internal_state": "internal_state_processing",
                     }
 
 DEFAULT_SENSORS = [{"name": "text", "modality": "text", "processor":
-                                                            "_process_text"},
+                                                            "text_processing"},
                     {"name": "image", "modality": "image", "processor":
-                                                            "_process_image"},
+                                                            "image_processing"},
                     {"name": "audio", "modality": "audio", "processor":
-                                                            "_process_audio"},
-                    {"name": "touch", "modality": "touch", "processor":
-                                                            "_process_touch"},
-                    {"name": "visual2", "modality": "image", "processor":
-                                                            "_process_image"},
+                                                            "audio_processing"},
+                    {"name": "video", "modality": "video", "processor":
+                                                            "video_processing"},
                     {"name": "internal_state", "modality": "internal_state",
-                                      "processor": "_process_internal_state"},
+                                      "processor": "internal_state_processing"},
                    ]
 
 with open("module_locations.yaml", "w", encoding="utf8") as yaml_file:

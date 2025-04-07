@@ -34,16 +34,21 @@ class SensoryMemoryImpl(SensoryMemory):
         self.logger.debug(f"Initialized SensoryMemory with "
                           f"{len(self.processors)} sensor processors")
 
+    def start(self):
+        # Initialize sensors
+        for key, processor in self.processor_dict.items():
+            self.processors[key] = getattr(self.sensor, processor)
+
     def notify(self, module):
         if isinstance(module, Environment):
             self.stimuli = module.get_stimuli()
             self.position = module.get_position()
             self.state = module.get_state()
 
-            #Initialize sensors
-            for key, processor in self.processor_dict.items():
-                self.processors[key] = getattr(self.sensor, processor)
-            self.run_sensors()
+        # Initialize sensors
+        for key, processor in self.processor_dict.items():
+            self.processors[key] = getattr(self.sensor, processor)
+        self.run_sensors()
 
     def run_sensors(self):
         """All sensors associated will run with the memory"""
@@ -63,7 +68,7 @@ class SensoryMemoryImpl(SensoryMemory):
                             for link in sensory_cue.getLinks():
                                 self.links.append(link)
             self.logger.debug(f"Processed {len(self.links)} sensory cue(s)")
-            sleep(1)
+            sleep(0.5)
             self.notify_observers()
         else:
             self.logger.debug("Waiting for stimuli from the environment")

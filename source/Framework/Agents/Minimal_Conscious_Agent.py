@@ -1,6 +1,7 @@
 import concurrent.futures
 import importlib
 import multiprocessing
+import sys
 from importlib import util
 from threading import Thread
 from time import sleep
@@ -25,12 +26,13 @@ from source.Workspace.WorkspaceImpl import WorkspaceImpl
 class MinimalConsciousAgent(Agent):
     def __init__(self):
         super().__init__()
+        self.environment_type = None
 
         #Agent modules
+        self.environment = None
         self.global_workspace = GlobalWorkSpaceImpl()
         self.csm = CurrentSituationalModelImpl()
         self.attention_codelets = AttentionCodeletImpl()
-        self.environment = FrozenLake()
         self.sensory_motor_mem = SensoryMotorMemoryImpl()
         self.action_selection = ActionSelectionImpl()
         self.procedural_memory = ProceduralMemoryImpl()
@@ -39,9 +41,7 @@ class MinimalConsciousAgent(Agent):
         self.sensory_memory = SensoryMemoryImpl()
 
         #Module observers
-        self.sensory_motor_mem.add_observer(self.environment)
         self.action_selection.add_observer(self.sensory_motor_mem)
-        self.environment.add_observer(self.sensory_memory)
         self.attention_codelets.add_observer(self.csm)
         self.pam.add_observer(self.procedural_memory)
         self.pam.add_observer(self.workspace)
@@ -62,7 +62,7 @@ class MinimalConsciousAgent(Agent):
 
         #Sensory Memory Sensors
         self.sensory_memory.sensor_dict = self.get_agent_sensors()
-        self.sensory_memory.sensor = self.load_sensors_from_file("Sensors")
+        self.sensory_memory.sensor = self.load_from_file("Sensors")
         self.sensory_memory.processor_dict = self.get_agent_processors()
 
         #Add workspace csm
@@ -75,11 +75,11 @@ class MinimalConsciousAgent(Agent):
         self.procedural_memory.scheme = ["Avoid hole", "Find goal"]
 
         #Environment thread
-        self.environment_thread = Thread(target=self.environment.reset)
+        self.environment_thread = None
 
         # Sensory memory thread
         self.sensory_memory_thread = (
-            Thread(target=self.sensory_memory.run_sensors))
+            Thread(target=self.sensory_memory.start))
 
         # PAM thread
         self.pam_thread = Thread(target=self.pam.run)
@@ -112,7 +112,6 @@ class MinimalConsciousAgent(Agent):
             Thread(target=self.sensory_motor_mem.run))
 
         self.threads = [
-            self.environment_thread,
             self.sensory_memory_thread,
             self.csm_thread,
             self.attention_codelets_thread,
@@ -126,6 +125,18 @@ class MinimalConsciousAgent(Agent):
 
 
     def run(self):
+        #Initialize environment dynamically
+        self.environment = self.load_from_file(self.environment_type)
+        if self.environment_type == "FrozenLakeEnvironment":
+            self.environment_type = "FrozenLake"
+
+        self.environment = self.environment.__getattribute__(
+                                                    self.environment_type)()
+        self.environment.add_observer(self.sensory_memory)
+        self.sensory_motor_mem.add_observer(self.environment)
+        self.environment_thread = Thread(target=self.environment.reset)
+        self.threads.append(self.environment_thread)
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(self.start, self.threads)
             executor.shutdown(wait=True, cancel_futures=False)
@@ -133,6 +144,7 @@ class MinimalConsciousAgent(Agent):
         if self.get_state()["done"]:
             self.global_workspace.task_manager.set_shutdown(True)
             self.attention_codelets.shutdown = True
+            sys.exit(0)
 
     def start(self, worker):
         worker.start()
@@ -143,7 +155,7 @@ class MinimalConsciousAgent(Agent):
         if isinstance(module, Environment):
             stimuli = module.get_stimuli()
 
-    def load_sensors_from_file(self, type):
+    def load_from_file(self, type):
         with open(
                 r'C:\Users\brian\Documents\Fall 2024\SWENG 480\lidapy'
                 r'\Configs\module_locations.yaml', 'r') as yaml_file:
