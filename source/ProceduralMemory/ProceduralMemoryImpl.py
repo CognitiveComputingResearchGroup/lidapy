@@ -92,8 +92,8 @@ class ProceduralMemoryImpl(ProceduralMemory):
                 percepts.append(link.getCategory("label"))
 
         values_to_match = len(self.scheme)
-        """if not "goal" in percepts:
-            values_to_match = 1"""
+        if not "goal" in percepts:
+            values_to_match = 1
 
         """Match the percept to a scheme based on string similarity"""
         if isinstance(self.scheme, list):
@@ -105,23 +105,6 @@ class ProceduralMemoryImpl(ProceduralMemory):
             closest_match = difflib.get_close_matches(self.scheme,
                                                           percepts,
                                                           n=values_to_match)
-        """if isinstance(closest_match, list):
-            for match in closest_match:
-                if len(match) == 0:
-                    found_matches = False
-                else:
-                    found_matches = True
-
-        if not found_matches:
-            if isinstance(self.scheme, list):
-                for scheme in self.scheme:
-                    for percept in percepts:
-                        if percept in scheme:
-                            closest_match.append(percept)
-            else:
-                for percept in percepts:
-                    if percept in self.scheme:
-                        closest_match.append(percept)"""
 
         ""'Get the corresponding schemes'
         for link in links:
