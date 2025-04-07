@@ -10,6 +10,9 @@ Test Cases: TC-051
 
 def test_agent_integration():
     agent = AlarmsControlAgent()
+    agent.environment_type = "FrozenLakeEnvironment"
+
+    agent.run()
 
     #Testing if the agent components are initialized
     assert agent.environment is not None

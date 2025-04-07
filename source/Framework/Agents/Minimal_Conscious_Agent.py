@@ -1,6 +1,5 @@
 import concurrent.futures
 import importlib
-import multiprocessing
 import sys
 from importlib import util
 from threading import Thread
@@ -10,7 +9,6 @@ from yaml import YAMLError, safe_load
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.AttentionCodelets.AttentionCodeletImpl import AttentionCodeletImpl
 from source.Environment.Environment import Environment
-from source.Environment.FrozenLakeEnvironment import FrozenLake
 from source.Framework.Agents.Agent import Agent
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.PAM.PAM_Impl import PAMImpl
@@ -196,5 +194,5 @@ class MinimalConsciousAgent(Agent):
                 print(exc)
         return DEFAULT_PROCESSORS
 
-    def __getstate__(self):
-        return self.environment.__getstate__()
+    def get_state(self):
+        return self.environment.get_state()

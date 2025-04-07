@@ -8,7 +8,7 @@ from source.Framework import Initialization
 from source.Framework import Shared
 from source.Framework import Strategies
 from source import GlobalWorkspace
-from source import ModuleInitialization
+from source import Module
 from source import PAM
 from source import ProceduralMemory
 from source import SensoryMemory

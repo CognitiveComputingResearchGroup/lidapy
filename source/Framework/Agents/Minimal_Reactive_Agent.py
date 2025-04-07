@@ -119,5 +119,5 @@ class MinimalReactiveAgent(Agent):
                 print(exc)
         return DEFAULT_PROCESSORS
 
-    def __getstate__(self):
-        return self.environment.get_stimuli()
+    def get_state(self):
+        return self.environment.get_state()

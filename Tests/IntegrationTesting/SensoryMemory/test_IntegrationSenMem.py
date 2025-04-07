@@ -1,9 +1,12 @@
 import pytest
 
+from source.PAM.PAM_Impl import PAMImpl
+from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 from source.SensoryMemory.SensoryMemory import SensoryMemory
 from source.PAM.PAM import PerceptualAssociativeMemory
-from source.Environment.Environment import FrozenLakeEnvironment
+from source.Environment.FrozenLakeEnvironment import FrozenLake
 from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 
 """
 This provided PyTest is for an integration test of the Sensory Memory Module:
@@ -16,10 +19,10 @@ Test Cases: TC-047, TC-048, TC-049 and TC-050.
 @pytest.fixture
 def setup_environment():
     #Fixtures that need to be initialized
-    environment = FrozenLakeEnvironment()
-    pam = PerceptualAssociativeMemory()
-    procedural_memory = ProceduralMemory()
-    sensory_memory = SensoryMemory(environment, pam)
+    environment = FrozenLake()
+    pam = PAMImpl()
+    procedural_memory = ProceduralMemoryImpl()
+    sensory_memory = SensoryMemoryImpl()
     return sensory_memory, procedural_memory, pam, environment
 
 def test_run_sensors(setup_environment):
@@ -31,7 +34,7 @@ def test_run_sensors(setup_environment):
     """
     sensory_memory, procedural_memory, pam, environment = setup_environment
 
-    state, percept, action, env, col, row = sensory_memory.run_sensors(procedural_memory, state_id=0)
+    state, percept, action, env, col, row = sensory_memory.run_sensors()
 
     #Assertions
     assert state is not None

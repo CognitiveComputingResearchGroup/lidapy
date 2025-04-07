@@ -1,6 +1,5 @@
 import concurrent.futures
 import importlib
-import multiprocessing
 import sys
 from importlib import util
 from threading import Thread
@@ -146,5 +145,5 @@ class AlarmsControlAgent(Agent):
                 print(exc)
         return DEFAULT_PROCESSORS
 
-    def __getstate__(self):
-        return self.environment.__getstate__()
+    def get_state(self):
+        return self.environment.get_state()
