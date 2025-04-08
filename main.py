@@ -3,15 +3,18 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 import argparse
+import importlib
+import os
 import sys
+from importlib import util
 
-
-from source.Framework.Initialization.ConcreteAgentFactory import \
+from Configs import Config
+from Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
 
 DEFAULT_AGENT_ID = 3
 DEFAULT_AGENT_TYPE = "AlarmsControlAgent"
-DEFAULT_AGENT_ENVIRONMENT = "GodotEnvironment"
+DEFAULT_AGENT_ENVIRONMENT = "FrozenLakeEnvironment"
 
 
 def parse_args():
@@ -30,6 +33,20 @@ def parse_args():
                         f'{DEFAULT_AGENT_ENVIRONMENT})')
     return parser.parse_args()
 
+def load_from_module(module):
+    proj_path = os.path.dirname(os.path.abspath("Configs"))
+    path = Config.module_locations[module]
+    full_path = proj_path + path
+
+    # Name the module
+    module_name = module
+
+    # Load the module dynamically
+    spec = importlib.util.spec_from_file_location(module_name, full_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
 if __name__ == "__main__":
     # Create agent factory
     agent_factory = ConcreteAgentFactory()
@@ -40,7 +57,8 @@ if __name__ == "__main__":
         else:
             agent = agent_factory.get_agent(args.id) # Initialize agent
 
-        agent.environment_type = args.environment
+        module = load_from_module(args.environment)
+        agent.environment = module.__getattribute__(args.environment)()
 
         # Start the agent
         try:

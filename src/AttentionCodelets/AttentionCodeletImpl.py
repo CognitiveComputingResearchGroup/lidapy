@@ -1,12 +1,11 @@
 import time
 from time import sleep
 
-from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
-from source.Framework.Tasks.TaskManager import TaskManager
-from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
-from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
-from source.Module.Initialization.DefaultLogger import getLogger
-from source.Workspace.CurrentSituationModel.CurrentSituationModelImpl import \
+from AttentionCodelets.AttentionCodelet import AttentionCodelet
+from GlobalWorkspace.CoalitionImpl import CoalitionImpl
+from GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
+from Module.Initialization.DefaultLogger import getLogger
+from Workspace.CurrentSituationalModel.CurrentSituationalModelImpl import \
     CurrentSituationalModelImpl
 
 DEFAULT_CODELET_REFRACTORY_PERIOD = 50

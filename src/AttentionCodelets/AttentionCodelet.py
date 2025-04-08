@@ -1,4 +1,4 @@
-from source.Framework.Tasks.Codelet import Codelet
+from Framework.Tasks.Codelet import Codelet
 
 
 class AttentionCodelet(Codelet):

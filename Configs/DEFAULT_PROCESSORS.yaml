@@ -1,5 +1,0 @@
-audio: audio_processing
-image: image_processing
-internal_state: internal_state_processing
-text: text_processing
-video: video_processing

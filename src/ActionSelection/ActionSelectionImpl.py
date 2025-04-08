@@ -2,10 +2,10 @@ import random
 from time import sleep
 
 
-from source.ActionSelection.ActionSelection import ActionSelection
-from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
-from source.Module.Initialization.DefaultLogger import getLogger
-from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
+from ActionSelection.ActionSelection import ActionSelection
+from GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
+from Module.Initialization.DefaultLogger import getLogger
+from ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 
 
 class ActionSelectionImpl(ActionSelection):
