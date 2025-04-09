@@ -8,8 +8,8 @@ import os
 import sys
 from importlib import util
 
-from Configs import Config
-from Framework.Initialization.ConcreteAgentFactory import \
+from Configurations import Config
+from source.Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
 
 DEFAULT_AGENT_ID = 3
@@ -33,13 +33,13 @@ def parse_args():
                         f'{DEFAULT_AGENT_ENVIRONMENT})')
     return parser.parse_args()
 
-def load_from_module(module):
-    proj_path = os.path.dirname(os.path.abspath("Configs"))
-    path = Config.module_locations[module]
+def load_from_module(module_name):
+    proj_path = os.path.dirname(os.path.abspath("lidapy"))
+    path = Config.module_locations[module_name]
     full_path = proj_path + path
 
     # Name the module
-    module_name = module
+    module_name = module_name
 
     # Load the module dynamically
     spec = importlib.util.spec_from_file_location(module_name, full_path)

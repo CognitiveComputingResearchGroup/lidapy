@@ -1,5 +1,5 @@
-from Framework.Shared.LinkImpl import LinkImpl
-from Framework.Shared.NodeStructureImpl import NodeStructureImpl
+from source.Framework.Shared.LinkImpl import LinkImpl
+from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 
 
 def text_processing(text):
