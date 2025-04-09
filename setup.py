@@ -152,6 +152,6 @@ setup(
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
         "Bug Reports": "https://pypi.org/project/lidapy/0.1.5/",
-        "Source": "https://github.com/CognitiveComputingResearchGroup/lidapy/",
+        "source": "https://github.com/CognitiveComputingResearchGroup/lidapy/",
     },
 )
