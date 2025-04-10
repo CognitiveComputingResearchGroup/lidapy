@@ -49,7 +49,7 @@ class FrozenLakeEnvironment(Environment):
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                          f"done: False")
-        sleep(0.3)
+        sleep(0.5)
         self.notify_observers()
 
     # perform an action in environment:
@@ -64,7 +64,7 @@ class FrozenLakeEnvironment(Environment):
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                           f"done: {done}, " + f"action: {action}")
-        sleep(0.3)
+        #sleep(0.5)
         self.notify_observers()
 
     def recursive_step(self, action_plan):
@@ -76,9 +76,8 @@ class FrozenLakeEnvironment(Environment):
                     sleep(0.5)
                     self.steps += 1
                     self.update_position(action)
-                    surrounding_tiles = self.get_surrounding_tiles(
-                        self.row,
-                        self.col)
+                    surrounding_tiles = self.get_surrounding_tiles(self.row,
+                                                                    self.col)
                     self.agent_stimuli = {
                         "text": self.form_stimuli(surrounding_tiles)}
                     self.state = {"state": state, "info": info,
@@ -156,4 +155,3 @@ class FrozenLakeEnvironment(Environment):
     # close the environment:
     def close(self):
         self.env.close()
-        self.render()

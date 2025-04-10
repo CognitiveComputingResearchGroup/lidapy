@@ -52,8 +52,6 @@ class WorkspaceImpl(Workspace):
     def notify(self, module):
         if isinstance(module, PerceptualAssociativeMemory):
             self.state = module.get_state()
-            self.csm.set_state(self.state)
-            percept = None
-            if isinstance(self.state, NodeImpl):
-                percept = module.retrieve_association(self.state)
+            percept = module.retrieve_association(self.state)
+            self.logger.debug(f"Received new percept")
             self.receive_percept(percept)

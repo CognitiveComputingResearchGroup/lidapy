@@ -12,7 +12,7 @@ class ActionSelection(Module):
     def get_action(self):
         pass
 
-    def select_action(self, percept):
+    def select_action_plan(self, percept):
         pass
 
     def notify(self, module):

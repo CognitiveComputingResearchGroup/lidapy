@@ -1,3 +1,5 @@
+from time import sleep
+
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.Module.Initialization.DefaultLogger import getLogger
@@ -20,16 +22,12 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
 
     def addBufferContent(self, workspace_content):
         self.node_structure.mergeWith(workspace_content)
-        #self.notify_observers()
 
     def getBufferContent(self):
         return self.node_structure
 
     def get_state(self):
         return self.state
-
-    def set_state(self, state):
-        self.state = state
 
     def decayModule(self, time):
         self.node_structure.decayNodeStructure(time)
@@ -46,7 +44,11 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
 
     def notify(self, module):
         if isinstance(module, SensoryMemory):
-            link_list = module.get_sensory_content()
+            cue = module.get_sensory_content()
+            link_list = cue["cue"]
+            """State here is a Frozen Lake state variable"""
+            #TODO Change it to a general state for other environments
+            self.state = cue["params"]["state"]["state"]
             stream = NodeStructureImpl()
             for link in link_list:
                 stream.addDefaultLink__(link)
@@ -54,5 +56,6 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
                               f"stream")
             self.receiveVentralStream(stream)
         elif isinstance(module, AttentionCodelet):
+            coalition = module.getModuleContent()
             self.logger.debug(f"Received new coalition")
-            self.receiveCoalition(module.getModuleContent())
+            self.receiveCoalition(coalition)

@@ -63,7 +63,6 @@ if __name__ == "__main__":
         # Start the agent
         try:
             agent.run()
-            sys.exit(0)
         except Exception as e:
             print(e)
     except Exception as e:

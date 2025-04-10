@@ -3,6 +3,7 @@ from time import sleep
 
 
 from source.ActionSelection.ActionSelection import ActionSelection
+from source.Framework.Shared.NodeImpl import NodeImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
@@ -20,62 +21,83 @@ class ActionSelectionImpl(ActionSelection):
     def run(self):
         self.logger.debug(f"Initialized ActionSelection")
 
+    def add_behavior(self, state, behavior):
+        if not self.behaviors or state not in self.behaviors:
+            self.behaviors[state] = []  # add new scheme to memory
+        self.behaviors[state].append(behavior)
+
+    def remove_behavior(self, state, behavior):
+        if self.behaviors and state in self.behaviors:
+            self.behaviors[state].remove(behavior)
+
     def get_action(self):
         return self.action
 
-    def select_action(self, percept):
-        if self.behaviors and percept in self.behaviors:
-            return self.behaviors[percept]
+    def get_behaviors(self, state):
+        if self.behaviors and state in self.behaviors:
+            return self.behaviors[state]
+
+    def select_action_plan(self, state):
+        if self.behaviors and state in self.behaviors:
+            return self.behaviors[state]
         # return corresponding action(s) or None if not found
 
     def notify(self, module):
         if isinstance(module, ProceduralMemoryImpl):
             state = module.get_state()
             self.state = state
-            if (module.get_schemes_(state, module.near_goal_schemes) is not
-                    None and len(
-                        module.get_schemes_(state, module.near_goal_schemes))
-                    > 0):
-                schemes = module.get_schemes_(state, module.near_goal_schemes)
-            else:
-                schemes = module.get_schemes(state)
+            schemes = module.get_schemes(state)
             action = None
-
-            for scheme in schemes:
-                self.behaviors[scheme.getCategory("label")] = (
-                    scheme.getCategory("id"))
 
             random_index = random.randint(0, len(schemes) - 1)
             while schemes[random_index].getActivation() <= 0.5:
                 random_index = random.randint(0, len(schemes) - 1)
 
-            self.action = module.get_action(state, schemes[random_index])
+            self.add_behavior(state,
+        {schemes[random_index].getCategory("label") :
+                schemes[random_index].getCategory("id")})
 
-            if self.action is not None:
+            schemes[random_index].decay(0.01)
+            if schemes[random_index].isRemovable():
+                module.schemes.remove(schemes[random_index])
+            else:
+                self.action = module.get_action(state, schemes[random_index])
+
+            if self.behaviors is not None:
                 self.logger.debug(
-                    f"Action plan retrieved from instantiated "
-                    f"schemes")
-                sleep(0.2)
+                    f"Behaviors retrieved from instantiated schemes")
                 self.notify_observers()
             else:
-                self.logger.debug("No action found plan for the selected "
-                                  "scheme")
+                self.logger.debug("No behaviors found for the selected scheme")
 
         elif isinstance(module, GlobalWorkSpaceImpl):
             winning_coalition = module.get_broadcast()
-            broadcast = winning_coalition.get_broadcast()
+            broadcast = winning_coalition.getContent()
             self.logger.debug(f"Received conscious broadcast: {broadcast}")
-            self.update_behaviors(broadcast.getConnectedSinks(self.state))
+            """Get the nodes that have been previously visited and update
+            the connected sink links"""
+            links = []
+            for link in broadcast.getLinks():
+                source = link.getSource()
+                if isinstance(source, NodeImpl):
+                    if link.getSource().getActivation() < 1:
+                        links.append(link)
+            if len(links) == 0:
+                source = broadcast.containsNode()
+                links = broadcast.getConnectedSinks(source)
+            self.update_behaviors(links)
 
 
     def update_behaviors(self, broadcast):
-        links = broadcast.get_links()
-        for link in links:
-            if link.getAction() >= 0.5:
-                if self.behaviors[link.getCategory("label")] is not None:
-                    #If the link exists in current behaviors, update behavior
-                    if (link.getSource() ==
-                        self.behaviors[link.getCategory("label")].getSource()):
-                            self.behaviors[link.getCategory("label"
-                                                            )] = link
+        for link in broadcast:
+            if link.getCategory("label") != "hole":
+                self.add_behavior(link.getSource(), {
+                    link.getCategory("label"): link.getCategory("id")})
+            behaviors = self.get_behaviors(link.getSource())
+            if behaviors is not None:
+                for behavior in behaviors:
+                    for key, value in behavior.items():
+                        if key == "hole":
+                            self.remove_behavior(link.getSource(), behavior)
+
         self.logger.debug("Updated instantiated behaviors")

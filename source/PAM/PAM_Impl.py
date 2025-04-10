@@ -63,7 +63,19 @@ class PAMImpl(PerceptualAssociativeMemory):
             broadcast = winning_coalition.getContent()
             self.logger.debug(
                 f"Received conscious broadcast: {broadcast}")
-            self.learn(broadcast.getConnectedSinks())
+
+            """Get the nodes that have been previously visited and update
+                        the connected sink links"""
+            links = []
+            for link in broadcast.getLinks():
+                source = link.getSource()
+                if isinstance(source, NodeImpl):
+                    if link.getSource().getActivation() < 1:
+                        links.append(link)
+            if len(links) == 0:
+                source = broadcast.containsNode()
+                links = broadcast.getConnectedSinks(source)
+            self.learn(links)
 
     def learn(self, cue):
         #Check all cells for the corresponding node
@@ -87,7 +99,10 @@ class PAMImpl(PerceptualAssociativeMemory):
                 i.e agent recognizing position within environment"""
                 self.current_cell = node
                 self.add_association(self.current_cell)
-        self.form_associations(cue["cue"])
+        if isinstance(cue, list):
+            self.form_associations(cue)
+        else:
+            self.form_associations(cue["cue"])
 
     def form_associations(self, cue):
         # Set links to surrounding cell nodes if none exist
@@ -117,4 +132,5 @@ class PAMImpl(PerceptualAssociativeMemory):
                                         "label": link.getCategory("label")},
                                             activation=link.getActivation(),
                                             removal_threshold=0.0)
+
         self.notify_observers()

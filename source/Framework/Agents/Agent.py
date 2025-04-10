@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from Module.Initialization.ModuleInterface import Module
+from source.Module.Initialization.ModuleInterface import Module
 
 class Agent(Module, ABC):
 

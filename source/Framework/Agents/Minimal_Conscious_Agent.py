@@ -8,6 +8,7 @@ from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.AttentionCodelets.AttentionCodeletImpl import AttentionCodeletImpl
 from source.Environment.Environment import Environment
 from source.Framework.Agents.Agent import Agent
+from source.Framework.Tasks.TaskManager import TaskManager
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.PAM.PAM_Impl import PAMImpl
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
@@ -107,6 +108,8 @@ class MinimalConsciousAgent(Agent):
         self.sensory_motor_mem_thread = (
             Thread(target=self.sensory_motor_mem.run))
 
+        self.shutdown_thread = Thread(target=self.shutdown)
+
         self.threads = [
             self.sensory_memory_thread,
             self.csm_thread,
@@ -117,6 +120,7 @@ class MinimalConsciousAgent(Agent):
             self.procedural_memory_thread,
             self.action_selection_thread,
             self.sensory_motor_mem_thread,
+            self.shutdown_thread
         ]
 
 
@@ -128,16 +132,20 @@ class MinimalConsciousAgent(Agent):
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(self.start, self.threads)
-            executor.shutdown(wait=True, cancel_futures=False)
-
-        if self.get_state()["done"]:
-            self.global_workspace.task_manager.set_shutdown(True)
-            self.attention_codelets.shutdown = True
+            #executor.shutdown(wait=True, cancel_futures=False)
 
     def start(self, worker):
         worker.start()
         sleep(5)
         worker.join()
+
+    def shutdown(self):
+        while self.get_state() is not None:
+            sleep(5)
+            if self.get_state()["done"]:
+                self.attention_codelets.shutdown = True
+                self.global_workspace.task_manager.set_shutdown(True)
+
 
     def notify(self, module):
         if isinstance(module, Environment):

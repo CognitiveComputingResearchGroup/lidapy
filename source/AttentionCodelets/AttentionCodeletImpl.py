@@ -23,7 +23,7 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.codelet_reinforcement = DEFAULT_CODELET_REINFORCEMENT
         self.shutdown = False
         self.logger = getLogger(self.__class__.__name__).logger
-        self.logger.debug("Initialized attention codelets")
+        self.logger.debug("Initialized new attention codelets")
 
     def start(self):
         self.logger.debug("Running attention codelets")
@@ -44,7 +44,7 @@ class AttentionCodeletImpl(AttentionCodelet):
                 self.logger.info("Coalition successfully formed.")
                 self.notify_observers()
                 while not self.shutdown:
-                    sleep(25)
+                    sleep(20)
                     self.run_task()
             else:
                 while csm_content.getLinkCount() == 0:
@@ -63,18 +63,22 @@ class AttentionCodeletImpl(AttentionCodelet):
 
     def notify(self, module):
         if isinstance(module, GlobalWorkSpaceImpl):
-            winning_coalition = module.__getstate__()
+            winning_coalition = module.get_broadcast()
+            self.logger.debug(f"Received conscious broadcast: "
+                              f"{winning_coalition}")
             self.learn(winning_coalition)
 
     def learn(self, coalition):
-        global coalition_codelet
+        coalition_codelet = None
         if isinstance(coalition, CoalitionImpl):
             coalition_codelet = coalition.getCreatingAttentionCodelet()
+            coalition_codelet.shutdown = True
         if isinstance (coalition_codelet, AttentionCodelet):
             newCodelet = AttentionCodeletImpl()
             newCodelet.buffer = self.buffer
             content = coalition.getContent()
             newCodelet.setSoughtContent(content)
+            sleep(10)
             newCodelet.run_task()
             self.logger.debug(f"Created new codelet: {newCodelet}")
         elif coalition_codelet is not None:

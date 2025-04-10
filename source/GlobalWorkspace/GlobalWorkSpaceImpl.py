@@ -37,9 +37,9 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.aggregate_trigger_threshold = DEFAULT_THRESHOLD
         self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
         self.broadcast_refractory_period = DEFAULT_REFRACTORY_PERIOD
-        trigger1 = "no_broadcast_for_extended_period"
+        trigger1 = "no_winning_coalition_trigger"
         trigger2 = "winning_coalition_trigger"
-        trigger3 = "no_winning_coalition_trigger"
+        trigger3 = "no_broadcast_for_extended_period"
         self.broadcast_triggers.append(trigger1)
         self.broadcast_triggers.append(trigger2)
         self.broadcast_triggers.append(trigger3)
@@ -96,6 +96,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                 self.broadcast_was_sent = self.sendBroadCast()
                 if self.broadcast_was_sent:
                     self.last_broadcast_trigger = trigger
+                    self.notify_observers()
 
 
     def sendBroadCast(self):
@@ -107,7 +108,6 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
             if "no_winning_coalition_trigger" in self.broadcast_triggers:
                 self.broadcast_triggers.remove("no_winning_coalition_trigger")
             self.tick_at_last_broadcast = self.task_manager.getCurrentTick()
-            self.notify_observers()
             self.broadcast_sent_count += 1
             self.broadcast_was_sent = True
         else:
