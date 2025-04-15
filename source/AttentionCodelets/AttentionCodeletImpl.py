@@ -4,7 +4,6 @@ from time import sleep
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
-from source.Module.Initialization.DefaultLogger import getLogger
 from source.Workspace.CurrentSituationalModel.CurrentSituationalModelImpl import \
     CurrentSituationalModelImpl
 
@@ -21,13 +20,15 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.codeletRefractoryPeriod = DEFAULT_CODELET_REFRACTORY_PERIOD
         self.formed_coalition = None
         self.codelet_reinforcement = DEFAULT_CODELET_REINFORCEMENT
+        self.tick_at_last_coalition = 0.0
         self.shutdown = False
-        self.logger = getLogger(self.__class__.__name__).logger
+        self.tick = 0.0
         self.logger.debug("Initialized new attention codelets")
 
     def start(self):
         self.logger.debug("Running attention codelets")
         self.run_task()
+        self.run()
 
     def run_task(self):
         if self.bufferContainsSoughtContent(self.buffer):
@@ -40,12 +41,19 @@ class AttentionCodeletImpl(AttentionCodelet):
                 self.formed_coalition = CoalitionImpl()
                 self.formed_coalition.setContent(csm_content)
                 self.formed_coalition.setCreatingAttentionCodelet(self)
-                self.formed_coalition.setActivation(1.0)
-                self.logger.info("Coalition successfully formed.")
+                self.formed_coalition.setActivation(DEFAULT_CODELET_ACTIVATION)
+                self.tick_at_last_coalition = self.tick
+                self.logger.debug("Coalition successfully formed.")
                 self.notify_observers()
-                while not self.shutdown:
-                    sleep(20)
-                    self.run_task()
+                while not (self.tick - self.tick_at_last_coalition >=
+                           self.codelet_reinforcement):
+                    sleep(15)
+                    new_codelet = AttentionCodeletImpl()
+                    for observer in self.observers:
+                        new_codelet.add_observer(observer)
+                    new_codelet.buffer = self.buffer
+                    new_codelet.setSoughtContent(csm_content)
+                    new_codelet.run_task()
             else:
                 while csm_content.getLinkCount() == 0:
                     time.sleep(10)
@@ -72,15 +80,16 @@ class AttentionCodeletImpl(AttentionCodelet):
         coalition_codelet = None
         if isinstance(coalition, CoalitionImpl):
             coalition_codelet = coalition.getCreatingAttentionCodelet()
-            coalition_codelet.shutdown = True
         if isinstance (coalition_codelet, AttentionCodelet):
-            newCodelet = AttentionCodeletImpl()
-            newCodelet.buffer = self.buffer
+            new_codelet = AttentionCodeletImpl()
+            for observer in self.observers:
+                new_codelet.add_observer(observer)
+            new_codelet.buffer = self.buffer
             content = coalition.getContent()
-            newCodelet.setSoughtContent(content)
-            sleep(10)
-            newCodelet.run_task()
-            self.logger.debug(f"Created new codelet: {newCodelet}")
+            new_codelet.setSoughtContent(content)
+            self.logger.debug(f"Created new codelet: {new_codelet}")
+            sleep(3)
+            new_codelet.run_task()
         elif coalition_codelet is not None:
     # TODO Reinforcement amount might be a function of the broadcast's
     # activation

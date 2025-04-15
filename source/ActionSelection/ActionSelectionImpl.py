@@ -1,5 +1,4 @@
 import random
-from time import sleep
 
 
 from source.ActionSelection.ActionSelection import ActionSelection
@@ -24,14 +23,15 @@ class ActionSelectionImpl(ActionSelection):
     def add_behavior(self, state, behavior):
         if not self.behaviors or state not in self.behaviors:
             self.behaviors[state] = []  # add new scheme to memory
-        self.behaviors[state].append(behavior)
+        if behavior not in self.behaviors[state]:
+            self.behaviors[state].append(behavior)
 
     def remove_behavior(self, state, behavior):
         if self.behaviors and state in self.behaviors:
             self.behaviors[state].remove(behavior)
 
-    def get_action(self):
-        return self.action
+    def get_state(self):
+        return self.state
 
     def get_behaviors(self, state):
         if self.behaviors and state in self.behaviors:
@@ -46,22 +46,21 @@ class ActionSelectionImpl(ActionSelection):
         if isinstance(module, ProceduralMemoryImpl):
             state = module.get_state()
             self.state = state
-            schemes = module.get_schemes(state)
-            action = None
+            schemes = module.get_schemes_(state, module.optimized_schemes)
+            if not schemes:
+                schemes = module.get_schemes(state)
 
             random_index = random.randint(0, len(schemes) - 1)
-            while schemes[random_index].getActivation() <= 0.5:
+            while (schemes[random_index].getActivation() < 0.5 and
+                   schemes[random_index].getIncentiveSalience() <= 0.0):
                 random_index = random.randint(0, len(schemes) - 1)
 
             self.add_behavior(state,
         {schemes[random_index].getCategory("label") :
                 schemes[random_index].getCategory("id")})
 
+            """Decay chosen scheme"""
             schemes[random_index].decay(0.01)
-            if schemes[random_index].isRemovable():
-                module.schemes.remove(schemes[random_index])
-            else:
-                self.action = module.get_action(state, schemes[random_index])
 
             if self.behaviors is not None:
                 self.logger.debug(
@@ -80,24 +79,34 @@ class ActionSelectionImpl(ActionSelection):
             for link in broadcast.getLinks():
                 source = link.getSource()
                 if isinstance(source, NodeImpl):
-                    if link.getSource().getActivation() < 1:
+                    if source.getActivation() < 1:
                         links.append(link)
-            if len(links) == 0:
-                source = broadcast.containsNode()
-                links = broadcast.getConnectedSinks(source)
+                else:
+                    source_node = broadcast.getNode(source)
+                    if isinstance(source_node, NodeImpl):
+                        if source_node.getActivation() < 1:
+                            links.append(link)
             self.update_behaviors(links)
 
 
     def update_behaviors(self, broadcast):
+        behaviors = []
         for link in broadcast:
-            if link.getCategory("label") != "hole":
+            if (link.getActivation() < 0.5 and link.getIncentiveSalience() <=
+                    0.0):
+                behaviors = self.get_behaviors(link.getSource())
+                if behaviors is not None:
+                    if isinstance(behaviors, list):
+                        for behavior in behaviors:
+                            self.remove_behavior(link.getSource(), behavior)
+                            behaviors.append(behavior)
+                    else:
+                        self.remove_behavior(link.getSource(), behaviors)
+                        behaviors.append(behaviors)
+
+            else:
                 self.add_behavior(link.getSource(), {
                     link.getCategory("label"): link.getCategory("id")})
-            behaviors = self.get_behaviors(link.getSource())
-            if behaviors is not None:
-                for behavior in behaviors:
-                    for key, value in behavior.items():
-                        if key == "hole":
-                            self.remove_behavior(link.getSource(), behavior)
-
-        self.logger.debug("Updated instantiated behaviors")
+                behaviors.append({link.getCategory("label"):
+                                      link.getCategory("id")})
+        self.logger.debug(f"Updated {len(behaviors)} instantiated behaviors")

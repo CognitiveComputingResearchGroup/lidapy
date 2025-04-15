@@ -1,4 +1,6 @@
 import concurrent.futures
+import multiprocessing
+from multiprocessing import Process
 from threading import Thread
 from time import sleep
 
@@ -16,15 +18,13 @@ class ModuleSubject:
 
     def notify_observers(self):
         for observer in self.observers:
-            thread = Thread(target = observer.notify, args=(self,))
+            thread = Thread(target=observer.notify, args=(self,))
             self.observer_threads.append(thread)
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-                executor.map(self.update, self.observer_threads)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            executor.map(self.update, self.observer_threads)
 
     def update(self, worker):
         worker.start()
         sleep(5)
         worker.join()
-
 

@@ -1,9 +1,11 @@
 from source.Framework.Tasks.Codelet import Codelet
+from source.Module.Initialization.DefaultLogger import getLogger
 
 
 class AttentionCodelet(Codelet):
     def __init__(self):
         super().__init__()
+        self.logger = getLogger(self.__class__.__name__).logger
 
     def getModuleContent(self):
         pass

@@ -3,11 +3,11 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 from time import sleep
-
 import gymnasium as gym
+
 from source.Environment.Environment import Environment
 from source.Module.Initialization.DefaultLogger import getLogger
-from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
+from source.MotorPlanExecution.MotorPlanExecution import MotorPlanExecution
 
 """
 The environment is essential for receiving, processing, and
@@ -36,7 +36,7 @@ class FrozenLakeEnvironment(Environment):
         self.reward = 0
         self.logger = getLogger(__class__.__name__).logger
         self.agent_stimuli = {}
-        self.action_plan = None
+        self.action_plan = []
         self.logger.debug(f"Initialized {__class__.__name__} Environment")
 
     # Reseting the environment to start a new episode
@@ -64,7 +64,7 @@ class FrozenLakeEnvironment(Environment):
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                           f"done: {done}, " + f"action: {action}")
-        #sleep(0.5)
+        sleep(0.5)
         self.notify_observers()
 
     def recursive_step(self, action_plan):
@@ -100,16 +100,12 @@ class FrozenLakeEnvironment(Environment):
         return self.agent_stimuli
 
     def notify(self, module):
-        if isinstance(module, SensoryMotorMemory):
-            action = module.send_action_event()
-            if len(module.send_action_execution_command()) > 1:
-                self.action_plan = module.send_action_execution_command()
-                self.recursive_step(self.action_plan)
+        if isinstance(module, MotorPlanExecution):
+            action = module.send_motor_plan()
+            if not self.state["done"] and self.steps < 1000:
+                self.step(action)
             else:
-                if not self.state["done"] and self.steps < 100:
-                    self.step(action)
-                else:
-                    self.close()
+                self.close()
 
     def update_position(self, action):
         if action == 3:  # up

@@ -1,3 +1,5 @@
+from time import sleep
+
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
@@ -8,21 +10,19 @@ from source.Module.Initialization.DefaultLogger import getLogger
 class WorkspaceImpl(Workspace):
     def __init__(self):
         super().__init__()
-        self.logger = getLogger(self.__class__.__name__)
         self.nodes = None
         self.csm = None
         self.coalition = None
-        self.logger = getLogger(self.__class__.__name__).logger
         self.episodic_memory = None
         self.state = None
-
-    def run(self):
         self.logger.debug("Initialized Workspace")
+
+    def start(self):
         self.nodes = []
 
     def cueEpisodicMemories(self, node_structure):
         self.episodic_memory = node_structure
-        self.logger.info(f"{len(self.episodic_memory.getLinks())} episodic "
+        self.logger.debug(f"{len(self.episodic_memory.getLinks())} episodic "
                          f"memories cued")
         self.notify_observers()
 
@@ -42,6 +42,7 @@ class WorkspaceImpl(Workspace):
         workspace_buffer.addLinks(percept, "Adjacent node")
         self.csm.addBufferContent(workspace_buffer)
         self.notify_observers()
+        sleep(25)
 
     def receiveLocalAssociation(self, node_structure):
         self.csm.addBufferContent(node_structure)

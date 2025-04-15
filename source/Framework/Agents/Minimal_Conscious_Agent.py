@@ -1,15 +1,15 @@
 import concurrent.futures
-from threading import Thread
+from threading import Thread, Lock
 from time import sleep
-
 from yaml import YAMLError
 
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.AttentionCodelets.AttentionCodeletImpl import AttentionCodeletImpl
 from source.Environment.Environment import Environment
 from source.Framework.Agents.Agent import Agent
-from source.Framework.Tasks.TaskManager import TaskManager
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
+from source.MotorPlanExecution.MotorPlanExecutionImpl import \
+    MotorPlanExecutionImpl
 from source.PAM.PAM_Impl import PAMImpl
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
@@ -36,6 +36,7 @@ class MinimalConsciousAgent(Agent):
         self.pam = PAMImpl()
         self.workspace = WorkspaceImpl()
         self.sensory_memory = SensoryMemoryImpl()
+        self.motor_plan = MotorPlanExecutionImpl()
 
         #Module observers
         self.action_selection.add_observer(self.sensory_motor_mem)
@@ -53,6 +54,7 @@ class MinimalConsciousAgent(Agent):
         self.global_workspace.add_observer(self.sensory_motor_mem)
         self.global_workspace.add_observer(self.attention_codelets)
         self.csm.add_observer(self.global_workspace)
+        self.sensory_motor_mem.add_observer(self.motor_plan)
 
         #Global Workspace Ticks
         self.global_workspace.ticks = 0
@@ -82,7 +84,7 @@ class MinimalConsciousAgent(Agent):
         self.pam_thread = Thread(target=self.pam.run)
 
         # Workspace thread
-        self.workspace_thread = Thread(target=self.workspace.run)
+        self.workspace_thread = Thread(target=self.workspace.start)
 
         # CSM thread
         self.csm_thread = Thread(target=self.csm.run_task)
@@ -108,6 +110,9 @@ class MinimalConsciousAgent(Agent):
         self.sensory_motor_mem_thread = (
             Thread(target=self.sensory_motor_mem.run))
 
+        # MotorPlan Thread
+        self.motor_plan_thread = Thread(target=self.motor_plan.run)
+
         self.shutdown_thread = Thread(target=self.shutdown)
 
         self.threads = [
@@ -120,23 +125,24 @@ class MinimalConsciousAgent(Agent):
             self.procedural_memory_thread,
             self.action_selection_thread,
             self.sensory_motor_mem_thread,
+            self.motor_plan_thread,
             self.shutdown_thread
         ]
 
 
     def run(self):
         self.environment.add_observer(self.sensory_memory)
-        self.sensory_motor_mem.add_observer(self.environment)
+        self.motor_plan.add_observer(self.environment)
         self.environment_thread = Thread(target=self.environment.reset)
         self.threads.insert(0, self.environment_thread)
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             executor.map(self.start, self.threads)
-            #executor.shutdown(wait=True, cancel_futures=False)
+        executor.shutdown(wait=True, cancel_futures=False)
 
     def start(self, worker):
         worker.start()
-        sleep(5)
+        sleep(2)
         worker.join()
 
     def shutdown(self):
@@ -144,7 +150,8 @@ class MinimalConsciousAgent(Agent):
             sleep(5)
             if self.get_state()["done"]:
                 self.attention_codelets.shutdown = True
-                self.global_workspace.task_manager.set_shutdown(True)
+                self.global_workspace.shutdown = True
+                self.workspace.shutdown = True
 
 
     def notify(self, module):

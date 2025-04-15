@@ -8,7 +8,6 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
-from threading import Lock
 
 
 from source.Framework.Shared.LinkImpl import LinkImpl
@@ -72,9 +71,11 @@ class PAMImpl(PerceptualAssociativeMemory):
                 if isinstance(source, NodeImpl):
                     if link.getSource().getActivation() < 1:
                         links.append(link)
-            if len(links) == 0:
-                source = broadcast.containsNode()
-                links = broadcast.getConnectedSinks(source)
+                else:
+                    source_node = broadcast.containsNode(source)
+                    if isinstance(source_node, NodeImpl):
+                        if link.getSource().getActivation() < 1:
+                            links.append(link)
             self.learn(links)
 
     def learn(self, cue):
@@ -92,9 +93,7 @@ class PAMImpl(PerceptualAssociativeMemory):
                     node.setActivation(1.0)
                     node.setLabel(str(self.position["row"]) +
                                   str(self.position["col"]))
-                self.logger.debug(
-                    f"Found an association, agent's position: "
-                    f" {node}")
+
                 """Considering the current cell node as the percept
                 i.e agent recognizing position within environment"""
                 self.current_cell = node
@@ -111,23 +110,28 @@ class PAMImpl(PerceptualAssociativeMemory):
             if link.getCategory("label") == 'S':
                 link.setCategory(link.getCategory("id"), "start")
                 link.setActivation(0.5)
+                link.setIncentiveSalience(0.3)
             elif link.getCategory("label") == 'G':
                 link.setCategory(link.getCategory("id"), "goal")
                 link.setActivation(1.0)
+                link.setIncentiveSalience(1.0)
             elif link.getCategory("label") == 'F':
                 link.setCategory(link.getCategory("id"), "safe")
                 link.setActivation(0.75)
+                link.setIncentiveSalience(0.5)
             elif link.getCategory("label") == 'H':
                 link.setCategory(link.getCategory("id"), "hole")
                 link.setActivation(0.1)
             else:
-                link.setActivation(1.0)
+                if (link.getActivation() == 0.0 and
+                        link.getIncentiveSalience() == 0.0):
+                    link.setActivation(0.1)
 
             link.setSource(self.current_cell)
 
             # Add links to surrounding cells
             if link not in self.associations.getLinks():
-                self.associations.addDefaultLink(self.current_cell, link,
+                self.associations.addDefaultLink(link.getSource(), link,
                             category = {"id": link.getCategory("id"),
                                         "label": link.getCategory("label")},
                                             activation=link.getActivation(),

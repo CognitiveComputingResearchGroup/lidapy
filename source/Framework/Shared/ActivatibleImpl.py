@@ -1,5 +1,5 @@
 from multiprocessing import Value
-from threading import Thread
+from threading import Thread, Lock
 
 from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.Framework.Strategies.LinearExciteStrategy import \
@@ -61,6 +61,8 @@ class ActivatibleImpl(Activatible):
 
             """Sharing of values between threads, d stands for float (double)
             Otherwise LinearDecayStrategy returns none without sharing"""
+            lock = Lock()
+            lock.acquire()
             activation = Value("d", self.getActivation())
             _ticks = Value("d", ticks)
             t = Thread(target=self.decayStrategy.decay, args=(activation,
@@ -75,6 +77,7 @@ class ActivatibleImpl(Activatible):
             t.join()
 
             self.incentiveSalience = incentiveSalience.value
+            lock.release()
             """self.logger.debug(f"After decaying {self} has current "
                                   f"activation: {self.getActivation()}")"""
 
@@ -85,6 +88,8 @@ class ActivatibleImpl(Activatible):
 
             """Sharing of values between threads, d stands for float (double)
                Otherwise LinearDecayStrategy returns none without sharing"""
+            lock = Lock()
+            lock.acquire()
             activation = Value("d", self.getActivation())
             _amount = Value("d", amount)
             t = Thread(target=self.exciteStrategy.excite, args=(activation,
@@ -92,18 +97,20 @@ class ActivatibleImpl(Activatible):
             t.start()
             t.join()
             self.activation = activation.value
-
+            lock.release()
             """self.logger.debug(f"After excitation {self} has current "
                               f"activation: {self.getActivation()}")"""
 
     def exciteIncentiveSalience(self, amount):
         if self.exciteStrategy is not None:
-            self.logger.debug(f"Before excitation {self} has current "
+            """self.logger.debug(f"Before excitation {self} has current "
                               f"incentive salience: "
-                              f"{self.getIncentiveSalience()}")
+                              f"{self.getIncentiveSalience()}")"""
 
             """Sharing of values between threads, d stands for float (double)
                 Otherwise LinearDecayStrategy returns none without sharing"""
+            lock = Lock()
+            lock.acquire()
             incentiveSalience = Value("d", self.getIncentiveSalience())
             _amount = Value("d", amount)
 
@@ -113,10 +120,10 @@ class ActivatibleImpl(Activatible):
             t.join()
 
             self.incentiveSalience = incentiveSalience.value
-
-            self.logger.debug(f"After excitation {self} has current "
+            lock.release()
+            """self.logger.debug(f"After excitation {self} has current "
                               f"incentive salience: "
-                              f"{self.getIncentiveSalience()}")
+                              f"{self.getIncentiveSalience()}")"""
 
     def setExciteStrategy(self, strategy):
         self.exciteStrategy = strategy

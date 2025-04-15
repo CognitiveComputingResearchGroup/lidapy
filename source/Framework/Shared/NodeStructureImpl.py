@@ -153,8 +153,13 @@ class NodeStructureImpl(NodeStructure):
     def getConnectedSinks(self, node):
         sink_links = []
         for link in self.links:
-            if link.getSource() == node.getId():
-                sink_links.append(link)
+            source = link.getSource()
+            if isinstance(source, NodeImpl):
+                if source == node:
+                    sink_links.append(link)
+            else:
+                if source == node.getId():
+                    sink_links.append(link)
         return sink_links
 
     # Returns a list of all node objects connected to link as a source

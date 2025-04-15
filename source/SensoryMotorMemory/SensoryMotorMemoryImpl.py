@@ -7,10 +7,10 @@ This module can temporarily store sensory data from the environment and then
 process and transfer to further working memory.
 """
 import random
+from time import sleep
 
 from source.ActionSelection.ActionSelection import ActionSelection
 from source.Framework.Shared.NodeImpl import NodeImpl
-from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.SensoryMemory.SensoryMemory import SensoryMemory
@@ -22,6 +22,7 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
         super().__init__()
         self.action_event = None
         self.action_plan = None
+        self.state = None
         self.logger = getLogger(__class__.__name__).logger
         #self.logger.debug("Initialized SensoryMotorMemory")
 
@@ -35,25 +36,27 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
         self.action_plan = []
         if isinstance(module, SensoryMemory):
             cue = module.get_sensory_content(module)["cue"]
-            iterations = random.randint(0, len(cue) - 1)
-            while cue[iterations].getCategory("label") == "hole":
-                iterations = random.randint(0, len(cue) - 1)
-            self.action_event = cue[iterations].getCategory("id")
+            for link in cue:
+                if (link.getActivation() >= 0.5 and
+                                            link.getIncentiveSalience() > 0):
+                    self.action_event = {link.getCategory("label"):
+                                            link.getCategory("id")}
+                    self.action_plan.append(self.action_event)
 
             if self.action_event is not None:
                 self.logger.debug("Retrieved motor plan(s) from action plan")
-                if isinstance(self.action_event, list):
-                    for action in self.action_event:
-                        self.action_plan.append(action)
-                #self.notify_observers()
+                sleep(15)
+            #self.notify_observers()
 
         elif isinstance(module, ActionSelection):
-            self.action_event = module.get_action()
+            state = module.get_state()
+            self.state = state
+            self.action_event = module.select_action_plan(state)
             if self.action_event is not None:
                 self.logger.debug("Retrieved motor plan(s) from action plan")
                 if isinstance(self.action_event, list):
-                    for action in self.action_event:
-                        self.action_plan.append(action)
+                    for action_plan in self.action_event:
+                        self.action_plan.append(action_plan)
                 self.notify_observers()
 
         elif isinstance(module, GlobalWorkSpaceImpl):
@@ -65,19 +68,25 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
             for link in broadcast.getLinks():
                 source = link.getSource()
                 if isinstance(source, NodeImpl):
-                    if link.getSource().getActivation() < 1:
+                    if source.getActivation() < 1:
                         links.append(link)
-            if len(links) == 0:
-                source = broadcast.containsNode()
-                links = broadcast.getConnectedSinks(source)
+                else:
+                    source_node = broadcast.containsNode(source)
+                    if isinstance(source_node, NodeImpl):
+                        if source_node.getActivation() < 1:
+                            links.append(link)
             self.logger.debug(f"Received conscious broadcast: {broadcast}")
             self.learn(links)
-
-    def send_action_event(self):
-        return self.action_event
 
     def send_action_execution_command(self):
         return self.action_plan
 
+    def get_state(self):
+        return self.state
+
     def learn(self, broadcast):
-        pass
+        for link in broadcast:
+            if (link.getActivation() >= 0.5 and link.getIncentiveSalience() >=
+                    0.1):
+                self.action_plan.append({link.getCategory("label") :
+                                             link.getCategory("id")})

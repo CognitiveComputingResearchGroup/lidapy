@@ -9,10 +9,10 @@ class ActionSelection(Module):
     def __init__(self):
         super().__init__()
 
-    def get_action(self):
+    def get_state(self):
         pass
 
-    def select_action_plan(self, percept):
+    def select_action_plan(self, state):
         pass
 
     def notify(self, module):

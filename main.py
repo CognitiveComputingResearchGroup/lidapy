@@ -5,7 +5,6 @@
 import argparse
 import importlib
 import os
-import sys
 from importlib import util
 
 from Configs import Config

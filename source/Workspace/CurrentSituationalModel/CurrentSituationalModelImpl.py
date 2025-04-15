@@ -1,5 +1,3 @@
-from time import sleep
-
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.Module.Initialization.DefaultLogger import getLogger
@@ -12,7 +10,7 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
     def __init__(self):
         super().__init__()
         self.node_structure = NodeStructureImpl()
-        self.formed_coalition = None
+        self.received_coalition = None
         self.state = None
         self.logger = getLogger(__class__.__name__).logger
         self.logger.debug("Initialized CurrentSituationalModel")
@@ -36,10 +34,10 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
         self.addBufferContent(stream)
 
     def getModuleContent(self):
-        return self.formed_coalition
+        return self.received_coalition
 
     def receiveCoalition(self, coalition):
-        self.formed_coalition = coalition
+        self.received_coalition = coalition
         self.notify_observers()
 
     def notify(self, module):

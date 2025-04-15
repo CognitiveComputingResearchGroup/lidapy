@@ -1,9 +1,11 @@
+from source.Module.Initialization.DefaultLogger import getLogger
 from source.Module.Initialization.ModuleInterface import Module
 
 
 class GlobalWorkspace(Module):
     def __init__(self):
         super().__init__()
+        self.logger = getLogger(self.__class__.__name__).logger
 
     def addCoalition(self, coalition):
         pass

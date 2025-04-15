@@ -8,6 +8,8 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
+from threading import Lock
+
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.Module.Initialization.DefaultLogger import getLogger
@@ -27,12 +29,15 @@ class PerceptualAssociativeMemory(Module):
     def add_association(self, cue : NodeImpl):
         #Add new associations
         if cue is not None and cue not in self.associations.getNodes():
-            self.logger.debug(f"Storing node {cue}")
+            self.logger.debug(f"Storing association, node: {cue}")
+            lock = Lock()
+            lock.acquire()
             self.associations.addNode_(cue)
+            lock.release()
 
     def retrieve_associations(self, cue : NodeStructureImpl):
         #Retreiving associations for the given cue
-        self.logger.info(f"Retrieved {len(cue.getLinkCount())} associations")
+        self.logger.debug(f"Retrieved {len(cue.getLinkCount())} associations")
         return cue.getLinks()
 
     def retrieve_association(self, cue: NodeImpl):
@@ -42,7 +47,7 @@ class PerceptualAssociativeMemory(Module):
         else:
             if cue in self.associations.getNodes():
                 links = self.associations.getConnectedSinks(cue)
-                self.logger.info(f"Retrieved {len(links)} associations")
+                self.logger.debug(f"Retrieved {len(links)} associations")
             else:
                 self.logger.debug(f"Unable to retrieve association for {cue}")
         return links
