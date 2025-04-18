@@ -34,11 +34,11 @@ class MinimalReactiveAgent(Agent):
 
         # Sensory memory thread
         self.sensory_memory_thread = (
-            Thread(target=self.sensory_memory.run_sensors))
+            Thread(target=self.sensory_memory.start))
 
         # SensoryMotorMem thread
         self.sensory_motor_mem_thread = (
-            Thread(target=self.sensory_motor_mem.run))
+            Thread(target=self.sensory_motor_mem.start))
 
         self.threads = [
             self.sensory_memory_thread,

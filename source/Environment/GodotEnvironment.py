@@ -14,8 +14,8 @@ import zmq  # Python Bindings for ZeroMq (PyZMQ)
 
 from source.Environment.Environment import Environment
 from source.Module.Initialization.DefaultLogger import getLogger
-from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
-    SensoryMotorMemoryImpl
+from source.MotorPlanExecution.MotorPlanExecutionImpl import \
+    MotorPlanExecutionImpl
 
 DEFAULT_TIMEOUT = 5000  # in milliseconds
 DEFAULT_AGENT = 2
@@ -88,8 +88,8 @@ class GodotEnvironment(Environment):
         return {'header': header, 'data': data}
 
     def notify(self, module):
-        if isinstance(module, SensoryMotorMemoryImpl):
-            action = module.send_action_event()
+        if isinstance(module, MotorPlanExecutionImpl):
+            action = module.send_motor_plan()
             self.step(action)
 
     def reset(self):

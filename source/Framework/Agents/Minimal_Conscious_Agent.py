@@ -81,7 +81,7 @@ class MinimalConsciousAgent(Agent):
         Thread(target=self.sensory_memory.start))
 
         # PAM thread
-        self.pam_thread = Thread(target=self.pam.run)
+        self.pam_thread = Thread(target=self.pam.start)
 
         # Workspace thread
         self.workspace_thread = Thread(target=self.workspace.start)
@@ -99,19 +99,19 @@ class MinimalConsciousAgent(Agent):
 
         # ProceduralMem thread
         self.procedural_memory_thread = (
-            Thread(target=self.procedural_memory.run,
+            Thread(target=self.procedural_memory.start,
                     args=(["Avoid hole", "Find goal"],)))
 
         # ActionSelection thread
         self.action_selection_thread = (
-            Thread(target=self.action_selection.run))
+            Thread(target=self.action_selection.start))
 
         # SensoryMotorMem thread
         self.sensory_motor_mem_thread = (
-            Thread(target=self.sensory_motor_mem.run))
+            Thread(target=self.sensory_motor_mem.start))
 
         # MotorPlan Thread
-        self.motor_plan_thread = Thread(target=self.motor_plan.run)
+        self.motor_plan_thread = Thread(target=self.motor_plan.start)
 
         self.shutdown_thread = Thread(target=self.shutdown)
 
@@ -142,7 +142,7 @@ class MinimalConsciousAgent(Agent):
 
     def start(self, worker):
         worker.start()
-        sleep(2)
+        sleep(3)
         worker.join()
 
     def shutdown(self):

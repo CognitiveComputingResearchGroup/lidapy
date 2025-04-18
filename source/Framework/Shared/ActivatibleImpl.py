@@ -4,7 +4,6 @@ from threading import Thread, Lock
 from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.Framework.Strategies.LinearExciteStrategy import \
     LinearExciteStrategy
-from source.Module.Initialization.DefaultLogger import getLogger
 from source.Framework.Shared.Activatible import Activatible
 
 DECAY_DEFAULT_SLOPE = 0.1
@@ -20,7 +19,6 @@ class ActivatibleImpl(Activatible):
         self.exciteStrategy = LinearExciteStrategy()
         self.incentiveSalienceDecayStrategy = None
         self.activation = 0.0
-        self.logger = getLogger(self.__class__.__name__).logger
 
     def setActivation(self, value):
         if value > 1.0:

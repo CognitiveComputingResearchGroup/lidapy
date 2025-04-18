@@ -16,9 +16,10 @@ class ActionSelectionImpl(ActionSelection):
         self.action = None
         self.state = None
         self.logger = getLogger(self.__class__.__name__).logger
-
-    def run(self):
         self.logger.debug(f"Initialized ActionSelection")
+
+    def start(self):
+        pass
 
     def add_behavior(self, state, behavior):
         if not self.behaviors or state not in self.behaviors:
@@ -46,12 +47,10 @@ class ActionSelectionImpl(ActionSelection):
         if isinstance(module, ProceduralMemoryImpl):
             state = module.get_state()
             self.state = state
-            schemes = module.get_schemes_(state, module.optimized_schemes)
-            if not schemes:
-                schemes = module.get_schemes(state)
+            schemes = module.get_schemes(state)
 
             random_index = random.randint(0, len(schemes) - 1)
-            while (schemes[random_index].getActivation() < 0.5 and
+            while (schemes[random_index].getActivation() < 0.1 and
                    schemes[random_index].getIncentiveSalience() <= 0.0):
                 random_index = random.randint(0, len(schemes) - 1)
 
@@ -92,21 +91,23 @@ class ActionSelectionImpl(ActionSelection):
     def update_behaviors(self, broadcast):
         behaviors = []
         for link in broadcast:
-            if (link.getActivation() < 0.5 and link.getIncentiveSalience() <=
-                    0.0):
-                behaviors = self.get_behaviors(link.getSource())
-                if behaviors is not None:
-                    if isinstance(behaviors, list):
-                        for behavior in behaviors:
-                            self.remove_behavior(link.getSource(), behavior)
-                            behaviors.append(behavior)
-                    else:
-                        self.remove_behavior(link.getSource(), behaviors)
-                        behaviors.append(behaviors)
+            source = link.getSource()
+            if isinstance(source, NodeImpl):
+                if (link.getActivation() < 0.5 and
+                        link.getIncentiveSalience() <= 0.0):
+                    behaviors = self.get_behaviors(source)
+                    if behaviors is not None:
+                        if isinstance(behaviors, list):
+                            for behavior in behaviors:
+                                self.remove_behavior(source, behavior)
+                                behaviors.append(behavior)
+                        else:
+                            self.remove_behavior(source, behaviors)
+                            behaviors.append(behaviors)
 
-            else:
-                self.add_behavior(link.getSource(), {
-                    link.getCategory("label"): link.getCategory("id")})
-                behaviors.append({link.getCategory("label"):
-                                      link.getCategory("id")})
+                else:
+                    self.add_behavior(source, {
+                        link.getCategory("label"): link.getCategory("id")})
+                    behaviors.append({link.getCategory("label"):
+                                          link.getCategory("id")})
         self.logger.debug(f"Updated {len(behaviors)} instantiated behaviors")

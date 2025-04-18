@@ -1,7 +1,8 @@
+from source.Framework.Shared.Learnable import Learnable
 from source.Module.Initialization.ModuleInterface import Module
 
 
-class Codelet(Module):
+class Codelet(Module, Learnable):
     def __init__(self):
         super().__init__()
         self.observers = []

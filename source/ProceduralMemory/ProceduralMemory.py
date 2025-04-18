@@ -15,7 +15,7 @@ class ProceduralMemory(Module):
         self.schemes = {}  # initialize empty memory for schemes
         self.logger = getLogger(__class__.__name__).logger
 
-    def run(self, scheme):
+    def start(self, scheme):
         self.scheme = scheme
 
     def add_scheme(self, state, percept):

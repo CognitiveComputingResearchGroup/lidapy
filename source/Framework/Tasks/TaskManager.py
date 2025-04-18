@@ -8,7 +8,6 @@ class TaskManager:
     def __init__(self):
         self.tick = 0
         self.name = ""
-        self.shutdown_manager = None
         self.shutdown = False
         self.logger = None
 

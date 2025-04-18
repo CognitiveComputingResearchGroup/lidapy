@@ -8,7 +8,7 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
-
+from threading import Lock
 
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
@@ -30,14 +30,14 @@ class PAMImpl(PerceptualAssociativeMemory):
 
 
         """Create node for each cell the agent could visit"""
-        for cell in range(16):
+        for cell in range(64):
             node = NodeImpl()
             """Set the cell identifier to the corresponding state"""
             node.setId(cell)
             """Store the node in memory"""
             self.memory.addNode_(node)
 
-    def run(self):
+    def start(self):
         pass
 
     def get_state(self):
@@ -66,17 +66,18 @@ class PAMImpl(PerceptualAssociativeMemory):
             """Get the nodes that have been previously visited and update
                         the connected sink links"""
             links = []
+            source = None
+            lock = Lock()
             for link in broadcast.getLinks():
                 source = link.getSource()
                 if isinstance(source, NodeImpl):
-                    if link.getSource().getActivation() < 1:
-                        links.append(link)
+                    if source.getActivation() < 1:
+                        self.form_association(link, source)
                 else:
-                    source_node = broadcast.containsNode(source)
-                    if isinstance(source_node, NodeImpl):
-                        if link.getSource().getActivation() < 1:
-                            links.append(link)
-            self.learn(links)
+                    source = broadcast.getNode(source)
+                    if isinstance(source, NodeImpl):
+                        if source.getActivation() < 1:
+                            self.form_association(link, source)
 
     def learn(self, cue):
         #Check all cells for the corresponding node
@@ -88,8 +89,8 @@ class PAMImpl(PerceptualAssociativeMemory):
                     self.associations.remove(node)
             """If the result of the function to obtain the cell state 
             equals the node id, activate the corresponding node"""
-            if self.position["row"] * 4 + self.position["col"] == node.getId():
-                if node.getActivation() is None:
+            if self.position["row"] * 8 + self.position["col"] == node.getId():
+                if node.getActivation() == 0:
                     node.setActivation(1.0)
                     node.setLabel(str(self.position["row"]) +
                                   str(self.position["col"]))
@@ -103,7 +104,47 @@ class PAMImpl(PerceptualAssociativeMemory):
         else:
             self.form_associations(cue["cue"])
 
+    def form_association(self, link, source):
+        lock = Lock()
+        lock.acquire()
+        # Priming data for scheme instantiation
+        if link.getCategory("label") == 'S':
+            link.setCategory(link.getCategory("id"), "start")
+            link.setActivation(0.5)
+            link.setIncentiveSalience(0.3)
+        elif link.getCategory("label") == 'G':
+            link.setCategory(link.getCategory("id"), "goal")
+            link.setActivation(1.0)
+            link.setIncentiveSalience(1.0)
+        elif link.getCategory("label") == 'F':
+            link.setCategory(link.getCategory("id"), "safe")
+            link.setActivation(0.75)
+            link.setIncentiveSalience(0.5)
+        elif link.getCategory("label") == 'H':
+            link.setCategory(link.getCategory("id"), "hole")
+            link.setActivation(0.05)
+        else:
+            if (link.getActivation() == 0.0 and
+                    link.getIncentiveSalience() == 0.0):
+                link.setActivation(1.0)
+                link.setIncentiveSalience(0.5)
+
+        link.setSource(source)
+
+        # Add links to surrounding cells
+        if link not in self.associations.getLinks():
+            self.associations.addDefaultLink(link.getSource(), link,
+                                             category={
+                                                 "id": link.getCategory("id"),
+                                                 "label": link.getCategory(
+                                                     "label")},
+                                             activation=link.getActivation(),
+                                             removal_threshold=0.0)
+        lock.release()
+
     def form_associations(self, cue):
+        lock = Lock()
+        lock.acquire()
         # Set links to surrounding cell nodes if none exist
         for link in cue:
             # Priming data for scheme instantiation
@@ -136,5 +177,5 @@ class PAMImpl(PerceptualAssociativeMemory):
                                         "label": link.getCategory("label")},
                                             activation=link.getActivation(),
                                             removal_threshold=0.0)
-
+        lock.release()
         self.notify_observers()

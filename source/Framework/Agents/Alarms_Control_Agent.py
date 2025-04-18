@@ -48,20 +48,20 @@ class AlarmsControlAgent(Agent):
             Thread(target=self.sensory_memory.run_sensors))
 
         # PAM thread
-        self.pam_thread = Thread(target=self.pam.run)
+        self.pam_thread = Thread(target=self.pam.start)
 
         # ProceduralMem thread
         self.procedural_memory_thread = (
-            Thread(target=self.procedural_memory.run,
+            Thread(target=self.procedural_memory.start,
                    args=(["Avoid hole", "Find goal"],)))
 
         # ActionSelection thread
         self.action_selection_thread = (
-            Thread(target=self.action_selection.run))
+            Thread(target=self.action_selection.start))
 
         # SensoryMotorMem thread
         self.sensory_motor_mem_thread = (
-            Thread(target=self.sensory_motor_mem.run))
+            Thread(target=self.sensory_motor_mem.start))
 
         self.threads = [
             self.sensory_memory_thread,

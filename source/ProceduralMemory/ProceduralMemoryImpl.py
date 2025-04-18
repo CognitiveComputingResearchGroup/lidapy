@@ -3,6 +3,7 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 import difflib
 import math
+from threading import Lock
 from time import sleep
 import string
 
@@ -134,39 +135,50 @@ class ProceduralMemoryImpl(ProceduralMemory):
 
     """Finds the shortest distance between a scheme and the goal"""
     def optimize_schemes(self, schemes):
-        min_distance = 64
+        min_distance = 20
         current_scheme = None
         instantiated_schemes = []
-
+        lock = Lock()
         # Find the links with the shortest distance to the goal
         for scheme in schemes:
+            lock.acquire()
             x_points = []
             y_points = []
             if isinstance(scheme, LinkImpl):
-                source_node = scheme.getSource()
-                state = source_node
+                state = scheme.getSource()
                 """For all the links with a similar source node,find the action
                 scheme that minimizes distance to the goal"""
-                if state == self.state:
-                    action = scheme.getCategory("id")
-                    scheme_position = []
-                    x, y = self.update_position(action,
-                                                int(self.state.getLabel()[0]),
-                                                int(self.state.getLabel()[1]))
-                    x_points.append(x)      # Link row
-                    y_points.append(y)      # Link column
-                    x_points.append(7)      # Goal row
-                    y_points.append(7)      # Goal column
-                    distance = self.closest_pair(x_points, y_points)
-                    if distance < min_distance:
-                        min_distance = distance
-                        current_scheme = scheme
+                if isinstance(state, NodeImpl):
+                    for link in schemes:
+                        source = link.getSource()
+                        if isinstance(source, NodeImpl) and source == state:
+                            action = link.getCategory("id")
+                            scheme_position = []
+                            x, y = self.update_position(action,
+                                                        int(
+                                                            state.getLabel()[
+                                                                0]),
+                                                        int(
+                                                            state.getLabel()[
+                                                                1]))
+                            x_points.append(x)  # Link row
+                            y_points.append(y)  # Link column
+                            x_points.append(7)  # Goal row
+                            y_points.append(7)  # Goal column
+                            distance = self.closest_pair(x_points,
+                                                         y_points)
+                            if distance < min_distance:
+                                min_distance = distance
+                                current_scheme = link
+                    if current_scheme:
+                        instantiated_schemes.append(current_scheme)
+                        current_scheme.exciteActivation(0.05)
+                        current_scheme.exciteIncentiveSalience(0.05)
+                        """self.add_scheme_(state, current_scheme,
+                                         self.optimized_schemes)"""
+                        self.add_scheme(state, current_scheme)
 
-        if current_scheme:
-            instantiated_schemes.append(current_scheme)
-            current_scheme.exciteActivation(0.05)
-            current_scheme.exciteIncentiveSalience(0.05)
-            self.add_scheme_(self.state, current_scheme,self.optimized_schemes)
+            lock.release()
         self.logger.debug(f"Learned {len(instantiated_schemes)} new action "
                           f"scheme(s) that minimize(s) distance to goal")
         return current_scheme

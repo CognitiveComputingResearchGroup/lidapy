@@ -20,13 +20,15 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.codeletRefractoryPeriod = DEFAULT_CODELET_REFRACTORY_PERIOD
         self.formed_coalition = None
         self.codelet_reinforcement = DEFAULT_CODELET_REINFORCEMENT
+        self.removal_threshold = DEFAULT_CODELET_REMOVAL_THRESHOLD
+        self.activation = DEFAULT_CODELET_ACTIVATION
         self.tick_at_last_coalition = 0.0
         self.shutdown = False
         self.tick = 0.0
-        self.logger.debug("Initialized new attention codelets")
+
 
     def start(self):
-        self.logger.debug("Running attention codelets")
+        self.logger.debug("Initialized new attention codelets")
         self.run_task()
         self.run()
 
@@ -44,16 +46,14 @@ class AttentionCodeletImpl(AttentionCodelet):
                 self.formed_coalition.setActivation(DEFAULT_CODELET_ACTIVATION)
                 self.tick_at_last_coalition = self.tick
                 self.logger.debug("Coalition successfully formed.")
+                self.decay(0.5)
                 self.notify_observers()
-                while not (self.tick - self.tick_at_last_coalition >=
+                if not (self.tick - self.tick_at_last_coalition >=
                            self.codelet_reinforcement):
-                    sleep(15)
-                    new_codelet = AttentionCodeletImpl()
-                    for observer in self.observers:
-                        new_codelet.add_observer(observer)
-                    new_codelet.buffer = self.buffer
-                    new_codelet.setSoughtContent(csm_content)
-                    new_codelet.run_task()
+                    sleep(self.codelet_reinforcement)
+                    if not self.isRemovable() and not self.shutdown:
+                        self.shutdown = True
+                        self.run_task()
             else:
                 while csm_content.getLinkCount() == 0:
                     time.sleep(10)
@@ -69,13 +69,6 @@ class AttentionCodeletImpl(AttentionCodelet):
     def get_refactory_period(self):
         return self.codeletRefractoryPeriod
 
-    def notify(self, module):
-        if isinstance(module, GlobalWorkSpaceImpl):
-            winning_coalition = module.get_broadcast()
-            self.logger.debug(f"Received conscious broadcast: "
-                              f"{winning_coalition}")
-            self.learn(winning_coalition)
-
     def learn(self, coalition):
         coalition_codelet = None
         if isinstance(coalition, CoalitionImpl):
@@ -87,14 +80,15 @@ class AttentionCodeletImpl(AttentionCodelet):
             new_codelet.buffer = self.buffer
             content = coalition.getContent()
             new_codelet.setSoughtContent(content)
-            self.logger.debug(f"Created new codelet: {new_codelet}")
+            self.decay(0.5)
+            self.logger.info(f"Created new codelet: {new_codelet}")
             sleep(3)
-            new_codelet.run_task()
+            new_codelet.start()
         elif coalition_codelet is not None:
     # TODO Reinforcement amount might be a function of the broadcast's
     # activation
-            #coalition_codelet.reinforceBaseLevelActivation(
-                #self.codelet_reinforcement)
+            coalition_codelet.reinforceBaseLevelActivation(
+                self.codelet_reinforcement)
             self.logger.debug(f"Reinforcing codelet: {coalition_codelet}")
 
     def getModuleContent(self):
@@ -114,3 +108,12 @@ class AttentionCodeletImpl(AttentionCodelet):
         if isinstance(buffer, CurrentSituationalModelImpl):
             return buffer.getBufferContent()
 
+    def notify(self, module):
+        if isinstance(module, GlobalWorkSpaceImpl):
+            if not self.isRemovable():
+                winning_coalition = module.get_broadcast()
+                self.logger.debug(f"Received conscious broadcast: "
+                                f"{winning_coalition}")
+                self.learn(winning_coalition)
+            else:
+                module.remove_observer(self)

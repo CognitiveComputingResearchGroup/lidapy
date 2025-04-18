@@ -2,7 +2,9 @@ import random
 
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.MotorPlanExecution.MotorPlanExecution import MotorPlanExecution
+from source.SensoryMemory.SensoryMemory import SensoryMemory
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
+from src.Framework.Shared.NodeImpl import NodeImpl
 
 
 class MotorPlanExecutionImpl(MotorPlanExecution):
@@ -11,9 +13,10 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
         self.motor_plans = {}
         self.state = None
         self.logger = getLogger(__class__.__name__).logger
-
-    def run(self):
         self.logger.debug("Initialized Motor Plan Execution")
+
+    def start(self):
+        pass
 
     def send_motor_plan(self):
         if self.motor_plans and self.state in self.motor_plans:
@@ -37,7 +40,17 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
 
 
     def notify(self, module):
-        if isinstance(module, SensoryMotorMemory):
+        if isinstance(module, SensoryMemory):
+            cue = module.get_sensory_content(module)["cue"]
+            for link in cue:
+                if link.getCategory("label") != "H":
+                    source = link.getSource()
+                    if source is not None and isinstance(source, NodeImpl):
+                        self.receive_motor_plan(source,
+                                    {link.getCategory("label"):
+                                                link.getCategory("id")})
+
+        elif isinstance(module, SensoryMotorMemory):
             state = module.get_state()
             self.state = state
             motor_plan = module.send_action_execution_command()

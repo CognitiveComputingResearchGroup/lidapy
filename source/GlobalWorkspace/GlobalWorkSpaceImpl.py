@@ -29,6 +29,9 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.tick = 0
         self.shutdown = False
         self.tick_at_last_broadcast = 0
+        self.trigger1 = "no_winning_coalition_trigger"
+        self.trigger2 = "winning_coalition_trigger"
+        self.trigger3 = "no_broadcast_for_extended_period"
         self.logger.debug("Initialized GlobalWorkspaceImpl")
 
     def run_task(self):
@@ -36,12 +39,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.aggregate_trigger_threshold = DEFAULT_THRESHOLD
         self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
         self.broadcast_refractory_period = DEFAULT_REFRACTORY_PERIOD
-        trigger1 = "no_winning_coalition_trigger"
-        trigger2 = "winning_coalition_trigger"
-        trigger3 = "no_broadcast_for_extended_period"
-        self.broadcast_triggers.append(trigger1)
-        self.broadcast_triggers.append(trigger2)
-        self.broadcast_triggers.append(trigger3)
+        self.broadcast_triggers.append(self.trigger1)
         self.run()
 
     def addCoalition(self, coalition):
@@ -89,6 +87,12 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                 self.broadcast_refractory_period):
                 self.broadcast_started = False
                 sleep(25)
+                """No winning coalition for some time, add trigger"""
+                if self.trigger3 not in self.broadcast_triggers:
+                    self.broadcast_triggers.append(self.trigger3)
+                """No winning coalition, remove trigger"""
+                if self.trigger2 in self.broadcast_triggers:
+                    self.broadcast_triggers.remove(self.trigger2)
             else:
                 self.broadcast_was_sent = self.sendBroadCast()
                 if self.broadcast_was_sent:
@@ -96,15 +100,18 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                     self.notify_observers()
                     sleep(25)
 
-
     def sendBroadCast(self):
         self.logger.debug("Triggering broadcast")
         self.winningCoalition = self.chooseCoalition()
         self.broadcast_was_sent = False
         if self.winningCoalition is not None:
             self.coalitions.remove(self.winningCoalition)
-            if "no_winning_coalition_trigger" in self.broadcast_triggers:
-                self.broadcast_triggers.remove("no_winning_coalition_trigger")
+            """Winning coalition found, remove trigger"""
+            if self.trigger1 in self.broadcast_triggers:
+                self.broadcast_triggers.remove(self.trigger1)
+            """Add winning coalition trigger"""
+            if self.trigger2 not in self.broadcast_triggers:
+                self.broadcast_triggers.append(self.trigger2)
             self.tick_at_last_broadcast = self.tick
             self.broadcast_sent_count += 1
             self.broadcast_was_sent = True
