@@ -29,7 +29,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version="0.0.5",  # Required
+    version="0.2.6",  # Required
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
@@ -60,7 +60,6 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url="https://github.com/CognitiveComputingResearchGroup/lidapy/",  # Optional
     # This should be your name or the name of the organization which owns the
     # project.
     author="Brian W Karimi, Katie Killian, Nicole Vadillo",
@@ -100,7 +99,7 @@ setup(
     keywords="lidapy, setuptools, development",  # Optional
     # When your source code is in a subdirectory under the project root, e.g.
     # `source/`, it is necessary to specify the `package_dir` argument.
-    package_dir={"": "src"},  # Optional
+    package_dir={"": "lidapy"},  # Optional
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
     #
@@ -110,7 +109,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(where="src"),  # Required
+    packages=find_packages(where="lidapy"),  # Required
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. See
@@ -152,6 +151,5 @@ setup(
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
         "Bug Reports": "https://pypi.org/project/lidapy/0.1.5/",
-        "source": "https://github.com/CognitiveComputingResearchGroup/lidapy/",
     },
 )

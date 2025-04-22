@@ -4,11 +4,11 @@
 
 import pytest
 
-from src.Framework.Shared.NodeStructureImpl import NodeStructureImpl
-from src.PAM.PAM_Impl import PAMImpl
-from src.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
-from src.Framework.Shared.NodeImpl import NodeImpl
-from src.Framework.Shared.LinkImpl import LinkImpl
+from lidapy.Framework.Shared.NodeStructureImpl import NodeStructureImpl
+from lidapy.PAM.PAM_Impl import PAMImpl
+from lidapy.ProceduralMemory import ProceduralMemoryImpl
+from lidapy.src import NodeImpl
+from lidapy.Framework.Shared.LinkImpl import LinkImpl
 
 """
 This provided PyTest is for the Procedural Memory Module:

@@ -3,9 +3,9 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 from Configs import Sensors
-from src.Environment.FrozenLakeEnvironment import FrozenLake
-from src.SensoryMemory.SensoryMemory import SensoryMemory
-from src.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
+from lidapy.src import FrozenLake
+from lidapy import SensoryMemory
+from lidapy.src import SensoryMemoryImpl
 
 """
 This provided PyTest is for the Sensory Memory Module:

@@ -1,5 +1,5 @@
 from multiprocessing import Value
-from threading import Lock, Thread
+from threading import Lock, Thread, RLock
 
 from source.Framework.Shared.Learnable import Learnable, \
     DEFAULT_BASE_LEVEL_ACTIVATION, DEFAULT_LEARNABLE_REMOVAL_THRESHOLD, \
@@ -58,16 +58,15 @@ class LearnableImpl(Learnable, ActivatibleImpl):
 
             """Sharing of values between threads, d stands for float (double)
                Otherwise LinearDecayStrategy returns none without sharing"""
-            lock = Lock()
-            lock.acquire()
-            activation = Value("d", self.getBaseLevelActivation())
-            _amount = Value("d", amount)
-            t = Thread(target=self.baseLevelExciteStrategy.excite,
-                       args=(activation, _amount))
-            t.start()
-            t.join()
-            self.activation = activation.value
-            lock.release()
+            lock = RLock()
+            with lock:
+                activation = Value("d", self.getBaseLevelActivation())
+                _amount = Value("d", amount)
+                t = Thread(target=self.baseLevelExciteStrategy.excite,
+                           args=(activation, _amount))
+                t.start()
+                t.join()
+                self.activation = activation.value
             """self.logger.debug(f"After reinforcement {self} has base-level "
                             f"activation: {self.getBaseLevelActivation()}")"""
 
@@ -78,16 +77,15 @@ class LearnableImpl(Learnable, ActivatibleImpl):
 
             """Sharing of values between threads, d stands for float (double)
                Otherwise LinearDecayStrategy returns none without sharing"""
-            lock = Lock()
-            lock.acquire()
-            activation = Value("d", self.getBaseLevelActivation())
-            _amount = Value("d", ticks)
-            t = Thread(target=self.baseLevelDecayStrategy.decay,
-                       args=(activation, _amount))
-            t.start()
-            t.join()
-            self.activation = activation.value
-            lock.release()
+            lock = RLock()
+            with lock:
+                activation = Value("d", self.getBaseLevelActivation())
+                _amount = Value("d", ticks)
+                t = Thread(target=self.baseLevelDecayStrategy.decay,
+                           args=(activation, _amount))
+                t.start()
+                t.join()
+                self.activation = activation.value
             """self.logger.debug(f"After decaying {self} has base-level "
                             f"activation: {self.getBaseLevelActivation()}")"""
 
@@ -109,17 +107,16 @@ class LearnableImpl(Learnable, ActivatibleImpl):
 
             """Sharing of values between threads, d stands for float (double)
                Otherwise LinearDecayStrategy returns none without sharing"""
-            lock = Lock()
-            lock.acquire()
-            incentiveSalience = Value("d",
-                                      self.getBaseLevelIncentiveSalience())
-            _amount = Value("d", amount)
-            t = Thread(target=self.baseLevelExciteStrategy.excite,
-                       args=(incentiveSalience, _amount))
-            t.start()
-            t.join()
-            self.incentiveSalience = incentiveSalience.value
-            lock.release()
+            lock = RLock()
+            with lock:
+                incentiveSalience = Value("d",
+                                          self.getBaseLevelIncentiveSalience())
+                _amount = Value("d", amount)
+                t = Thread(target=self.baseLevelExciteStrategy.excite,
+                           args=(incentiveSalience, _amount))
+                t.start()
+                t.join()
+                self.incentiveSalience = incentiveSalience.value
             """self.logger.debug(f"After reinforcement {self} has base-level "
                f"IncentiveSalience: {self.getBaseLevelIncentiveSalience()}")"""
 
@@ -130,17 +127,16 @@ class LearnableImpl(Learnable, ActivatibleImpl):
 
             """Sharing of values between threads, d stands for float (double)
                Otherwise LinearDecayStrategy returns none without sharing"""
-            lock = Lock()
-            lock.acquire()
-            incentiveSalience = Value("d",
-                                      self.getBaseLevelIncentiveSalience())
-            _amount = Value("d", ticks)
-            t = Thread(target=self.baseLevelDecayStrategy.decay,
-                       args=(incentiveSalience, _amount))
-            t.start()
-            t.join()
-            self.incentiveSalience = incentiveSalience.value
-            lock.release()
+            lock = RLock()
+            with lock:
+                incentiveSalience = Value("d",
+                                          self.getBaseLevelIncentiveSalience())
+                _amount = Value("d", ticks)
+                t = Thread(target=self.baseLevelDecayStrategy.decay,
+                           args=(incentiveSalience, _amount))
+                t.start()
+                t.join()
+                self.incentiveSalience = incentiveSalience.value
             """self.logger.debug(f"After decaying {self} has base-level "
                f"IncentiveSalience: {self.getBaseLevelIncentiveSalience()}")"""
 

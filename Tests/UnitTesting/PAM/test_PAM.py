@@ -4,8 +4,8 @@
 
 import logging
 
-from src.PAM.PAM import PerceptualAssociativeMemory
-from src.PAM.PAM_Impl import PAMImpl
+from lidapy.src import PerceptualAssociativeMemory
+from lidapy.PAM.PAM_Impl import PAMImpl
 
 """
 This provided PyTest is for the Perceptual Associative Memory (PAM) and PAMImpl.
@@ -42,8 +42,6 @@ class exampleNode:
     def isRemovable(self): #Determinr if the node is removable based on activation
         return self.activation < 0.1 #If low it can be removed
 
-from src.Framework.Shared.ActivatibleImpl import ActivatibleImpl
-from src.Framework.Shared.Link import Link
 
 class exampleLink:
     # initializing the link with default id, activation and label

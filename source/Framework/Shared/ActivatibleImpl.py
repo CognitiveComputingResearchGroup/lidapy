@@ -1,5 +1,5 @@
 from multiprocessing import Value
-from threading import Thread, Lock
+from threading import Thread, Lock, RLock
 
 from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
 from source.Framework.Strategies.LinearExciteStrategy import \
@@ -59,23 +59,22 @@ class ActivatibleImpl(Activatible):
 
             """Sharing of values between threads, d stands for float (double)
             Otherwise LinearDecayStrategy returns none without sharing"""
-            lock = Lock()
-            lock.acquire()
-            activation = Value("d", self.getActivation())
-            _ticks = Value("d", ticks)
-            t = Thread(target=self.decayStrategy.decay, args=(activation,
-                                                               _ticks))
-            t.start()
-            t.join()
-            self.activation = activation.value
-            incentiveSalience = Value("d", self.getIncentiveSalience())
-            t = Thread(target=self.decayStrategy.decay,
-                        args=(incentiveSalience, _ticks))
-            t.start()
-            t.join()
+            lock = RLock()
+            with lock:
+                activation = Value("d", self.getActivation())
+                _ticks = Value("d", ticks)
+                t = Thread(target=self.decayStrategy.decay, args=(activation,
+                                                                  _ticks))
+                t.start()
+                t.join()
+                self.activation = activation.value
+                incentiveSalience = Value("d", self.getIncentiveSalience())
+                t = Thread(target=self.decayStrategy.decay,
+                           args=(incentiveSalience, _ticks))
+                t.start()
+                t.join()
 
-            self.incentiveSalience = incentiveSalience.value
-            lock.release()
+                self.incentiveSalience = incentiveSalience.value
             """self.logger.debug(f"After decaying {self} has current "
                                   f"activation: {self.getActivation()}")"""
 
@@ -86,16 +85,15 @@ class ActivatibleImpl(Activatible):
 
             """Sharing of values between threads, d stands for float (double)
                Otherwise LinearDecayStrategy returns none without sharing"""
-            lock = Lock()
-            lock.acquire()
-            activation = Value("d", self.getActivation())
-            _amount = Value("d", amount)
-            t = Thread(target=self.exciteStrategy.excite, args=(activation,
-                                                               _amount))
-            t.start()
-            t.join()
-            self.activation = activation.value
-            lock.release()
+            lock = RLock()
+            with lock:
+                activation = Value("d", self.getActivation())
+                _amount = Value("d", amount)
+                t = Thread(target=self.exciteStrategy.excite, args=(activation,
+                                                                    _amount))
+                t.start()
+                t.join()
+                self.activation = activation.value
             """self.logger.debug(f"After excitation {self} has current "
                               f"activation: {self.getActivation()}")"""
 
@@ -107,19 +105,18 @@ class ActivatibleImpl(Activatible):
 
             """Sharing of values between threads, d stands for float (double)
                 Otherwise LinearDecayStrategy returns none without sharing"""
-            lock = Lock()
-            lock.acquire()
-            incentiveSalience = Value("d", self.getIncentiveSalience())
-            _amount = Value("d", amount)
+            lock = RLock()
+            with lock:
+                incentiveSalience = Value("d", self.getIncentiveSalience())
+                _amount = Value("d", amount)
 
-            t = Thread(target=self.exciteStrategy.excite,
-                       args=(incentiveSalience, _amount))
-            t.start()
-            t.join()
+                t = Thread(target=self.exciteStrategy.excite,
+                   args=(incentiveSalience, _amount))
+                t.start()
+                t.join()
 
-            self.incentiveSalience = incentiveSalience.value
-            lock.release()
-            """self.logger.debug(f"After excitation {self} has current "
+                self.incentiveSalience = incentiveSalience.value
+                """self.logger.debug(f"After excitation {self} has current "
                               f"incentive salience: "
                               f"{self.getIncentiveSalience()}")"""
 

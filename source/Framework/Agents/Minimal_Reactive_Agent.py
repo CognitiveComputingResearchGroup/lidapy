@@ -6,9 +6,9 @@ from yaml import YAMLError
 from source.Environment.Environment import Environment
 from source.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
 from source.Framework.Agents.Agent import Agent
+from source.MotorPlanExecution.MotorPlanExecutionImpl import \
+    MotorPlanExecutionImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
-from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
-    SensoryMotorMemoryImpl
 from Configs import Sensors, Config
 
 
@@ -18,7 +18,7 @@ class MinimalReactiveAgent(Agent):
 
         # Agent modules
         self.environment = FrozenLakeEnvironment()
-        self.sensory_motor_mem = SensoryMotorMemoryImpl()
+        self.motor_plan_exec = MotorPlanExecutionImpl()
         self.sensory_memory = SensoryMemoryImpl()
 
         # Sensory Memory Sensors
@@ -27,7 +27,7 @@ class MinimalReactiveAgent(Agent):
         self.sensory_memory.processor_dict = self.get_agent_processors()
 
         # Module observers
-        self.sensory_memory.add_observer(self.sensory_motor_mem)
+        self.sensory_memory.add_observer(self.motor_plan_exec)
 
         # Environment thread
         self.environment_thread = None
@@ -36,24 +36,24 @@ class MinimalReactiveAgent(Agent):
         self.sensory_memory_thread = (
             Thread(target=self.sensory_memory.start))
 
-        # SensoryMotorMem thread
-        self.sensory_motor_mem_thread = (
-            Thread(target=self.sensory_motor_mem.start))
+        # MotorPlan Thread
+        self.motor_plan_exec_thread = (
+            Thread(target=self.motor_plan_exec.start))
 
         self.threads = [
             self.sensory_memory_thread,
-            self.sensory_motor_mem_thread,
+            self.motor_plan_exec_thread,
         ]
 
     def run(self):
         self.environment.add_observer(self.sensory_memory)
-        self.sensory_motor_mem.add_observer(self.environment)
+        self.motor_plan_exec.add_observer(self.environment)
         self.environment_thread = Thread(target=self.environment.reset)
-        self.threads.append(self.environment_thread)
+        self.threads.insert(0, self.environment_thread)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(self.start, self.threads)
-            executor.shutdown(wait=True)
+        executor.shutdown(wait=True, cancel_futures=False)
 
     def start(self, worker):
         worker.start()

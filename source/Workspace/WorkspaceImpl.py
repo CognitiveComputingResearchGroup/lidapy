@@ -1,10 +1,10 @@
 from time import sleep
 
-from source.Framework.Shared.NodeImpl import NodeImpl
+
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
 from source.Workspace.Workspace import Workspace
-from source.Module.Initialization.DefaultLogger import getLogger
+
 
 
 class WorkspaceImpl(Workspace):

@@ -47,7 +47,19 @@ class ActionSelectionImpl(ActionSelection):
         if isinstance(module, ProceduralMemoryImpl):
             state = module.get_state()
             self.state = state
-            schemes = module.get_schemes(state)
+            schemes = module.get_schemes_(state, module.optimized_schemes)
+            if schemes is not None and len(schemes) > 0:
+                for scheme in schemes:
+                    if scheme.isRemovable():
+                        module.schemes.remove(scheme)
+
+            if schemes is None or len(schemes) <= 0:
+                schemes = module.get_schemes(state)
+
+            if len(schemes) > 0:
+                for scheme in schemes:
+                    if scheme.isRemovable():
+                        module.schemes.remove(scheme)
 
             random_index = random.randint(0, len(schemes) - 1)
             while (schemes[random_index].getActivation() < 0.1 and
@@ -94,7 +106,7 @@ class ActionSelectionImpl(ActionSelection):
             source = link.getSource()
             if isinstance(source, NodeImpl):
                 if (link.getActivation() < 0.5 and
-                        link.getIncentiveSalience() <= 0.0):
+                        link.getIncentiveSalience() <= 0.1):
                     behaviors = self.get_behaviors(source)
                     if behaviors is not None:
                         if isinstance(behaviors, list):

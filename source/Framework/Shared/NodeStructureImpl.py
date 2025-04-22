@@ -10,13 +10,13 @@ DEFAULT_LINK_TYPE = "DEFAULT_LINK"
 class NodeStructureImpl(NodeStructure):
     def __init__(self):
         super().__init__()
-        self.max_links = 4
 
     def addDefaultNode(self, label, activation, removal_threshold):
         self.addNode(label, activation, removal_threshold)
 
     def addDefaultNode_(self, node):
-        self.nodes.append(node)
+        if node not in self.nodes:
+            self.nodes.append(node)
 
     def addDefaultNodes(self, nodes):
         for node in nodes:
@@ -37,7 +37,7 @@ class NodeStructureImpl(NodeStructure):
 
     def addDefaultLink(self, source_node, sink_link, category, activation,
                        removal_threshold):
-        if not source_node in self.getConnectedSources(sink_link):
+        if source_node not in self.getConnectedSources(sink_link):
             self.addDefaultLink_(source_node.getId(),
                                  sink_link.getCategory("id"), category,
                                  activation, removal_threshold)
@@ -64,7 +64,8 @@ class NodeStructureImpl(NodeStructure):
         link.setSink(sink_id)
         link.setActivation(activation)
         link.setActivatibleRemovalThreshold(removal_threshold)
-        self.links.append(link)
+        if link not in self.links:
+            self.links.append(link)
 
     def addLinks(self, links, link_type):
         for link in links:
@@ -112,10 +113,12 @@ class NodeStructureImpl(NodeStructure):
     def mergeWith(self, node_structure):
         if node_structure.nodes is not None:
             for node in node_structure.nodes:
-                self.nodes.append(node)
+                if node not in self.nodes:
+                    self.nodes.append(node)
         if node_structure.links is not None:
             for link in node_structure.links:
-                self.links.append(link)
+                if link not in self.links:
+                    self.links.append(link)
 
     def copy(self):
         return self
@@ -178,7 +181,6 @@ class NodeStructureImpl(NodeStructure):
 
     def getLinkableCount(self):
         #TODO Implement actual getLinkableCount function
-        #temp frozen lake implementation
         return self.getNodeCount() + self.getLinkCount()
 
     def getDefaultNodeType(self):

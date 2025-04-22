@@ -2,11 +2,8 @@
 #Pennsylvania State University, Course : SWENG481
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
-from unittest.mock import Mock
-
-from src.Environment.FrozenLakeEnvironment import FrozenLake
-from src.SensoryMotorMemory.SensoryMotorMemoryImpl import \
-    SensoryMotorMemoryImpl
+from lidapy.src import FrozenLake
+from lidapy.SensoryMotorMemory import SensoryMotorMemoryImpl
 
 """
 This provided PyTest is for the Sensory Motor Memory Module:

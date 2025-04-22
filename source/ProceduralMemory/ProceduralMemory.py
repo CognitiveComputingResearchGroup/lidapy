@@ -1,7 +1,7 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-from threading import Lock
+from threading import Lock, RLock
 
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.Module.Initialization.ModuleInterface import Module
@@ -19,20 +19,19 @@ class ProceduralMemory(Module):
         self.scheme = scheme
 
     def add_scheme(self, state, percept):
-        lock = Lock()
-        lock.acquire()
-        if not self.schemes or state not in self.schemes:
-            self.schemes[state] = []  # add new scheme to memory
-        self.schemes[state].append(percept)
-        lock.release()
+        lock = RLock()
+        with lock:
+            if not self.schemes or state not in self.schemes:
+                self.schemes[state] = []  # add new scheme to memory
+            if percept not in self.schemes[state]:
+                self.schemes[state].append(percept)
 
     def add_scheme_(self, state, percept, schemes):
-        lock = Lock()
-        lock.acquire()
-        if not schemes or state not in schemes:
-            schemes[state] = []  # add new scheme to memory
-        schemes[state].append(percept)
-        lock.release()
+        lock = RLock()
+        with lock:
+            if not schemes or state not in schemes:
+                schemes[state] = []  # add new scheme to memory
+            schemes[state].append(percept)
 
     def receive_broadcast(self, coalition):
         self.logger.debug(f"Received broadcast coalition {coalition}")

@@ -2,6 +2,7 @@ import time
 from time import sleep
 
 from source.AttentionCodelets.AttentionCodelet import AttentionCodelet
+from source.Framework.Tasks.TaskManager import TaskManager
 from source.GlobalWorkspace.CoalitionImpl import CoalitionImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.Workspace.CurrentSituationalModel.CurrentSituationalModelImpl import \
@@ -23,14 +24,13 @@ class AttentionCodeletImpl(AttentionCodelet):
         self.removal_threshold = DEFAULT_CODELET_REMOVAL_THRESHOLD
         self.activation = DEFAULT_CODELET_ACTIVATION
         self.tick_at_last_coalition = 0.0
-        self.shutdown = False
-        self.tick = 0.0
+        self.task_manager = TaskManager()
 
 
     def start(self):
         self.logger.debug("Initialized new attention codelets")
         self.run_task()
-        self.run()
+        self.task_manager.run()
 
     def run_task(self):
         if self.bufferContainsSoughtContent(self.buffer):
@@ -44,15 +44,16 @@ class AttentionCodeletImpl(AttentionCodelet):
                 self.formed_coalition.setContent(csm_content)
                 self.formed_coalition.setCreatingAttentionCodelet(self)
                 self.formed_coalition.setActivation(DEFAULT_CODELET_ACTIVATION)
-                self.tick_at_last_coalition = self.tick
+                self.tick_at_last_coalition = (
+                    self.task_manager.getCurrentTick())
                 self.logger.debug("Coalition successfully formed.")
-                self.decay(0.5)
+                self.decay(1.0)
                 self.notify_observers()
-                if not (self.tick - self.tick_at_last_coalition >=
+                if not self.isRemovable() and not self.task_manager.shutdown:
+                    if not (self.task_manager.getCurrentTick() -
+                           self.tick_at_last_coalition >=
                            self.codelet_reinforcement):
-                    sleep(self.codelet_reinforcement)
-                    if not self.isRemovable() and not self.shutdown:
-                        self.shutdown = True
+                        sleep(self.codelet_reinforcement)
                         self.run_task()
             else:
                 while csm_content.getLinkCount() == 0:
@@ -80,7 +81,8 @@ class AttentionCodeletImpl(AttentionCodelet):
             new_codelet.buffer = self.buffer
             content = coalition.getContent()
             new_codelet.setSoughtContent(content)
-            self.decay(0.5)
+            self.task_manager.shutdown = True
+            self.decay(1.0)
             self.logger.info(f"Created new codelet: {new_codelet}")
             sleep(3)
             new_codelet.start()
@@ -110,7 +112,7 @@ class AttentionCodeletImpl(AttentionCodelet):
 
     def notify(self, module):
         if isinstance(module, GlobalWorkSpaceImpl):
-            if not self.isRemovable():
+            if not self.isRemovable() and not self.task_manager.shutdown:
                 winning_coalition = module.get_broadcast()
                 self.logger.debug(f"Received conscious broadcast: "
                                 f"{winning_coalition}")

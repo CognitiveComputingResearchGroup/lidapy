@@ -6,6 +6,8 @@ from yaml import YAMLError
 from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 from source.Environment.Environment import Environment
 from source.Framework.Agents.Agent import Agent
+from source.MotorPlanExecution.MotorPlanExecutionImpl import \
+    MotorPlanExecutionImpl
 from source.PAM.PAM_Impl import PAMImpl
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
@@ -25,12 +27,15 @@ class AlarmsControlAgent(Agent):
         self.procedural_memory = ProceduralMemoryImpl()
         self.pam = PAMImpl()
         self.sensory_memory = SensoryMemoryImpl()
+        self.motor_plan_exec = MotorPlanExecutionImpl()
 
         # Module observers
         self.action_selection.add_observer(self.sensory_motor_mem)
         self.pam.add_observer(self.procedural_memory)
         self.procedural_memory.add_observer(self.action_selection)
         self.sensory_memory.add_observer(self.pam)
+        self.sensory_memory.add_observer(self.motor_plan_exec)
+        self.sensory_motor_mem.add_observer(self.motor_plan_exec)
 
         # Sensory Memory Sensors
         self.sensory_memory.sensor_dict = self.get_agent_sensors()
@@ -45,7 +50,7 @@ class AlarmsControlAgent(Agent):
 
         # Sensory memory thread
         self.sensory_memory_thread = (
-            Thread(target=self.sensory_memory.run_sensors))
+            Thread(target=self.sensory_memory.start))
 
         # PAM thread
         self.pam_thread = Thread(target=self.pam.start)
@@ -63,26 +68,32 @@ class AlarmsControlAgent(Agent):
         self.sensory_motor_mem_thread = (
             Thread(target=self.sensory_motor_mem.start))
 
+        # MotorPlan Thread
+        self.motor_plan_exec_thread = (
+            Thread(target=self.motor_plan_exec.start))
+
         self.threads = [
             self.sensory_memory_thread,
             self.pam_thread,
             self.procedural_memory_thread,
             self.action_selection_thread,
             self.sensory_motor_mem_thread,
+            self.motor_plan_exec_thread
         ]
 
     def run(self):
         self.environment.add_observer(self.sensory_memory)
-        self.sensory_motor_mem.add_observer(self.environment)
+        self.motor_plan_exec.add_observer(self.environment)
         self.environment_thread = Thread(target=self.environment.reset)
-        self.threads.append(self.environment_thread)
+        self.threads.insert(0, self.environment_thread)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(self.start, self.threads)
+        executor.shutdown(wait=True, cancel_futures=False)
 
     def start(self, worker):
         worker.start()
-        sleep(5)
+        sleep(3)
         worker.join()
 
     def notify(self, module):

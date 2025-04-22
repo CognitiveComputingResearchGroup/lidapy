@@ -1,4 +1,4 @@
-from threading import Lock
+from threading import Lock, RLock
 from time import sleep
 
 from source.Module.Initialization.DefaultLogger import getLogger
@@ -9,16 +9,15 @@ class TaskManager:
         self.tick = 0
         self.name = ""
         self.shutdown = False
-        self.logger = None
+        self.logger = getLogger(__class__.__name__).logger
 
     def run(self):
-        self.logger = getLogger(__class__.__name__ + f" ({self.name})").logger
+        self.logger.name = __class__.__name__ +  f" ({self.name})"
         self.logger.debug("Initializing Task Manager")
         while not self.shutdown:
-            lock = Lock()
-            lock.acquire()
-            self.tick += 3
-            lock.release()
+            lock = RLock()
+            with lock:
+                self.tick += 3
             sleep(3)
 
     def getCurrentTick(self):

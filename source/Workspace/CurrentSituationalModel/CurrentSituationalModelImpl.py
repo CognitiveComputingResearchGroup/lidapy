@@ -16,7 +16,7 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
         self.logger.debug("Initialized CurrentSituationalModel")
 
     def run_task(self):
-        self.node_structure = NodeStructureImpl()
+        pass
 
     def addBufferContent(self, workspace_content):
         self.node_structure.mergeWith(workspace_content)

@@ -1,13 +1,11 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-import difflib
 import math
-from threading import Lock
-from time import sleep
+from threading import RLock
 import string
 
-from source.Framework.Shared.LinkImpl import LinkImpl
+
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.PAM.PAM_Impl import PAMImpl
@@ -27,11 +25,14 @@ class ProceduralMemoryImpl(ProceduralMemory):
 
             if isinstance(self.state, NodeImpl):
                 associations = module.retrieve_association(self.state)
+                for association in associations:
+                    if association.isRemovable():
+                        module.associations.remove(association)
 
             """Get the closest_match to the scheme from surrounding
             link nodes"""
             self.activate_schemes(associations)
-            sleep(0.2)
+            self.activate_schemes(associations)
             self.notify_observers()
 
         elif isinstance(module, GlobalWorkSpaceImpl):
@@ -92,25 +93,29 @@ class ProceduralMemoryImpl(ProceduralMemory):
 
     """Gets the link that closely matches the scheme"""
     def get_closest_match(self, links):
-        unwanted_scheme = None
-        wanted_scheme = None
+        goal_scheme = None
+        unwanted_schemes = []
+        lock = RLock()
+        with lock:
+            for link in links:
+                avoid_hole_similarity = self.get_similarity(self.scheme[0],
+                                                            link)
+                if avoid_hole_similarity != -1:
+                    links.remove(link)
+                    unwanted_schemes.append(link)
 
-        for link in links:
-            avoid_hole_similarity = self.get_similarity(self.scheme[0], link)
-            if avoid_hole_similarity > -1:
-                unwanted_scheme = link
-                link.decay(0.05)
+                find_goal_similarity = self.get_similarity(self.scheme[1],
+                                                           link)
+                if find_goal_similarity != -1:
+                    goal_scheme = link
+                    link.exciteActivation(0.05)
+                    link.exciteIncentiveSalience(0.05)
 
-            find_goal_similarity = self.get_similarity(self.scheme[1], link)
-            if find_goal_similarity > -1:
-                wanted_scheme = link
-                link.exciteActivation(0.05)
-                link.exciteIncentiveSalience(0.05)
-
-        if unwanted_scheme is not None:
-            links.remove(unwanted_scheme)
-        if wanted_scheme is not None:
-            return wanted_scheme
+        if len(unwanted_schemes) > 0:
+            for scheme in unwanted_schemes:
+                scheme.decay(0.3)
+        if goal_scheme is not None:
+            return goal_scheme
         return links
 
     """Updates the column, row value given a specific action"""
@@ -138,47 +143,57 @@ class ProceduralMemoryImpl(ProceduralMemory):
         min_distance = 20
         current_scheme = None
         instantiated_schemes = []
-        lock = Lock()
         # Find the links with the shortest distance to the goal
         for scheme in schemes:
-            lock.acquire()
             x_points = []
             y_points = []
-            if isinstance(scheme, LinkImpl):
-                state = scheme.getSource()
-                """For all the links with a similar source node,find the action
-                scheme that minimizes distance to the goal"""
-                if isinstance(state, NodeImpl):
-                    for link in schemes:
-                        source = link.getSource()
-                        if isinstance(source, NodeImpl) and source == state:
-                            action = link.getCategory("id")
-                            scheme_position = []
-                            x, y = self.update_position(action,
-                                                        int(
-                                                            state.getLabel()[
-                                                                0]),
-                                                        int(
-                                                            state.getLabel()[
-                                                                1]))
-                            x_points.append(x)  # Link row
-                            y_points.append(y)  # Link column
-                            x_points.append(7)  # Goal row
-                            y_points.append(7)  # Goal column
-                            distance = self.closest_pair(x_points,
-                                                         y_points)
-                            if distance < min_distance:
-                                min_distance = distance
-                                current_scheme = link
+            source = scheme.getSource()
+            scheme_position = []
+            if isinstance(source, NodeImpl):
+                stored_schemes = self.get_schemes(source)
+                """Optimize stored schemes based on state from coalition"""
+                if stored_schemes is not None and len(stored_schemes) > 0:
+                    for link in stored_schemes:
+                        action = link.getCategory("id")
+                        x, y = self.update_position(action,
+                                                    int(source.getLabel()[0]),
+                                                    int(source.getLabel()[1]))
+                        x_points.append(x)  # Link row
+                        y_points.append(y)  # Link column
+                        x_points.append(7)  # Goal row
+                        y_points.append(7)  # Goal column
+                        distance = self.closest_pair(x_points,
+                                                     y_points)
+                        if distance < min_distance:
+                            min_distance = distance
+                            current_scheme = scheme
                     if current_scheme:
                         instantiated_schemes.append(current_scheme)
                         current_scheme.exciteActivation(0.05)
                         current_scheme.exciteIncentiveSalience(0.05)
-                        """self.add_scheme_(state, current_scheme,
-                                         self.optimized_schemes)"""
-                        self.add_scheme(state, current_scheme)
+                else:
+                    """Store new links otherwise from coalition"""
+                    action = scheme.getCategory("id")
+                    x, y = self.update_position(action,
+                                                int(source.getLabel()[0]),
+                                                int(source.getLabel()[1]))
+                    x_points.append(x)  # Link row
+                    y_points.append(y)  # Link column
+                    x_points.append(7)  # Goal row
+                    y_points.append(7)  # Goal column
+                    distance = self.closest_pair(x_points,
+                                                 y_points)
+                    if distance < min_distance:
+                        min_distance = distance
+                        current_scheme = scheme
+        if current_scheme:
+            instantiated_schemes.append(current_scheme)
+            current_scheme.exciteActivation(0.05)
+            current_scheme.exciteIncentiveSalience(0.05)
+            self.add_scheme_(current_scheme.getSource(), current_scheme,
+                                         self.optimized_schemes)
+            self.add_scheme(current_scheme.getSource(), current_scheme)
 
-            lock.release()
         self.logger.debug(f"Learned {len(instantiated_schemes)} new action "
                           f"scheme(s) that minimize(s) distance to goal")
         return current_scheme

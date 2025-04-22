@@ -142,7 +142,14 @@ class FrozenLakeEnvironment(Environment):
             "left" : 0
         }
         for direction, tile in surrounding_tiles.items():
-            stimuli[directions[direction]] = tile
+            if tile == "H":
+                stimuli[directions[direction]] = "hole"
+            elif tile == "S":
+                stimuli[directions[direction]] = "start"
+            elif tile == "G":
+                stimuli[directions[direction]] = "goal"
+            else:
+                stimuli[directions[direction]] = "safe"
         return stimuli
 
     def get_position(self):

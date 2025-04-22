@@ -39,13 +39,14 @@ class SensoryMemoryImpl(SensoryMemory):
         # Initialize sensors
         for key, processor in self.processor_dict.items():
             self.processors[key] = getattr(self.sensor, processor)
-        sleep(5)
 
     def notify(self, module):
         if isinstance(module, Environment):
             self.stimuli = module.get_stimuli()
             self.position = module.get_position()
             self.state = module.get_state()
+        if not self.processors:
+            self.start()
         self.run_sensors()
 
     def run_sensors(self):

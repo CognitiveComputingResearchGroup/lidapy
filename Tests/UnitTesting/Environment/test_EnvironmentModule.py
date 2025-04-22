@@ -2,9 +2,8 @@
 #Pennsylvania State University, Course : SWENG481
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
-import pytest
-from src.Environment.Environment import Environment
-from src.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
+from lidapy import Environment
+from lidapy.src import FrozenLakeEnvironment
 
 """
 This generated test case ensures the functions within the generalized environment and 

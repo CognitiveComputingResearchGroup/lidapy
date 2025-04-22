@@ -6,8 +6,8 @@ import time
 
 import pytest
 
-from src.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
-from src.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
+from lidapy.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
+from lidapy.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 
 """
 This generated test case will test the functions within the Global Workspace. These are to ensure each function is 

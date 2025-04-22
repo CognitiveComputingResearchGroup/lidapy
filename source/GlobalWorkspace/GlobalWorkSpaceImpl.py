@@ -1,6 +1,7 @@
 from time import sleep
 
 from source.Framework.Strategies.LinearDecayStrategy import LinearDecayStrategy
+from source.Framework.Tasks.TaskManager import TaskManager
 from source.GlobalWorkspace.Coalition import Coalition
 from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
 from source.Workspace.CurrentSituationalModel.CurrentSituationalModelImpl import \
@@ -26,8 +27,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.broadcast_refractory_period = None
         self.winningCoalition = None
         self.state = None
-        self.tick = 0
-        self.shutdown = False
+        self.task_manager = TaskManager()
         self.tick_at_last_broadcast = 0
         self.trigger1 = "no_winning_coalition_trigger"
         self.trigger2 = "winning_coalition_trigger"
@@ -40,7 +40,8 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
         self.broadcast_refractory_period = DEFAULT_REFRACTORY_PERIOD
         self.broadcast_triggers.append(self.trigger1)
-        self.run()
+        self.name = __class__.__name__
+        self.task_manager.run()
 
     def addCoalition(self, coalition):
         coalition.setDecayStrategy(self.coalition_decay_strategy)
@@ -65,7 +66,8 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                     aggregateActivation += coalition.getActivation()
                     if aggregateActivation > self.aggregate_trigger_threshold:
                         self.logger.debug("Aggregate activation trigger fired"
-                                          f" at tick: {self.tick}")
+                                          f" at tick: {
+                                          self.task_manager.getCurrentTick()}")
                         self.broadcast_started = True
                         self.triggerBroadcast(trigger)
                         sleep(3)
@@ -74,7 +76,8 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                 aggregateActivation += coalition.getActivation()
                 if aggregateActivation > self.aggregate_trigger_threshold:
                     self.logger.debug("Aggregate activation trigger fired"
-                                      f" at tick: {self.tick}")
+                                      f" at tick: {
+                                      self.task_manager.getCurrentTick()}")
                     self.triggerBroadcast(None)
 
     def getTickAtLastBroadcast(self):
@@ -83,7 +86,8 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
     def triggerBroadcast(self, trigger):
         if self.broadcast_started:
             self.broadcast_started = False
-            if (self.tick - self.tick_at_last_broadcast <
+            if (self.task_manager.getCurrentTick() -
+                    self.tick_at_last_broadcast <
                 self.broadcast_refractory_period):
                 self.broadcast_started = False
                 sleep(25)
@@ -112,7 +116,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
             """Add winning coalition trigger"""
             if self.trigger2 not in self.broadcast_triggers:
                 self.broadcast_triggers.append(self.trigger2)
-            self.tick_at_last_broadcast = self.tick
+            self.tick_at_last_broadcast = self.task_manager.getCurrentTick()
             self.broadcast_sent_count += 1
             self.broadcast_was_sent = True
         else:

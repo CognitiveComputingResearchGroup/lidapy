@@ -6,14 +6,13 @@ import pytest
 
 from unittest.mock import Mock
 from Configs import Sensors
-from src.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
-from src.Framework.Shared.LinkImpl import LinkImpl
-from src.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
-from src.PAM.PAM_Impl import PAMImpl
-from src.ProceduralMemory.ProceduralMemory import ProceduralMemory
-from src.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
-from src.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
-from src.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
+from lidapy.src import FrozenLakeEnvironment
+from lidapy.Framework.Shared.LinkImpl import LinkImpl
+from lidapy.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
+from lidapy.PAM.PAM_Impl import PAMImpl
+from lidapy.ProceduralMemory import ProceduralMemoryImpl, ProceduralMemory
+from lidapy.src import SensoryMemoryImpl
+from lidapy.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 
 """
 This generated test case will ensure that all functions within the Action Selection are functioning properly.

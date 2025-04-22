@@ -1,8 +1,5 @@
-import os
-from pathlib import Path
-
-from src.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
-from src.Framework.Agents.Alarms_Control_Agent import AlarmsControlAgent
+from lidapy.src import FrozenLakeEnvironment
+from lidapy.Framework.Agents.Alarms_Control_Agent import AlarmsControlAgent
 
 """
 This provided PyTest is for the Integration Tests of the Autonomous Agent:

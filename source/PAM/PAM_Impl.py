@@ -8,7 +8,7 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
-from threading import Lock
+from threading import RLock
 
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
@@ -67,7 +67,6 @@ class PAMImpl(PerceptualAssociativeMemory):
                         the connected sink links"""
             links = []
             source = None
-            lock = Lock()
             for link in broadcast.getLinks():
                 source = link.getSource()
                 if isinstance(source, NodeImpl):
@@ -105,34 +104,14 @@ class PAMImpl(PerceptualAssociativeMemory):
             self.form_associations(cue["cue"])
 
     def form_association(self, link, source):
-        lock = Lock()
-        lock.acquire()
-        # Priming data for scheme instantiation
-        if link.getCategory("label") == 'S':
-            link.setCategory(link.getCategory("id"), "start")
-            link.setActivation(0.5)
-            link.setIncentiveSalience(0.3)
-        elif link.getCategory("label") == 'G':
-            link.setCategory(link.getCategory("id"), "goal")
-            link.setActivation(1.0)
-            link.setIncentiveSalience(1.0)
-        elif link.getCategory("label") == 'F':
-            link.setCategory(link.getCategory("id"), "safe")
-            link.setActivation(0.75)
-            link.setIncentiveSalience(0.5)
-        elif link.getCategory("label") == 'H':
-            link.setCategory(link.getCategory("id"), "hole")
-            link.setActivation(0.05)
-        else:
+        lock = RLock()
+        with lock:
             if (link.getActivation() == 0.0 and
                     link.getIncentiveSalience() == 0.0):
                 link.setActivation(1.0)
                 link.setIncentiveSalience(0.5)
 
-        link.setSource(source)
-
-        # Add links to surrounding cells
-        if link not in self.associations.getLinks():
+            link.setSource(source)
             self.associations.addDefaultLink(link.getSource(), link,
                                              category={
                                                  "id": link.getCategory("id"),
@@ -140,42 +119,24 @@ class PAMImpl(PerceptualAssociativeMemory):
                                                      "label")},
                                              activation=link.getActivation(),
                                              removal_threshold=0.0)
-        lock.release()
 
     def form_associations(self, cue):
-        lock = Lock()
-        lock.acquire()
-        # Set links to surrounding cell nodes if none exist
-        for link in cue:
-            # Priming data for scheme instantiation
-            if link.getCategory("label") == 'S':
-                link.setCategory(link.getCategory("id"), "start")
-                link.setActivation(0.5)
-                link.setIncentiveSalience(0.3)
-            elif link.getCategory("label") == 'G':
-                link.setCategory(link.getCategory("id"), "goal")
-                link.setActivation(1.0)
-                link.setIncentiveSalience(1.0)
-            elif link.getCategory("label") == 'F':
-                link.setCategory(link.getCategory("id"), "safe")
-                link.setActivation(0.75)
-                link.setIncentiveSalience(0.5)
-            elif link.getCategory("label") == 'H':
-                link.setCategory(link.getCategory("id"), "hole")
-                link.setActivation(0.1)
-            else:
+        lock = RLock()
+        with lock:
+            # Set links to surrounding cell nodes if none exist
+            for link in cue:
                 if (link.getActivation() == 0.0 and
                         link.getIncentiveSalience() == 0.0):
-                    link.setActivation(0.1)
+                    link.setActivation(1.0)
+                    link.setIncentiveSalience(0.5)
 
-            link.setSource(self.current_cell)
-
-            # Add links to surrounding cells
-            if link not in self.associations.getLinks():
+                link.setSource(self.current_cell)
                 self.associations.addDefaultLink(link.getSource(), link,
-                            category = {"id": link.getCategory("id"),
-                                        "label": link.getCategory("label")},
-                                            activation=link.getActivation(),
-                                            removal_threshold=0.0)
-        lock.release()
+                                                 category={
+                                                     "id": link.getCategory(
+                                                         "id"),
+                                                     "label": link.getCategory(
+                                                         "label")},
+                                                 activation=link.getActivation(),
+                                                 removal_threshold=0.0)
         self.notify_observers()

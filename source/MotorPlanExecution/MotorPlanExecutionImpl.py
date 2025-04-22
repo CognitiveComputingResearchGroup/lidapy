@@ -1,10 +1,12 @@
 import random
+from time import sleep
 
+from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.MotorPlanExecution.MotorPlanExecution import MotorPlanExecution
 from source.SensoryMemory.SensoryMemory import SensoryMemory
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
-from src.Framework.Shared.NodeImpl import NodeImpl
+
 
 
 class MotorPlanExecutionImpl(MotorPlanExecution):
@@ -42,13 +44,21 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
     def notify(self, module):
         if isinstance(module, SensoryMemory):
             cue = module.get_sensory_content(module)["cue"]
+            source = NodeImpl()
+            state = (module.get_sensory_content(module)["params"]["state"]
+            ["state"])
+            source.setId(state)
             for link in cue:
-                if link.getCategory("label") != "H":
+                if link.getCategory("label") != "hole":
                     source = link.getSource()
                     if source is not None and isinstance(source, NodeImpl):
-                        self.receive_motor_plan(source,
-                                    {link.getCategory("label"):
-                                                link.getCategory("id")})
+                        self.state = source
+                        self.receive_motor_plan(source, link.getCategory("id"))
+                    else:
+                        self.state = source
+                        self.receive_motor_plan(source, link.getCategory("id"))
+            sleep(0.1)
+            self.notify_observers()
 
         elif isinstance(module, SensoryMotorMemory):
             state = module.get_state()

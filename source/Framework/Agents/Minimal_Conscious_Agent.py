@@ -149,9 +149,8 @@ class MinimalConsciousAgent(Agent):
         while self.get_state() is not None:
             sleep(5)
             if self.get_state()["done"]:
-                self.attention_codelets.shutdown = True
-                self.global_workspace.shutdown = True
-                self.workspace.shutdown = True
+                self.attention_codelets.task_manager.shutdown = True
+                self.global_workspace.task_manager.shutdown = True
 
 
     def notify(self, module):
