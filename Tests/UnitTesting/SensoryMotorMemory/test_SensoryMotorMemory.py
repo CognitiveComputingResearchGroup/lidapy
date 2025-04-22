@@ -2,8 +2,8 @@
 #Pennsylvania State University, Course : SWENG481
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
-from lidapy.src import FrozenLake
-from lidapy.SensoryMotorMemory import SensoryMotorMemoryImpl
+from source.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
+from source.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
 
 """
 This provided PyTest is for the Sensory Motor Memory Module:
@@ -15,17 +15,17 @@ Tests Cases: TC-044, TC-045, and TC-046.
 
 def test_add_sensory_listener():
     sensory_motor_memory = SensoryMotorMemoryImpl()
-    env = FrozenLake()
+    env = FrozenLakeEnvironment()
     sensory_motor_memory.add_observer(env)
     assert env in sensory_motor_memory.observers
 
 def test_receive_action():
-    environment = FrozenLake()  # Generating environment for testing
+    environment = FrozenLakeEnvironment()  # Generating environment for testing
     environment.reset()
     sensory_motor_memory = SensoryMotorMemoryImpl()
     action = 1
-    sensory_motor_memory.action_event = action
-    action = sensory_motor_memory.send_action_event()
+    sensory_motor_memory.action_plan = action
+    action = sensory_motor_memory.send_action_execution_command()
     state, reward, done, truncated, info = environment.env.step(action)
 
     #Assertions
@@ -36,7 +36,7 @@ def test_receive_action():
     assert info != 'info'
 
 def test_send_action_execution_command():
-    environment = FrozenLake()  # Generating environment for testing
+    environment = FrozenLakeEnvironment()  # Generating environment for testing
     environment.reset()
     sensory_motor_memory = SensoryMotorMemoryImpl()
     sensory_motor_memory.add_observer(environment)

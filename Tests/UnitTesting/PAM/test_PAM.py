@@ -4,8 +4,8 @@
 
 import logging
 
-from lidapy.src import PerceptualAssociativeMemory
-from lidapy.PAM.PAM_Impl import PAMImpl
+from source.PAM.PAM import PerceptualAssociativeMemory
+from source.PAM.PAM_Impl import PAMImpl
 
 """
 This provided PyTest is for the Perceptual Associative Memory (PAM) and PAMImpl.

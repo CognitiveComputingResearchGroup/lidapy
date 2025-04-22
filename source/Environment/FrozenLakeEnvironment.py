@@ -25,7 +25,7 @@ class FrozenLakeEnvironment(Environment):
             'FrozenLake-v1',
             desc=None,
             is_slippery=False,
-            map_name="8x8",
+            map_name="4x4",
             render_mode=render_mode)
 
         self.action_space = self.env.action_space  # action_space attribute

@@ -1,10 +1,10 @@
-from lidapy.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
-from lidapy.src import FrozenLakeEnvironment
-from lidapy.Framework.Initialization import ConcreteAgentFactory
-from lidapy.PAM.PAM_Impl import PAMImpl
-from lidapy.ProceduralMemory import ProceduralMemoryImpl
-from lidapy.src import SensoryMemoryImpl
-from lidapy.SensoryMotorMemory import SensoryMotorMemoryImpl
+from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
+from source.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
+from source.Framework.Initialization.ConcreteAgentFactory import ConcreteAgentFactory
+from source.PAM.PAM_Impl import PAMImpl
+from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
+from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
+from source.SensoryMotorMemory.SensoryMotorMemoryImpl import SensoryMotorMemoryImpl
 
 """
 This generated integrated test case will test the relationship between 

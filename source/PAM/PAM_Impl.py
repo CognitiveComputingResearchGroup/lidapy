@@ -30,7 +30,7 @@ class PAMImpl(PerceptualAssociativeMemory):
 
 
         """Create node for each cell the agent could visit"""
-        for cell in range(64):
+        for cell in range(16):
             node = NodeImpl()
             """Set the cell identifier to the corresponding state"""
             node.setId(cell)
@@ -88,7 +88,7 @@ class PAMImpl(PerceptualAssociativeMemory):
                     self.associations.remove(node)
             """If the result of the function to obtain the cell state 
             equals the node id, activate the corresponding node"""
-            if self.position["row"] * 8 + self.position["col"] == node.getId():
+            if self.position["row"] * 4 + self.position["col"] == node.getId():
                 if node.getActivation() == 0:
                     node.setActivation(1.0)
                     node.setLabel(str(self.position["row"]) +

@@ -3,9 +3,10 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 
 from Configs import Sensors
-from lidapy.src import FrozenLake
-from lidapy import SensoryMemory
-from lidapy.src import SensoryMemoryImpl
+
+from source.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
+from source.SensoryMemory.SensoryMemory import SensoryMemory
+from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 
 """
 This provided PyTest is for the Sensory Memory Module:
@@ -33,7 +34,7 @@ def test_sensoryMemoryImpl_Initialization():
 #Tesing the notify function
 def test_notify():
     smi = SensoryMemoryImpl()
-    env = FrozenLake() #Testing with the Frozen Lake Environment
+    env = FrozenLakeEnvironment() #Testing with the Frozen Lake Environment
     env.reset()
     env.add_observer(smi)
     env.notify_observers()
@@ -42,7 +43,7 @@ def test_notify():
     smi.processors["text"] = getattr(Sensors, smi.processor_dict["text"])
     assert smi.stimuli == env.get_stimuli()
     assert smi.position == env.get_position()
-    assert smi.state == env.__getstate__()
+    assert smi.state == env.get_state()
     assert smi.processors["text"] is Sensors.text_processing
 
 def test_run_sensors():
@@ -51,7 +52,7 @@ def test_run_sensors():
     smi.sensor_dict = {"text": "text_processing"}
     smi.processor_dict = {"text": "text_processing"}
     smi.processors["text"] = getattr(Sensors, smi.processor_dict["text"])
-    env = FrozenLake()  # Testing with the Frozen Lake Environment
+    env = FrozenLakeEnvironment()  # Testing with the Frozen Lake Environment
     env.reset()
     assert smi.processors["text"] is Sensors.text_processing
     smi.stimuli = env.get_stimuli()

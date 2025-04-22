@@ -14,9 +14,6 @@ class SensoryMotorMemory(Module):
         if listener not in self.listeners:
             self.listeners.append(listener)
 
-    def send_action_event(self):
-        pass
-
     def send_action_execution_command(self):
         """
         Returning the content from this Sensory Motor Memory

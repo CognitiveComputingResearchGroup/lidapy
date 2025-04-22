@@ -1,5 +1,5 @@
-from lidapy.src import FrozenLakeEnvironment
-from lidapy.Framework.Agents.Alarms_Control_Agent import AlarmsControlAgent
+from source.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
+from source.Framework.Agents.Alarms_Control_Agent import AlarmsControlAgent
 
 """
 This provided PyTest is for the Integration Tests of the Autonomous Agent:

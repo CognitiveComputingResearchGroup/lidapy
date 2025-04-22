@@ -6,13 +6,15 @@ import pytest
 
 from unittest.mock import Mock
 from Configs import Sensors
-from lidapy.src import FrozenLakeEnvironment
-from lidapy.Framework.Shared.LinkImpl import LinkImpl
-from lidapy.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
-from lidapy.PAM.PAM_Impl import PAMImpl
-from lidapy.ProceduralMemory import ProceduralMemoryImpl, ProceduralMemory
-from lidapy.src import SensoryMemoryImpl
-from lidapy.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
+from source.Environment.FrozenLakeEnvironment import FrozenLakeEnvironment
+from source.Framework.Shared.LinkImpl import LinkImpl
+from source.Framework.Shared.NodeImpl import NodeImpl
+from source.GlobalWorkspace.GlobalWorkSpace import GlobalWorkspace
+from source.PAM.PAM_Impl import PAMImpl
+from source.ProceduralMemory.ProceduralMemory import ProceduralMemory
+from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
+from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
+from source.ActionSelection.ActionSelectionImpl import ActionSelectionImpl
 
 """
 This generated test case will ensure that all functions within the Action Selection are functioning properly.
@@ -39,18 +41,20 @@ def procedural_mem():
     return ProceduralMemoryImpl()
 
 def test_initialization(action_selection):
-    assert isinstance(action_selection.scheme, dict)
-    assert action_selection.scheme == {}
+    assert isinstance(action_selection.behaviors, dict)
+    assert action_selection.behaviors == {}
 
 def test_select_action(action_selection):
-    action_selection.scheme = {"test_key":"test_value"}
-    assert action_selection.select_action() == {"test_key":"test_value"}
+    state = NodeImpl()
+    state.setId(0)
+    action_selection.add_behavior(state, {"test_key":"test_value"})
+    assert action_selection.get_behaviors(state)[0] == {"test_key":"test_value"}
 
 def test_select_action_initiallyEmpty(action_selection):
     smi = SensoryMemoryImpl()
     pam = PAMImpl()
     procedural_mem = ProceduralMemoryImpl()
-    env = FrozenLakeEnvironment()          # Testing with the Frozen Lake Environment
+    env = FrozenLakeEnvironment()    # Testing with the Frozen Lake Environment
     env.reset()
 
     #Setting up sensory memory sensors
@@ -59,12 +63,12 @@ def test_select_action_initiallyEmpty(action_selection):
     smi.processors["text"] = getattr(Sensors, smi.processor_dict["text"])
 
     smi.stimuli = env.get_stimuli()
-    smi.state = env.__getstate__()
+    smi.state = env.get_state()
     smi.position = env.get_position()
 
     assert smi.stimuli == env.get_stimuli()
     assert smi.position == env.get_position()
-    assert smi.state == env.__getstate__()
+    assert smi.state == env.get_state()
     assert smi.processors["text"] is Sensors.text_processing
 
     smi.run_sensors()
@@ -77,7 +81,7 @@ def test_select_action_initiallyEmpty(action_selection):
     pam.learn(cue)
     procedural_mem.scheme = ["avoid hole", "seek goal"]
 
-    state = pam.__getstate__()
+    state = pam.get_state()
     schemes = pam.retrieve_association(state)
 
     assert state is not None
@@ -105,8 +109,12 @@ def test_notify_with_proceduralMemory(action_selection):
 
     mock_procedural.get_action.return_value ={"action":"chosen_action"}
 
+    state = NodeImpl()
+    state.setId(0)
+    action_selection.add_behavior(state, {"action":"chosen_action"})
     action_selection.notify(mock_procedural)
-    assert action_selection.scheme == {"action":"chosen_action"} #Ensuring the scheme is updated
+    # Ensuring the scheme is updated
+    assert action_selection.get_behaviors(state)[0] == {"action":"chosen_action"}
 
 def test_notify_with_globalWorkspace(action_selection):
     mock_workspace = Mock(spec=GlobalWorkspace)

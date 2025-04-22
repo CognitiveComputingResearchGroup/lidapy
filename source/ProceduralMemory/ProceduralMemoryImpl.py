@@ -101,8 +101,8 @@ class ProceduralMemoryImpl(ProceduralMemory):
                 avoid_hole_similarity = self.get_similarity(self.scheme[0],
                                                             link)
                 if avoid_hole_similarity != -1:
-                    links.remove(link)
                     unwanted_schemes.append(link)
+                    avoid_hole_similarity = -1
 
                 find_goal_similarity = self.get_similarity(self.scheme[1],
                                                            link)
@@ -110,10 +110,13 @@ class ProceduralMemoryImpl(ProceduralMemory):
                     goal_scheme = link
                     link.exciteActivation(0.05)
                     link.exciteIncentiveSalience(0.05)
+                    find_goal_similarity = -1
+                    break
 
         if len(unwanted_schemes) > 0:
             for scheme in unwanted_schemes:
                 scheme.decay(0.3)
+                links.remove(scheme)
         if goal_scheme is not None:
             return goal_scheme
         return links
@@ -123,9 +126,9 @@ class ProceduralMemoryImpl(ProceduralMemory):
         if action == 3:  # up
             row = max(row - 1, 0)
         elif action == 2:  # Right
-            col = min(col + 1, 7)
+            col = min(col + 1, 3)
         elif action == 1:  # down
-            row = min(row + 1, 7)
+            row = min(row + 1, 3)
         elif action == 0:  # Left
             col = max(col - 1, 0)
         return row, col
@@ -160,8 +163,8 @@ class ProceduralMemoryImpl(ProceduralMemory):
                                                     int(source.getLabel()[1]))
                         x_points.append(x)  # Link row
                         y_points.append(y)  # Link column
-                        x_points.append(7)  # Goal row
-                        y_points.append(7)  # Goal column
+                        x_points.append(3)  # Goal row
+                        y_points.append(3)  # Goal column
                         distance = self.closest_pair(x_points,
                                                      y_points)
                         if distance < min_distance:
@@ -179,8 +182,8 @@ class ProceduralMemoryImpl(ProceduralMemory):
                                                 int(source.getLabel()[1]))
                     x_points.append(x)  # Link row
                     y_points.append(y)  # Link column
-                    x_points.append(7)  # Goal row
-                    y_points.append(7)  # Goal column
+                    x_points.append(3)  # Goal row
+                    y_points.append(3)  # Goal column
                     distance = self.closest_pair(x_points,
                                                  y_points)
                     if distance < min_distance:

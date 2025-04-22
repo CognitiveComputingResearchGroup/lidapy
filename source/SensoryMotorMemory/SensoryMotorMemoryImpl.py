@@ -17,7 +17,6 @@ from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 class SensoryMotorMemoryImpl(SensoryMotorMemory):
     def __init__(self):
         super().__init__()
-        self.action_event = None
         self.action_plan = None
         self.state = None
         self.logger = getLogger(__class__.__name__).logger
