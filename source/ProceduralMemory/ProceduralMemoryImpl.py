@@ -134,29 +134,36 @@ class ProceduralMemoryImpl(ProceduralMemory):
         return row, col
 
     """Finds the distance between a pair of coordinates x, y"""
-    def closest_pair(self, x_points, y_points):
-        d = 64.0
-        d = min(d, math.sqrt(math.pow(x_points[1] - x_points[0], 2)
-                                      + math.pow(y_points[1] - y_points[0],
+    def closest_pair(self, distance, x_points, y_points):
+        d = distance
+        i = 0
+        j = i + 1
+        current_scheme = None
+        for i in range(i, len(x_points) - 1):
+            for j in range(j, len(x_points)):
+                d = min(d, math.sqrt(math.pow(x_points[j] - x_points[i], 2)
+                                      + math.pow(y_points[j] - y_points[i],
                                                  2)))
         return d
 
     """Finds the shortest distance between a scheme and the goal"""
     def optimize_schemes(self, schemes):
-        min_distance = 20
+        distance = 6400.0
+        min_distance = distance
         current_scheme = None
         instantiated_schemes = []
         # Find the links with the shortest distance to the goal
         for scheme in schemes:
+            source = scheme.getSource()
             x_points = []
             y_points = []
-            source = scheme.getSource()
-            scheme_position = []
             if isinstance(source, NodeImpl):
                 stored_schemes = self.get_schemes(source)
                 """Optimize stored schemes based on state from coalition"""
                 if stored_schemes is not None and len(stored_schemes) > 0:
                     for link in stored_schemes:
+                        x_points = []
+                        y_points = []
                         action = link.getCategory("id")
                         x, y = self.update_position(action,
                                                     int(source.getLabel()[0]),
@@ -165,11 +172,12 @@ class ProceduralMemoryImpl(ProceduralMemory):
                         y_points.append(y)  # Link column
                         x_points.append(3)  # Goal row
                         y_points.append(3)  # Goal column
-                        distance = self.closest_pair(x_points,
+                        distance = self.closest_pair(distance, x_points,
                                                      y_points)
                         if distance < min_distance:
                             min_distance = distance
-                            current_scheme = scheme
+                            current_scheme = link
+
                     if current_scheme:
                         instantiated_schemes.append(current_scheme)
                         current_scheme.exciteActivation(0.05)
@@ -184,8 +192,8 @@ class ProceduralMemoryImpl(ProceduralMemory):
                     y_points.append(y)  # Link column
                     x_points.append(3)  # Goal row
                     y_points.append(3)  # Goal column
-                    distance = self.closest_pair(x_points,
-                                                 y_points)
+                    distance = self.closest_pair(distance, x_points, y_points)
+
                     if distance < min_distance:
                         min_distance = distance
                         current_scheme = scheme

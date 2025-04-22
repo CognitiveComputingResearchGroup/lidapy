@@ -9,7 +9,7 @@ from source.Framework.Agents.Agent import Agent
 from source.MotorPlanExecution.MotorPlanExecutionImpl import \
     MotorPlanExecutionImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
-from Configs import Sensors, Config
+from Configurations import Sensors, Config
 
 
 class MinimalReactiveAgent(Agent):

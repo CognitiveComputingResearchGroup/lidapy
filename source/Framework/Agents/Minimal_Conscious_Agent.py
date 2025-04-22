@@ -18,7 +18,7 @@ from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
 from source.Workspace.CurrentSituationalModel.CurrentSituationalModelImpl import \
     CurrentSituationalModelImpl
 from source.Workspace.WorkspaceImpl import WorkspaceImpl
-from Configs import Sensors, Config
+from Configurations import Sensors, Config
 
 
 class MinimalConsciousAgent(Agent):

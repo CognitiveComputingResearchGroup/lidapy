@@ -7,7 +7,7 @@ import importlib
 import os
 from importlib import util
 
-from Configs import Config
+from Configurations import Config
 from source.Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
 
