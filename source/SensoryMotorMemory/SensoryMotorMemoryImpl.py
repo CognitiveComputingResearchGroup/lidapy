@@ -6,7 +6,6 @@
 This module can temporarily store sensory data from the environment and then
 process and transfer to further working memory.
 """
-
 from source.ActionSelection.ActionSelection import ActionSelection
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl

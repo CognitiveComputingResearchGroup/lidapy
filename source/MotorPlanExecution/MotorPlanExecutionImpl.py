@@ -6,7 +6,7 @@ from source.Module.Initialization.DefaultLogger import getLogger
 from source.MotorPlanExecution.MotorPlanExecution import MotorPlanExecution
 from source.SensoryMemory.SensoryMemory import SensoryMemory
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
-
+from source.Sockets.Publisher import Publisher
 
 
 class MotorPlanExecutionImpl(MotorPlanExecution):
@@ -14,6 +14,8 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
         super().__init__()
         self.motor_plans = {}
         self.state = None
+        self.publisher = Publisher()
+        self.connection = None
         self.logger = getLogger(__class__.__name__).logger
         self.logger.debug("Initialized Motor Plan Execution")
 
@@ -67,8 +69,19 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
             if len(motor_plan) > 1:
                 for action in motor_plan:
                     for key, value in action.items():
-                        self.receive_motor_plan(state, value)
+                        self.receive_motor_plan(state, key)
             elif len(motor_plan) == 1:
                 for key, value in motor_plan[0].items():
-                    self.receive_motor_plan(state, value)
+                    self.receive_motor_plan(state, key)
             self.notify_observers()
+
+    def send_action_request(self):
+        action = random.choice(list(self.publisher.action_map.keys()))
+        request = self.publisher.create_request(data={'event':
+                                {'type': 'action',
+                                'agent': self.publisher.id,
+                                'value': self.publisher.action_map[action]}
+                                })
+        self.connection = self.publisher.connection
+        reply = self.publisher.send(self.connection, request)
+        return action

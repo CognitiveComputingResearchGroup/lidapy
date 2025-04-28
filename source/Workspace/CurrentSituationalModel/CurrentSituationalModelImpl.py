@@ -43,14 +43,11 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
     def notify(self, module):
         if isinstance(module, SensoryMemory):
             cue = module.get_sensory_content()
-            link_list = cue["cue"]
-            """State here is a Frozen Lake state variable"""
-            #TODO Change it to a general state for other environments
-            self.state = cue["params"]["state"]["state"]
+            nodes = cue["cue"]
             stream = NodeStructureImpl()
-            for link in link_list:
-                stream.addDefaultLink__(link)
-            self.logger.debug(f"Received {len(link_list)} cues from ventral "
+            for node in nodes:
+                stream.addNode_(node)
+            self.logger.debug(f"Received {len(nodes)} cues from ventral "
                               f"stream")
             self.receiveVentralStream(stream)
         elif isinstance(module, AttentionCodelet):

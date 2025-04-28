@@ -48,30 +48,12 @@ class ActionSelectionImpl(ActionSelection):
             state = module.get_state()
             self.state = state
             schemes = module.get_schemes_(state, module.optimized_schemes)
-            if schemes is not None and len(schemes) > 0:
-                for scheme in schemes:
-                    if scheme.isRemovable():
-                        module.schemes.remove(scheme)
 
             if schemes is None or len(schemes) <= 0:
                 schemes = module.get_schemes(state)
 
-            if len(schemes) > 0:
-                for scheme in schemes:
-                    if scheme.isRemovable():
-                        module.schemes.remove(scheme)
-
-            random_index = random.randint(0, len(schemes) - 1)
-            while (schemes[random_index].getActivation() < 0.1 and
-                   schemes[random_index].getIncentiveSalience() <= 0.0):
-                random_index = random.randint(0, len(schemes) - 1)
-
-            self.add_behavior(state,
-        {schemes[random_index].getCategory("label") :
-                schemes[random_index].getCategory("id")})
-
-            """Decay chosen scheme"""
-            schemes[random_index].decay(0.01)
+            scheme = random.choice(schemes)
+            self.add_behavior(state, scheme)
 
             if self.behaviors is not None:
                 self.logger.debug(

@@ -39,7 +39,7 @@ class AttentionCodeletImpl(AttentionCodelet):
             if csm_content is None:
                 self.logger.warning("Null WorkspaceContent returned."
                                           "Coalition cannot be formed.")
-            elif csm_content.getLinkCount() > 0:
+            elif csm_content.getLinkableCount() > 0:
                 self.formed_coalition = CoalitionImpl()
                 self.formed_coalition.setContent(csm_content)
                 self.formed_coalition.setCreatingAttentionCodelet(self)
@@ -56,7 +56,7 @@ class AttentionCodeletImpl(AttentionCodelet):
                         sleep(self.codelet_reinforcement)
                         self.run_task()
             else:
-                while csm_content.getLinkCount() == 0:
+                while csm_content.getLinkableCount() == 0:
                     time.sleep(10)
                 self.run_task()
 
