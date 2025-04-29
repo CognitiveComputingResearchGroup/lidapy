@@ -9,7 +9,7 @@ def text_processing(text):
     node = NodeImpl()
     node.label = text["content"]
     node.setActivation(1.0)
-    node.Id = text['id']
+    node.id = text['id']
     node.extended_id.setLinkCategory("link")
     node.extended_id.setSinkLinkCategory({"position": text['position']})
     node.extended_id.setSinkNode1Id(random.randint(1, 101))

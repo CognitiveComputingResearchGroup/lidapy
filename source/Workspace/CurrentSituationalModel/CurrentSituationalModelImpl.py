@@ -13,10 +13,9 @@ class CurrentSituationalModelImpl(CurrentSituationalModel):
         self.received_coalition = None
         self.state = None
         self.logger = getLogger(__class__.__name__).logger
-        self.logger.debug("Initialized CurrentSituationalModel")
 
     def run_task(self):
-        pass
+        self.logger.debug("Initialized CurrentSituationalModel")
 
     def addBufferContent(self, workspace_content):
         self.node_structure.mergeWith(workspace_content)

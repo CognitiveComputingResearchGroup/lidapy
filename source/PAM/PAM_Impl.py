@@ -8,11 +8,7 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
-from threading import RLock
-from time import sleep
-
 from source.Framework.Shared.LinkImpl import LinkImpl
-from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
@@ -28,10 +24,9 @@ class PAMImpl(PerceptualAssociativeMemory):
         self.current_node = None
         self.position = None
         self.feature_detector = {"Feature" : None, "Desired" : False}
-        self.logger.debug("Initialized PerceptualAssociativeMemory")
 
     def start(self):
-        pass
+        self.logger.debug("Initialized PerceptualAssociativeMemory")
 
     def get_state(self):
         return self.current_node
@@ -58,26 +53,25 @@ class PAMImpl(PerceptualAssociativeMemory):
 
     def form_associations(self, cue):
         for node in cue['cue']:
-            lock = RLock()
-            with lock:
-                self.position = node.extended_id.sinkLinkCategory["position"]
-                node_activation = node.getActivation()
-                self.current_node = node
+            self.position = node.extended_id.sinkLinkCategory["position"]
+            node_activation = node.getActivation()
+            self.current_node = node
 
-                if node_activation >= 0.01:
-                    node.decay(0.01)
+            if node_activation >= 0.01:
+                node.decay(0.01)
 
-                if node.isRemovable():
-                    self.associations.remove(node)
+            if node.isRemovable():
+                self.associations.remove(node)
 
-                self.add_association(node)
-                link = LinkImpl()
-                category = {"id" : node.extended_id.sinkNode1Id,
-                            "label" : node.getLabel(),}
-                self.associations.addDefaultLink(node, link,
-                                            category,
-                                             activation=1.0,
-                                             removal_threshold=0.0)
+            self.add_association(node)
+            link = LinkImpl()
+            category = {"id" : node.extended_id.sinkNode1Id,
+                        "label" : node.getLabel(),}
+            self.associations.addDefaultLink(node, link,
+                                        category,
+                                         activation=1.0,
+                                         removal_threshold=0.0)
+                
         self.notify_observers()
 
     def learn(self, broadcast):
@@ -88,11 +82,11 @@ class PAMImpl(PerceptualAssociativeMemory):
                 if node.isRemovable():
                     self.associations.remove(node)
 
-                elif self.feature_detector["feature"] in node.label:
+                elif self.feature_detector["Feature"] in node.label:
                     if not self.feature_detector["Desired"]:
                         for association in self.associations:
                             if (node.getId() == association.getId() and
-                                    node.getLabel() == association.getLabel()):
+                                    node.getName() == association.getName()):
                                 self.associations.remove(node)
                     else:
                         self.add_association(node)

@@ -17,7 +17,7 @@ class GodotEnvironment(Environment):
         super().__init__()
         self.steps = 0
         self.done = False
-        self.subscriber = Subscriber()
+        self.subscriber
         self.connection = None
         self.stimuli = None
         self.col = 0
@@ -39,6 +39,7 @@ class GodotEnvironment(Environment):
     def reset(self):
         try:
             if self.connection is None:
+                self.subscriber = Subscriber()
                 self.connection = self.subscriber.connection
 
             state = self.subscriber.receive(self.connection)[1]

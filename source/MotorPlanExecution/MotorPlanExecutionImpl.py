@@ -17,10 +17,9 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
         self.publisher = None
         self.connection = None
         self.logger = getLogger(__class__.__name__).logger
-        self.logger.debug("Initialized Motor Plan Execution")
 
     def start(self):
-        pass
+        self.logger.debug("Initialized Motor Plan Execution")
 
     def send_motor_plan(self):
         if self.motor_plans and self.state in self.motor_plans:
@@ -74,6 +73,8 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
             self.notify_observers()
 
     def send_action_request(self):
+        if self.publisher is None:
+            self.publisher = Publisher()
         action = random.choice(list(self.publisher.action_map.keys()))
         request = self.publisher.create_request(data={'event':
                                 {'type': 'action',

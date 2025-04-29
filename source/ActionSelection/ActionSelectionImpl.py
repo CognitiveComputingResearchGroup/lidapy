@@ -15,10 +15,9 @@ class ActionSelectionImpl(ActionSelection):
         self.action = None
         self.state = None
         self.logger = getLogger(self.__class__.__name__).logger
-        self.logger.debug(f"Initialized ActionSelection")
 
     def start(self):
-        pass
+        self.logger.debug(f"Initialized ActionSelection")
 
     def add_behavior(self, state, behavior):
         if not self.behaviors or state not in self.behaviors:
@@ -79,7 +78,9 @@ class ActionSelectionImpl(ActionSelection):
                             behaviors.append(saved_behaviors)
 
             else:
-                for key, value in node.getLabel():
-                    self.add_behavior(node, key)
-                    behaviors.append(key)
+                content = node.getLabel()
+                if content and isinstance(content, dict):
+                    for key, value in content.items():
+                        self.add_behavior(node, key)
+                        behaviors.append(key)
         self.logger.debug(f"Updated {len(behaviors)} instantiated behaviors")

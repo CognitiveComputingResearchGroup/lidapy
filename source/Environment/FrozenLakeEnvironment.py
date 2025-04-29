@@ -45,10 +45,10 @@ class FrozenLakeEnvironment(Environment):
         self.logger = getLogger(__class__.__name__).logger
         self.stimuli = {}
         self.action_plan = []
-        self.logger.debug(f"Initialized {__class__.__name__} Environment")
 
     # Reseting the environment to start a new episode
     def reset(self):
+        self.logger.debug(f"Initialized {__class__.__name__} Environment")
         # interacting with the environment by using Reset()
         state, info = self.env.reset()
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
@@ -117,7 +117,7 @@ class FrozenLakeEnvironment(Environment):
     def notify(self, module):
         if isinstance(module, MotorPlanExecution):
             action = ActionMap[module.send_motor_plan()]
-            if not self.state["done"] and self.steps < 1000:
+            if not self.state["done"] and self.steps < 100:
                 self.step(action)
             else:
                 self.close()
@@ -149,21 +149,21 @@ class FrozenLakeEnvironment(Environment):
 
     def form_external_stimuli(self, surrounding_tile):
         directions = {
-            "up": 3,
-            "right": 2,
-            "down" : 1,
-            "left" : 0
+            'up': 3,
+            'right': 2,
+            'down' : 1,
+            'left' : 0
         }
         self.stimuli["content"] = {}
         for direction, tile in surrounding_tile.items():
-            if tile == "H":
-                self.stimuli["content"][direction] = "hole"
-            elif tile == "S":
-                self.stimuli["content"][direction] = "safe"
-            elif tile == "G":
-                self.stimuli["content"][direction] = "goal"
+            if tile == 'H':
+                self.stimuli["content"][direction] = 'hole'
+            elif tile == 'S':
+                self.stimuli["content"][direction] = 'start'
+            elif tile == 'G':
+                self.stimuli["content"][direction] = 'goal'
             else:
-                self.stimuli["content"][direction] = "safe"
+                self.stimuli["content"][direction] = 'safe'
 
     def form_internal_stimuli(self, state):
         self.stimuli["position"] = [self.row, self.col]

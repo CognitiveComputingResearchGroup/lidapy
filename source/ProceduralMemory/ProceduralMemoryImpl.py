@@ -19,8 +19,11 @@ class ProceduralMemoryImpl(ProceduralMemory):
         self.map_size = 3       #Map rows/columns max index
         self.goal = [self.map_size, self.map_size]
         self.similarity_min = 85.0
+        
+    def start(self, scheme):
         self.logger.debug(f"Initialized ProceduralMemory")
-
+        self.scheme = scheme
+        
     def notify(self, module):
         if isinstance(module, PAMImpl):
             self.state = module.get_state()
@@ -50,26 +53,17 @@ class ProceduralMemoryImpl(ProceduralMemory):
             """Get only the links that match the scheme"""
             schemes = self.get_closest_match(associations)
         if isinstance(schemes, list):
-            lock = RLock()
-            with lock:
-                for scheme in associations:
-                    content = scheme.getCategory("label")
-                    if isinstance(content, dict):
-                        for key, value in content.items():
-                            if key not in schemes:
-                                self.add_scheme(self.state, key)
+            for scheme in associations:
+                content = scheme.getCategory("label")
+                if isinstance(content, dict):
+                    for key, value in content.items():
+                        if key not in schemes:
+                            self.add_scheme(self.state, key)
 
             self.logger.debug(f"Instantiated {len(associations)-len(schemes)} "
                                 f"action scheme(s)")
         else:
-            lock = RLock()
-            with lock:
-                for scheme in associations:
-                    content = scheme.getCategory("label")
-                    for key, value in content.items():
-                        if key == schemes:
-                            self.add_scheme(self.state, key)
-                            break
+            self.add_scheme(self.state, schemes)
             self.logger.debug("Instantiated single action scheme")
 
     def shift_table(self, text):
@@ -108,32 +102,31 @@ class ProceduralMemoryImpl(ProceduralMemory):
     def get_closest_match(self, linkables):
         goal_scheme = None
         unwanted_schemes = []
-        lock = RLock()
-        with lock:
-            for linkable in linkables:
-                if isinstance(linkable, LinkImpl):
-                    content = linkable.getCategory("label")
-                elif isinstance(linkable, NodeImpl):
-                    content = linkable.getLabel()
+        for linkable in linkables:
+            if isinstance(linkable, LinkImpl):
+                content = linkable.getCategory("label")
+            elif isinstance(linkable, NodeImpl):
+                content = linkable.getLabel()
 
-                if isinstance(content, dict):
-                    for key, value in content.items():
-                        avoid_hole_similarity = self.get_similarity(
-                            self.scheme[0], value)
-                        if avoid_hole_similarity != -1:
-                            unwanted_schemes.append(key)
-                            linkable.decay(0.05)
-                            avoid_hole_similarity = -1
+            if isinstance(content, dict):
+                for key, value in content.items():
+                    avoid_hole_similarity = self.get_similarity(
+                        self.scheme[0], value)
+                    if avoid_hole_similarity != -1:
+                        unwanted_schemes.append(key)
+                        avoid_hole_similarity = -1
+                        linkable.decay(0.05)
 
-                        find_goal_similarity = self.get_similarity(
-                            self.scheme[1], value)
-                        if find_goal_similarity != -1:
-                            goal_scheme = key
-                            linkable.exciteActivation(0.05)
-                            linkable.exciteIncentiveSalience(0.05)
-                            find_goal_similarity = -1
-                            break
-        if goal_scheme is not None:
+                    find_goal_similarity = self.get_similarity(
+                        self.scheme[1], value)
+                    if find_goal_similarity != -1:
+                        goal_scheme = key
+                        find_goal_similarity = -1
+                        linkable.exciteActivation(0.05)
+                        linkable.exciteIncentiveSalience(0.05)
+                        break
+            
+        if goal_scheme:
             return goal_scheme
         return unwanted_schemes
 
@@ -169,21 +162,20 @@ class ProceduralMemoryImpl(ProceduralMemory):
         current_scheme = None
         instantiated_schemes = []
         # Find the links with the shortest distance to the goal
-        lock = RLock()
-        with lock:
-            for scheme in schemes:
-                position = scheme.extended_id.sinkLinkCategory["position"]
-                distance = self.closest_pair(distance,
-                                             [position[0],
-                                              self.goal[0]],
-                                             [position[1],
-                                              self.goal[1]])
-                if distance < min_distance:
-                    min_distance = distance
-                    current_scheme = scheme
-                    instantiated_schemes.append(scheme)
-                    current_scheme.exciteActivation(0.5)
-                    current_scheme.exciteIncentiveSalience(0.3)
+        for scheme in schemes:
+            position = scheme.extended_id.sinkLinkCategory["position"]
+            distance = self.closest_pair(distance,
+                                         [position[0],
+                                          self.goal[0]],
+                                         [position[1],
+                                          self.goal[1]])
+            if distance < min_distance:
+                min_distance = distance
+                current_scheme = scheme
+                instantiated_schemes.append(scheme)
+                current_scheme.exciteActivation(0.5)
+                current_scheme.exciteIncentiveSalience(0.3)
+            
 
 
         self.logger.debug(f"Learned {len(instantiated_schemes)} new action "

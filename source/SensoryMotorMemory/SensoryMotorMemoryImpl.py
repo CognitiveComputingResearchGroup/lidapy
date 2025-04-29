@@ -55,5 +55,5 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
         for node in broadcast.getNodes():
             if (node.getActivation() >= 0.5 and node.getIncentiveSalience() >=
                     0.1):
-                for key, value in node.getLabel():
+                for key, value in node.getLabel().items():
                     self.action_plan.append(key)

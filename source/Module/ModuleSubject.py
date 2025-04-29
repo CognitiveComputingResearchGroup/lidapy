@@ -1,4 +1,4 @@
-import concurrent.futures
+from threading import Thread
 
 
 class ModuleSubject:
@@ -14,7 +14,5 @@ class ModuleSubject:
 
     def notify_observers(self):
         for observer in self.observers:
-            with (concurrent.futures.ThreadPoolExecutor(max_workers=5) as
-                  executor):
-                executor.submit(observer.notify, self)
+            observer.notify(self)
 

@@ -15,9 +15,9 @@ class WorkspaceImpl(Workspace):
         self.episodic_memory = None
         self.buffer = NodeStructureImpl()
         self.state = None
-        self.logger.debug("Initialized Workspace")
 
     def start(self):
+        self.logger.debug("Initialized Workspace")
         self.nodes = []
 
     def cueEpisodicMemories(self, node_structure):
@@ -39,6 +39,8 @@ class WorkspaceImpl(Workspace):
 
     def receive_percept(self, percept):
         self.buffer.addLinks(percept, "Adjacent nodes")
+        self.notify_observers()
+        sleep(5)
 
     def receiveLocalAssociation(self, node_structure):
         self.csm.addBufferContent(node_structure)

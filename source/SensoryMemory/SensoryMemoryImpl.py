@@ -33,10 +33,10 @@ class SensoryMemoryImpl(SensoryMemory):
         self.processor_dict = {}
         self.logger = getLogger(__class__.__name__).logger
 
-        self.logger.debug(f"Initialized SensoryMemory with "
-                          f"{len(self.processors)} sensor processors")
 
     def start(self):
+        self.logger.debug(f"Initialized SensoryMemory with "
+                          f"{len(self.processors)} sensor processors")
         # Initialize sensors
         for key, processor in self.processor_dict.items():
             self.processors[key] = getattr(self.sensor, processor)
