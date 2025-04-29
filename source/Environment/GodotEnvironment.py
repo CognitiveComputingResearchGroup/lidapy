@@ -18,8 +18,8 @@ class GodotEnvironment(Environment):
         super().__init__()
         self.steps = 0
         self.done = False
-        self.publisher = None
         self.subscriber = None
+        self.publisher = None
         self.connection = None
         self.stimuli = None
         self.col = 0
@@ -37,22 +37,15 @@ class GodotEnvironment(Environment):
         if isinstance(module, MotorPlanExecutionImpl):
             if self.publisher is None:
                 self.publisher = Publisher()
-            actions = module.send_motor_plan()
-            if len(actions) > 0:
-                for action in actions:
-                    action = self.publisher.action_map[action]
-                    if action:
-                        request = self.publisher.create_request(data={'event':
-                                                {'type': 'action',
-                                                 'agent': self.publisher.id,
-                                                   'value':
-                                                     self.publisher.action_map[
-                                                       action]}})
-                        self.connection = self.publisher.connection
-                        reply = self.publisher.send(self.connection, request)
-                        self.step(action)
-            else:
-                self.step(None)
+            action = module.send_motor_plan()
+            if action:
+                action = self.publisher.action_map[action]
+                request = self.publisher.create_request(data={'event':
+                                 {'type': 'action','agent': self.publisher.id,
+                                  'value':self.publisher.action_map[action]}})
+                self.connection = self.publisher.connection
+                reply = self.publisher.send(self.connection, request)
+            self.step(action)
 
     def reset(self):
         try:
@@ -84,9 +77,8 @@ class GodotEnvironment(Environment):
                           state["data"]["rotation_in_degrees"],
                       "seqno": state["header"]["seqno"],
                       "done": False}
-        self.state["id"] += 1
+        self.steps += 1
         if action:
-            self.steps += 1
             self.update_position(action)
         self.logger.debug(self.state)
         self.notify_observers()

@@ -16,6 +16,7 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
         self.state = None
         self.publisher = None
         self.connection = None
+        self.schemes = None
         self.logger = getLogger(__class__.__name__).logger
 
     def start(self):
@@ -45,19 +46,13 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
     def notify(self, module):
         if isinstance(module, SensoryMemory):
             cue = module.get_sensory_content(module)["cue"]
-            source = NodeImpl()
-            state = (module.get_sensory_content(module)["params"]["state"]
-            ["state"])
-            source.setId(state)
-            for link in cue:
-                if link.getCategory("label") != "hole":
-                    source = link.getSource()
-                    if source is not None and isinstance(source, NodeImpl):
-                        self.state = source
-                        self.receive_motor_plan(source, link.getCategory("id"))
-                    else:
-                        self.state = source
-                        self.receive_motor_plan(source, link.getCategory("id"))
+            for node in cue:
+                content = node.getLabel()
+                if isinstance(content, dict):
+                    for key, value in content.items():
+                        if key != self.schemes[0]:
+                            self.state = node
+                            self.receive_motor_plan(node, key)
             sleep(0.1)
             self.notify_observers()
 
@@ -68,16 +63,14 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
             if len(motor_plan) >= 1:
                 for action in motor_plan:
                     self.receive_motor_plan(state, action)
-            else:
-                self.receive_motor_plan(state, motor_plan)
             self.notify_observers()
 
-    def send_action_request(self):
+    """def send_action_request(self):
         if self.publisher is None:
             self.publisher = Publisher()
         action = self.send_motor_plan()
-        action = self.publisher.action_map[action]
         if action:
+            action = self.publisher.action_map[action]
             request = self.publisher.create_request(data={'event':
                                 {'type': 'action',
                                 'agent': self.publisher.id,
@@ -85,4 +78,4 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
                                 })
             self.connection = self.publisher.connection
             reply = self.publisher.send(self.connection, request)
-        return action
+        return action"""

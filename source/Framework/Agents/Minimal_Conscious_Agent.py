@@ -73,6 +73,9 @@ class MinimalConsciousAgent(Agent):
         # Add procedural memory schemes
         self.procedural_memory.scheme = ["Avoid hole", "Find goal"]
 
+        #Add dorsal stream schemes
+        self.motor_plan.schemes = ["Avoid hole", "Find goal"]
+
         #Environment thread
         self.environment_thread = None
 
