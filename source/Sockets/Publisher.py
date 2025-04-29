@@ -10,12 +10,12 @@ DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 10002
 
 # maps single character user inputs from command line to Godot agent actions
-ACTION_MAP = {'W': 'up',
-              'S': 'down',
-              'A': 'left',
-              'D': 'right',
-              'Q': 'rotate_counterclockwise',
-              'E': 'rotate_clockwise'}
+ACTION_MAP = {'up' : 'W',
+              'down' : 'S',
+              'left' : 'A',
+              'right' : 'D',
+              'rotate_counterclockwise' : 'Q',
+              'rotate_clockwise' : 'E'}
 verbose = False
 seqno = 1  # current request's sequence number
 

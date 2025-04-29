@@ -2,6 +2,7 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 import math
+import random
 from threading import RLock
 import string
 
@@ -59,12 +60,46 @@ class ProceduralMemoryImpl(ProceduralMemory):
                     for key, value in content.items():
                         if key not in schemes:
                             self.add_scheme(self.state, key)
+                else:
+                    object_scheme = random.choice(associations)
+                    action = self.determine_direction(scheme, object_scheme)
+                    if action:
+                        self.add_scheme(self.state, action)
 
             self.logger.debug(f"Instantiated {len(associations)-len(schemes)} "
                                 f"action scheme(s)")
         else:
             self.add_scheme(self.state, schemes)
             self.logger.debug("Instantiated single action scheme")
+
+    def get_direction(self, point1, point2):
+        direction = None
+        if point2[0] - point1[0] > 0:
+            direction = "right"
+        elif point2[0] - point1[0] < 0:
+            direction = "left"
+        elif point2[1] - point1[1] > 0:
+            direction = "up"
+        elif point2[1] - point1[1] < 0:
+            direction = "left"
+
+        return direction
+
+    def determine_direction(self, node1, node2):
+        direction = None
+        """If the nodes aren't both agent nodes, find the direction to the
+        object node (for the agent)"""
+        if self.get_similarity(node1.getCategory("label"),
+                              node2.getCategory("label")) == -1:
+            node1_x = node1.extended_id.sinkLinkCategory()["position"][0]
+            node1_y = node1.extended_id.sinkLinkCategory()["position"][1]
+
+            node2_x = node2.extended_id.sinkLinkCategory()["position"][0]
+            node2_y = node2.extended_id.sinkLinkCategory()["position"][1]
+
+            direction =self.get_direction([node1_x, node1_y],
+                               [node2_x, node2_y])
+        return direction
 
     def shift_table(self, text):
         table = {}

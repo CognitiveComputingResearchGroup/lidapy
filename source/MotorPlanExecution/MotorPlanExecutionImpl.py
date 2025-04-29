@@ -75,12 +75,14 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
     def send_action_request(self):
         if self.publisher is None:
             self.publisher = Publisher()
-        action = random.choice(list(self.publisher.action_map.keys()))
-        request = self.publisher.create_request(data={'event':
+        action = self.send_motor_plan()
+        action = self.publisher.action_map[action]
+        if action:
+            request = self.publisher.create_request(data={'event':
                                 {'type': 'action',
                                 'agent': self.publisher.id,
                                 'value': self.publisher.action_map[action]}
                                 })
-        self.connection = self.publisher.connection
-        reply = self.publisher.send(self.connection, request)
+            self.connection = self.publisher.connection
+            reply = self.publisher.send(self.connection, request)
         return action

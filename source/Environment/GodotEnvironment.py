@@ -2,6 +2,7 @@ from source.Environment.Environment import Environment
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.MotorPlanExecution.MotorPlanExecutionImpl import \
     MotorPlanExecutionImpl
+from source.Sockets.Publisher import Publisher
 from source.Sockets.Subscriber import Subscriber
 
 # maps single character user inputs from command line to Godot agent actions
@@ -17,7 +18,8 @@ class GodotEnvironment(Environment):
         super().__init__()
         self.steps = 0
         self.done = False
-        self.subscriber
+        self.publisher = None
+        self.subscriber = None
         self.connection = None
         self.stimuli = None
         self.col = 0
@@ -33,8 +35,24 @@ class GodotEnvironment(Environment):
 
     def notify(self, module):
         if isinstance(module, MotorPlanExecutionImpl):
-            action = module.send_action_request()
-            self.step(action)
+            if self.publisher is None:
+                self.publisher = Publisher()
+            actions = module.send_motor_plan()
+            if len(actions) > 0:
+                for action in actions:
+                    action = self.publisher.action_map[action]
+                    if action:
+                        request = self.publisher.create_request(data={'event':
+                                                {'type': 'action',
+                                                 'agent': self.publisher.id,
+                                                   'value':
+                                                     self.publisher.action_map[
+                                                       action]}})
+                        self.connection = self.publisher.connection
+                        reply = self.publisher.send(self.connection, request)
+                        self.step(action)
+            else:
+                self.step(None)
 
     def reset(self):
         try:
@@ -66,8 +84,10 @@ class GodotEnvironment(Environment):
                           state["data"]["rotation_in_degrees"],
                       "seqno": state["header"]["seqno"],
                       "done": False}
-        self.steps += 1
-        self.update_position(action)
+        self.state["id"] += 1
+        if action:
+            self.steps += 1
+            self.update_position(action)
         self.logger.debug(self.state)
         self.notify_observers()
 

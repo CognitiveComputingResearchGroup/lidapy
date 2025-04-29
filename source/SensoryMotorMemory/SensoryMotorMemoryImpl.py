@@ -37,7 +37,7 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
                 if isinstance(self.action_event, list):
                     for action_plan in self.action_event:
                         self.action_plan.append(action_plan)
-                self.notify_observers()
+            self.notify_observers()
 
         elif isinstance(module, GlobalWorkSpaceImpl):
             winning_coalition = module.get_broadcast()

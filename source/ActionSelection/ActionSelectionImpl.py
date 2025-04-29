@@ -46,15 +46,16 @@ class ActionSelectionImpl(ActionSelection):
             state = module.get_state()
             self.state = state
             schemes = module.get_schemes(state)
-            scheme = random.choice(schemes)
-            self.add_behavior(state,scheme)
+            if schemes:
+                scheme = random.choice(schemes)
+                self.add_behavior(state,scheme)
 
             if self.behaviors is not None:
                 self.logger.debug(
                     f"Behaviors retrieved from instantiated schemes")
-                self.notify_observers()
             else:
                 self.logger.debug("No behaviors found for the selected scheme")
+            self.notify_observers()
 
         elif isinstance(module, GlobalWorkSpaceImpl):
             winning_coalition = module.get_broadcast()
