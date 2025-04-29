@@ -60,10 +60,7 @@ if __name__ == "__main__":
         agent.environment = module.__getattribute__(args.environment)()
 
         # Start the agent
-        try:
-            agent.run()
-        except Exception as e:
-            print(e)
+        agent.run()
     except Exception as e:
         raise e
 

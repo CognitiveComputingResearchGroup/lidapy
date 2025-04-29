@@ -38,6 +38,9 @@ class MinimalConsciousAgent(Agent):
         self.sensory_memory = SensoryMemoryImpl()
         self.motor_plan = MotorPlanExecutionImpl()
 
+        self.pam.feature_detector["Feature"] = "hole"
+        self.pam.feature_detector["Desired"] = False
+
         #Module observers
         self.action_selection.add_observer(self.sensory_motor_mem)
         self.attention_codelets.add_observer(self.csm)

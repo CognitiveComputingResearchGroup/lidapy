@@ -2,7 +2,6 @@ import random
 
 
 from source.ActionSelection.ActionSelection import ActionSelection
-from source.Framework.Shared.NodeImpl import NodeImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
@@ -47,13 +46,9 @@ class ActionSelectionImpl(ActionSelection):
         if isinstance(module, ProceduralMemoryImpl):
             state = module.get_state()
             self.state = state
-            schemes = module.get_schemes_(state, module.optimized_schemes)
-
-            if schemes is None or len(schemes) <= 0:
-                schemes = module.get_schemes(state)
-
+            schemes = module.get_schemes(state)
             scheme = random.choice(schemes)
-            self.add_behavior(state, scheme)
+            self.add_behavior(state,scheme)
 
             if self.behaviors is not None:
                 self.logger.debug(
@@ -66,42 +61,25 @@ class ActionSelectionImpl(ActionSelection):
             winning_coalition = module.get_broadcast()
             broadcast = winning_coalition.getContent()
             self.logger.debug(f"Received conscious broadcast: {broadcast}")
-            """Get the nodes that have been previously visited and update
-            the connected sink links"""
-            links = []
-            for link in broadcast.getLinks():
-                source = link.getSource()
-                if isinstance(source, NodeImpl):
-                    if source.getActivation() < 1:
-                        links.append(link)
-                else:
-                    source_node = broadcast.getNode(source)
-                    if isinstance(source_node, NodeImpl):
-                        if source_node.getActivation() < 1:
-                            links.append(link)
-            self.update_behaviors(links)
+            self.update_behaviors(broadcast)
 
 
     def update_behaviors(self, broadcast):
         behaviors = []
-        for link in broadcast:
-            source = link.getSource()
-            if isinstance(source, NodeImpl):
-                if (link.getActivation() < 0.5 and
-                        link.getIncentiveSalience() <= 0.1):
-                    behaviors = self.get_behaviors(source)
-                    if behaviors is not None:
-                        if isinstance(behaviors, list):
-                            for behavior in behaviors:
-                                self.remove_behavior(source, behavior)
+        for node in broadcast.getNodes():
+            if node.getActivation() < 0.5 and node.getIncentiveSalience() <= 0:
+                    saved_behaviors = self.get_behaviors(node)
+                    if saved_behaviors is not None:
+                        if isinstance(saved_behaviors, list):
+                            for behavior in saved_behaviors:
+                                self.remove_behavior(node, behavior)
                                 behaviors.append(behavior)
                         else:
-                            self.remove_behavior(source, behaviors)
-                            behaviors.append(behaviors)
+                            self.remove_behavior(node, saved_behaviors)
+                            behaviors.append(saved_behaviors)
 
-                else:
-                    self.add_behavior(source, {
-                        link.getCategory("label"): link.getCategory("id")})
-                    behaviors.append({link.getCategory("label"):
-                                          link.getCategory("id")})
+            else:
+                for key, value in node.getLabel():
+                    self.add_behavior(node, key)
+                    behaviors.append(key)
         self.logger.debug(f"Updated {len(behaviors)} instantiated behaviors")

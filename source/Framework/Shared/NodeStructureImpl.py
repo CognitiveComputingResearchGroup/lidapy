@@ -69,7 +69,7 @@ class NodeStructureImpl(NodeStructure):
     def addLinks(self, links, link_type):
         for link in links:
             if link not in self.links:
-                self.setLinkType(link, link_type)
+                #self.setLinkType(link, link_type)
                 self.links.append(link)
 
     def setLinkType(self, link, link_type):

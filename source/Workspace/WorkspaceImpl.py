@@ -1,6 +1,5 @@
 from time import sleep
 
-
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
 from source.Workspace.Workspace import Workspace
@@ -14,6 +13,7 @@ class WorkspaceImpl(Workspace):
         self.csm = None
         self.coalition = None
         self.episodic_memory = None
+        self.buffer = NodeStructureImpl()
         self.state = None
         self.logger.debug("Initialized Workspace")
 
@@ -30,7 +30,7 @@ class WorkspaceImpl(Workspace):
         return self.state
 
     def get_module_content(self , params=None):
-        return self.episodic_memory
+        return self.buffer
 
     def receive_broadcast(self, coalition):
         self.coalition = coalition
@@ -38,11 +38,7 @@ class WorkspaceImpl(Workspace):
         self.csm.notify_observers()
 
     def receive_percept(self, percept):
-        workspace_buffer = NodeStructureImpl()
-        workspace_buffer.addLinks(percept, "Adjacent node")
-        self.csm.addBufferContent(workspace_buffer)
-        self.notify_observers()
-        sleep(25)
+        self.buffer.addLinks(percept, "Adjacent nodes")
 
     def receiveLocalAssociation(self, node_structure):
         self.csm.addBufferContent(node_structure)

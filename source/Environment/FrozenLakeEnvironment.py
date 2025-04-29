@@ -27,12 +27,13 @@ class FrozenLakeEnvironment(Environment):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     def __init__(self, render_mode="human"):
         super().__init__()
+        self.map_size = "4x4"
         # generating the frozen lake environment
         self.env = gym.make(
             'FrozenLake-v1',
             desc=None,
             is_slippery=False,
-            map_name="8x8",
+            map_name=self.map_size,
             render_mode=render_mode)
 
         self.action_space = self.env.action_space  # action_space attribute
@@ -51,12 +52,14 @@ class FrozenLakeEnvironment(Environment):
         # interacting with the environment by using Reset()
         state, info = self.env.reset()
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
-        self.form_external_stimuli(surrounding_tiles)
-        self.form_internal_stimuli(state)
+
         self.state = {"state": state, "info": info, "done": False,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                          f"done: False")
+
+        self.form_external_stimuli(surrounding_tiles)
+        self.form_internal_stimuli(state)
         sleep(0.5)
         self.notify_observers()
 
@@ -67,12 +70,14 @@ class FrozenLakeEnvironment(Environment):
         self.steps += 1
         self.update_position(action)
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
-        self.form_external_stimuli(surrounding_tiles)
-        self.form_internal_stimuli(state)
+
         self.state = {"state": state, "info": info, "done": done,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
-                          f"done: {done}, " + f"action: {action}")
+                         f"done: {done}, " + f"action: {action}")
+
+        self.form_external_stimuli(surrounding_tiles)
+        self.form_internal_stimuli(state)
         sleep(0.5)
         self.notify_observers()
 
@@ -87,15 +92,16 @@ class FrozenLakeEnvironment(Environment):
                     self.update_position(action)
                     surrounding_tiles = self.get_surrounding_tiles(self.row,
                                                                     self.col)
-                    self.form_external_stimuli(surrounding_tiles)
-                    self.form_internal_stimuli(state)
                     self.state = {"state": state, "info": info,
                                   "done": done,
                                   "outcome": surrounding_tiles}
                     self.logger.info(
                         f"state: {state}, " + f"info: {info}, " +
                         f"done: {done}, " + f"action: {action}")
-            self.notify_observers()
+
+                    self.form_external_stimuli(surrounding_tiles)
+                    self.form_internal_stimuli(state)
+                    self.notify_observers()
 
 
     # render environment's current state:
@@ -141,7 +147,7 @@ class FrozenLakeEnvironment(Environment):
                 'utf-8')  # Decode byte to string
         return surrounding_tiles
 
-    def form_external_stimuli(self, surrounding_tiles):
+    def form_external_stimuli(self, surrounding_tile):
         directions = {
             "up": 3,
             "right": 2,
@@ -149,7 +155,7 @@ class FrozenLakeEnvironment(Environment):
             "left" : 0
         }
         self.stimuli["content"] = {}
-        for direction, tile in surrounding_tiles.items():
+        for direction, tile in surrounding_tile.items():
             if tile == "H":
                 self.stimuli["content"][direction] = "hole"
             elif tile == "S":

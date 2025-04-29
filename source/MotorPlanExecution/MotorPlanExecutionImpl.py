@@ -14,7 +14,7 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
         super().__init__()
         self.motor_plans = {}
         self.state = None
-        self.publisher = Publisher()
+        self.publisher = None
         self.connection = None
         self.logger = getLogger(__class__.__name__).logger
         self.logger.debug("Initialized Motor Plan Execution")
@@ -66,13 +66,11 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
             state = module.get_state()
             self.state = state
             motor_plan = module.send_action_execution_command()
-            if len(motor_plan) > 1:
+            if len(motor_plan) >= 1:
                 for action in motor_plan:
-                    for key, value in action.items():
-                        self.receive_motor_plan(state, key)
-            elif len(motor_plan) == 1:
-                for key, value in motor_plan[0].items():
-                    self.receive_motor_plan(state, key)
+                    self.receive_motor_plan(state, action)
+            else:
+                self.receive_motor_plan(state, motor_plan)
             self.notify_observers()
 
     def send_action_request(self):

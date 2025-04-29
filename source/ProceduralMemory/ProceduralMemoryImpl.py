@@ -16,6 +16,9 @@ class ProceduralMemoryImpl(ProceduralMemory):
     def __init__(self):
         super().__init__()
         self.optimized_schemes = {}
+        self.map_size = 3       #Map rows/columns max index
+        self.goal = [self.map_size, self.map_size]
+        self.similarity_min = 85.0
         self.logger.debug(f"Initialized ProceduralMemory")
 
     def notify(self, module):
@@ -38,8 +41,8 @@ class ProceduralMemoryImpl(ProceduralMemory):
             winning_coalition = module.get_broadcast()
             broadcast = winning_coalition.getContent()
             self.logger.debug(f"Received conscious broadcast: {broadcast}")
-            nodes = broadcast.getNodes()
-            self.learn(nodes)
+            self.learn(broadcast)
+
 
     def activate_schemes(self, associations):
         schemes = None
@@ -47,17 +50,26 @@ class ProceduralMemoryImpl(ProceduralMemory):
             """Get only the links that match the scheme"""
             schemes = self.get_closest_match(associations)
         if isinstance(schemes, list):
-            for scheme in associations:
-                position = scheme.getCategory("label")["position"]
-                if isinstance(position, dict):
-                    for key, value in position.items():
-                        if key not in schemes:
-                            self.add_scheme(self.state, {key : value})
+            lock = RLock()
+            with lock:
+                for scheme in associations:
+                    content = scheme.getCategory("label")
+                    if isinstance(content, dict):
+                        for key, value in content.items():
+                            if key not in schemes:
+                                self.add_scheme(self.state, key)
 
-            self.logger.debug(f"Instantiated {len(associations) - len(schemes)} "
+            self.logger.debug(f"Instantiated {len(associations)-len(schemes)} "
                                 f"action scheme(s)")
         else:
-            self.add_scheme(self.state, schemes)
+            lock = RLock()
+            with lock:
+                for scheme in associations:
+                    content = scheme.getCategory("label")
+                    for key, value in content.items():
+                        if key == schemes:
+                            self.add_scheme(self.state, key)
+                            break
             self.logger.debug("Instantiated single action scheme")
 
     def shift_table(self, text):
@@ -100,27 +112,27 @@ class ProceduralMemoryImpl(ProceduralMemory):
         with lock:
             for linkable in linkables:
                 if isinstance(linkable, LinkImpl):
-                    position = linkable.getCategory("label")["content"]
+                    content = linkable.getCategory("label")
                 elif isinstance(linkable, NodeImpl):
-                    position =linkable.label["content"]
+                    content = linkable.getLabel()
 
-                if isinstance(position, dict):
-                    for key, value in position.items():
+                if isinstance(content, dict):
+                    for key, value in content.items():
                         avoid_hole_similarity = self.get_similarity(
                             self.scheme[0], value)
                         if avoid_hole_similarity != -1:
                             unwanted_schemes.append(key)
+                            linkable.decay(0.05)
                             avoid_hole_similarity = -1
 
                         find_goal_similarity = self.get_similarity(
                             self.scheme[1], value)
                         if find_goal_similarity != -1:
-                            goal_scheme = {key : value}
+                            goal_scheme = key
                             linkable.exciteActivation(0.05)
                             linkable.exciteIncentiveSalience(0.05)
                             find_goal_similarity = -1
                             break
-
         if goal_scheme is not None:
             return goal_scheme
         return unwanted_schemes
@@ -130,9 +142,9 @@ class ProceduralMemoryImpl(ProceduralMemory):
         if action == 3:  # up
             row = max(row - 1, 0)
         elif action == 2:  # Right
-            col = min(col + 1, 3)
+            col = min(col + 1, self.map_size)
         elif action == 1:  # down
-            row = min(row + 1, 3)
+            row = min(row + 1, self.map_size)
         elif action == 0:  # Left
             col = max(col - 1, 0)
         return row, col
@@ -152,35 +164,49 @@ class ProceduralMemoryImpl(ProceduralMemory):
 
     """Finds the shortest distance between a scheme and the goal"""
     def optimize_schemes(self, schemes):
-        distance = 4.0
+        distance = self.similarity_min
         min_distance = distance
         current_scheme = None
         instantiated_schemes = []
-        """Change constant to FrozenLake Map final state"""
         # Find the links with the shortest distance to the goal
-        for scheme in schemes:
-            if 64 - scheme.id < min_distance:
-                min_distance = 64 - scheme.id
-                current_scheme = scheme
-                current_scheme.exciteActivation(0.05)
-                instantiated_schemes.append(current_scheme)
+        lock = RLock()
+        with lock:
+            for scheme in schemes:
+                position = scheme.extended_id.sinkLinkCategory["position"]
+                distance = self.closest_pair(distance,
+                                             [position[0],
+                                              self.goal[0]],
+                                             [position[1],
+                                              self.goal[1]])
+                if distance < min_distance:
+                    min_distance = distance
+                    current_scheme = scheme
+                    instantiated_schemes.append(scheme)
+                    current_scheme.exciteActivation(0.5)
+                    current_scheme.exciteIncentiveSalience(0.3)
+
 
         self.logger.debug(f"Learned {len(instantiated_schemes)} new action "
                           f"scheme(s) that minimize(s) distance to goal")
+        return instantiated_schemes
 
     def learn(self, broadcast):
-        result = self.get_closest_match(broadcast)
+        result = self.optimize_schemes(broadcast.getNodes())
+        schemes = self.get_closest_match(broadcast.getNodes())
         wanted_schemes = []
-        """If closest match returns more than one link, optimize results"""
-        if isinstance(result, list):
-            for scheme in broadcast:
-                position = scheme.extended_id.sinkLinkCategory["position"]
-                for key, value in position.items():
-                    if key not in result:
-                        wanted_schemes.append(scheme)
-            self.optimize_schemes(wanted_schemes)
-        else:
-            """Scheme leads to goal if single link is returned"""
-            current_scheme = result
+
+        if len(result) > 0:
+            for node in result:
+                content = node.getLabel()
+                if isinstance(content, dict):
+                    for key, value in content.items():
+                        if isinstance(schemes, list):
+                            if key not in schemes:
+                                self.add_scheme(node, key)
+                        else:
+                            """Scheme is the goal or only wanted schemes"""
+                            if key == schemes:
+                                self.add_scheme(node, key)
+                                break
 
 

@@ -7,7 +7,6 @@ This module can temporarily store sensory data from the environment and then
 process and transfer to further working memory.
 """
 from source.ActionSelection.ActionSelection import ActionSelection
-from source.Framework.Shared.NodeImpl import NodeImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
@@ -43,21 +42,8 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
         elif isinstance(module, GlobalWorkSpaceImpl):
             winning_coalition = module.get_broadcast()
             broadcast = winning_coalition.getContent()
-            """Get the nodes that have been previously visited and learn from 
-            them"""
-            links = []
             self.logger.debug(f"Received conscious broadcast: {broadcast}")
-            for link in broadcast.getLinks():
-                source = link.getSource()
-                if isinstance(source, NodeImpl):
-                    if source.getActivation() < 1:
-                        links.append(link)
-                else:
-                    source_node = broadcast.containsNode(source)
-                    if isinstance(source_node, NodeImpl):
-                        if source_node.getActivation() < 1:
-                            links.append(link)
-            self.learn(links)
+            self.learn(broadcast)
 
     def send_action_execution_command(self):
         return self.action_plan
@@ -66,8 +52,8 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
         return self.state
 
     def learn(self, broadcast):
-        for link in broadcast:
-            if (link.getActivation() >= 0.5 and link.getIncentiveSalience() >=
+        for node in broadcast.getNodes():
+            if (node.getActivation() >= 0.5 and node.getIncentiveSalience() >=
                     0.1):
-                self.action_plan.append({link.getCategory("label") :
-                                             link.getCategory("id")})
+                for key, value in node.getLabel():
+                    self.action_plan.append(key)
