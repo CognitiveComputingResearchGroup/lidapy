@@ -84,7 +84,7 @@ class FrozenLakeEnvironment(Environment):
     def recursive_step(self, action_plan):
         if action_plan is not None:
             for action in action_plan:
-                if not self.state["done"] and self.steps < 100:
+                if not self.state["done"] and self.steps < 1000:
                     state, reward, done, truncated, info = self.env.step(
                         action)
                     sleep(0.5)
