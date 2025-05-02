@@ -38,6 +38,12 @@ class Learnable(Activatible):
     def getBaseLevelExciteStrategy(self):
         pass
 
+    def setBaseLevelDecayStrategy(self, strategy):
+        pass
+
+    def getBaseLevelDecayStrategy(self):
+        pass
+
     def setBaseLevelRemovalThreshold(self, threshold):
         pass
 

@@ -36,7 +36,7 @@ class PerceptualAssociativeMemory(Module):
 
     def retrieve_associations(self, cue : NodeStructureImpl):
         #Retreiving associations for the given cue
-        self.logger.debug(f"Retrieved {len(cue.getLinkCount())} associations")
+        self.logger.debug(f"Retrieved {cue.getLinkCount()} associations")
         return cue.getLinks()
 
     def retrieve_association(self, cue: NodeImpl):

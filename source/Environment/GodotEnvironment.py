@@ -2,7 +2,6 @@ from source.Environment.Environment import Environment
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.MotorPlanExecution.MotorPlanExecutionImpl import \
     MotorPlanExecutionImpl
-from source.Sockets.Publisher import Publisher
 from source.Sockets.Subscriber import Subscriber
 
 # maps single character user inputs from command line to Godot agent actions
@@ -35,16 +34,7 @@ class GodotEnvironment(Environment):
 
     def notify(self, module):
         if isinstance(module, MotorPlanExecutionImpl):
-            if self.publisher is None:
-                self.publisher = Publisher()
-            action = module.send_motor_plan()
-            if action:
-                action = self.publisher.action_map[action]
-                request = self.publisher.create_request(data={'event':
-                                 {'type': 'action','agent': self.publisher.id,
-                                  'value':self.publisher.action_map[action]}})
-                self.connection = self.publisher.connection
-                reply = self.publisher.send(self.connection, request)
+            action = module.send_action_request()
             self.step(action)
 
     def reset(self):

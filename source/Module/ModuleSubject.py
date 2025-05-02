@@ -1,10 +1,14 @@
+import concurrent
+from concurrent.futures import ProcessPoolExecutor
 from threading import Thread
+from time import sleep
 
 
 class ModuleSubject:
     def __init__(self):
         self.observers = []
-        self.observer_threads = []
+        self.threads = {}
+        self.threads_arr = []
 
     def add_observer(self, observer):
         self.observers.append(observer)
@@ -15,4 +19,3 @@ class ModuleSubject:
     def notify_observers(self):
         for observer in self.observers:
             observer.notify(self)
-

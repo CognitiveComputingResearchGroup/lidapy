@@ -1,7 +1,7 @@
 import random
 from time import sleep
 
-from source.Framework.Shared.NodeImpl import NodeImpl
+
 from source.Module.Initialization.DefaultLogger import getLogger
 from source.MotorPlanExecution.MotorPlanExecution import MotorPlanExecution
 from source.SensoryMemory.SensoryMemory import SensoryMemory
@@ -65,17 +65,16 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
                     self.receive_motor_plan(state, action)
             self.notify_observers()
 
-    """def send_action_request(self):
+    def send_action_request(self):
         if self.publisher is None:
             self.publisher = Publisher()
         action = self.send_motor_plan()
         if action:
-            action = self.publisher.action_map[action]
             request = self.publisher.create_request(data={'event':
                                 {'type': 'action',
                                 'agent': self.publisher.id,
-                                'value': self.publisher.action_map[action]}
+                                'value': action}
                                 })
             self.connection = self.publisher.connection
             reply = self.publisher.send(self.connection, request)
-        return action"""
+        return action

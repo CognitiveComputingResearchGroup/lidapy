@@ -146,6 +146,12 @@ class LearnableImpl(Learnable, ActivatibleImpl):
     def getBaseLevelExciteStrategy(self):
         return self.baseLevelExciteStrategy
 
+    def setBaseLevelDecayStrategy(self, strategy):
+        self.baseLevelDecayStrategy = strategy
+
+    def getBaseLevelDecayStrategy(self):
+        return self.baseLevelDecayStrategy
+
     def setBaseLevelRemovalThreshold(self, threshold):
         self.learnableRemovalThreshold = threshold
 

@@ -27,7 +27,7 @@ class FrozenLakeEnvironment(Environment):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     def __init__(self, render_mode="human"):
         super().__init__()
-        self.map_size = "4x4"
+        self.map_size = "8x8"
         # generating the frozen lake environment
         self.env = gym.make(
             'FrozenLake-v1',

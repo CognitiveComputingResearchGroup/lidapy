@@ -3,7 +3,6 @@
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 import math
 import random
-from threading import RLock
 import string
 
 from source.Framework.Shared.LinkImpl import LinkImpl
@@ -17,7 +16,7 @@ class ProceduralMemoryImpl(ProceduralMemory):
     def __init__(self):
         super().__init__()
         self.optimized_schemes = {}
-        self.map_size = 3       #Map rows/columns max index
+        self.map_size = 7       #Map rows/columns max index
         self.goal = [self.map_size, self.map_size]
         self.similarity_min = 85.0
         
@@ -31,7 +30,11 @@ class ProceduralMemoryImpl(ProceduralMemory):
             associations = None
 
             if isinstance(self.state, NodeImpl):
-                associations = module.retrieve_association(self.state)
+                if self.state.getLabel() == 'Agent':
+                    associations =\
+                        module.retrieve_associations(module.associations)
+                else:
+                    associations = module.retrieve_association(self.state)
                 for association in associations:
                     if association.isRemovable():
                         module.associations.remove(association)
@@ -61,10 +64,14 @@ class ProceduralMemoryImpl(ProceduralMemory):
                         if key not in schemes:
                             self.add_scheme(self.state, key)
                 else:
-                    object_scheme = random.choice(associations)
-                    action = self.determine_direction(scheme, object_scheme)
-                    if action:
-                        self.add_scheme(self.state, action)
+                    if content == 'Agent':
+                        object_scheme = random.choice(associations)
+                        action = self.determine_direction(scheme,object_scheme)
+                        if action:
+                            self.add_scheme(self.state, action)
+                    else:
+                        if len(schemes) > 1:
+                            schemes.remove(scheme)
 
             self.logger.debug(f"Instantiated {len(associations)-len(schemes)} "
                                 f"action scheme(s)")
@@ -87,15 +94,21 @@ class ProceduralMemoryImpl(ProceduralMemory):
 
     def determine_direction(self, node1, node2):
         direction = None
-        """If the nodes aren't both agent nodes, find the direction to the
-        object node (for the agent)"""
+        """If the nodes aren't similar, find the direction to the
+        other node from the agent node"""
         if self.get_similarity(node1.getCategory("label"),
                               node2.getCategory("label")) == -1:
-            node1_x = node1.extended_id.sinkLinkCategory()["position"][0]
-            node1_y = node1.extended_id.sinkLinkCategory()["position"][1]
+            node1_pam_link = node1.getGroundingPamLink()
+            node1_x = (node1_pam_link.extended_id.sinkLinkCategory["position"]
+                                                                        [0])
+            node1_y = (node1_pam_link.extended_id.sinkLinkCategory["position"]
+                                                                        [1])
 
-            node2_x = node2.extended_id.sinkLinkCategory()["position"][0]
-            node2_y = node2.extended_id.sinkLinkCategory()["position"][1]
+            node2_pam_link = node2.getGroundingPamLink()
+            node2_x = (node2_pam_link.extended_id.sinkLinkCategory["position"]
+                                                                        [0])
+            node2_y = (node2_pam_link.extended_id.sinkLinkCategory["position"]
+                                                                        [1])
 
             direction =self.get_direction([node1_x, node1_y],
                                [node2_x, node2_y])

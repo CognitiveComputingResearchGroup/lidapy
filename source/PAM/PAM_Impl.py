@@ -12,6 +12,9 @@ from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
+from source.PAM.PAMLink import PAMLink
+from source.PAM.PAMLinkImpl import PAMLinkImpl
+from source.PAM.PAMNodeImpl import PAMNodeImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 from source.Workspace.WorkspaceImpl import WorkspaceImpl
 
@@ -20,7 +23,7 @@ class PAMImpl(PerceptualAssociativeMemory):
     def __init__(self):
         super().__init__()
         self.state = None
-        self.memory = NodeStructureImpl()
+        self.PAMNodeStructure = NodeStructureImpl()
         self.current_node = None
         self.position = None
         self.feature_detector = {"Feature" : None, "Desired" : False}
@@ -30,9 +33,6 @@ class PAMImpl(PerceptualAssociativeMemory):
 
     def get_state(self):
         return self.current_node
-
-    def get_stored_nodes(self):
-        return self.memory.getNodes()
 
     def notify(self, module):
         if isinstance(module, SensoryMemoryImpl):
@@ -54,23 +54,40 @@ class PAMImpl(PerceptualAssociativeMemory):
     def form_associations(self, cue):
         for node in cue['cue']:
             self.position = node.extended_id.sinkLinkCategory["position"]
-            node_activation = node.getActivation()
             self.current_node = node
+            node_activation = node.getActivation()
+            pam_node = PAMNodeImpl()
+            pam_node.setId(node.getId())
+            pam_node.setActivation(node_activation)
+            pam_node.extended_id.setSinkLinkCategory({"position":
+                                                          self.position})
+            self.PAMNodeStructure.addNode_(pam_node)
 
             if node_activation >= 0.01:
+                self.current_node.decay(0.01)
                 node.decay(0.01)
 
             if node.isRemovable():
                 self.associations.remove(node)
+                self.PAMNodeStructure.removeNode(pam_node)
 
             self.add_association(node)
-            link = LinkImpl()
+            pam_link = PAMLinkImpl()
             category = {"id" : node.extended_id.sinkNode1Id,
                         "label" : node.getLabel(),}
-            self.associations.addDefaultLink(node, link,
-                                        category,
-                                         activation=1.0,
-                                         removal_threshold=0.0)
+            pam_link.extended_id.setSinkLinkCategory({"position":
+                                                         self.position})
+            pam_link.setCategory(category["id"], category["label"])
+            pam_link.setActivation(1.0)
+            pam_link.setActivatibleRemovalThreshold(0.0)
+            link = LinkImpl()
+            link.setSource(node)
+            link.setCategory(category["id"], category["label"])
+            link.setActivation(1.0)
+            link.setActivatibleRemovalThreshold(0.0)
+            link.setGroundingPamLink(pam_link)
+            self.associations.addDefaultLink__(link)
+
                 
         self.notify_observers()
 
