@@ -117,7 +117,7 @@ class FrozenLakeEnvironment(Environment):
     def notify(self, module):
         if isinstance(module, MotorPlanExecution):
             action = ActionMap[module.send_motor_plan()]
-            if not self.state["done"] and self.steps < 100:
+            if not self.state["done"]:
                 self.step(action)
             else:
                 self.close()

@@ -13,7 +13,7 @@ from source.Framework.Initialization.ConcreteAgentFactory import \
 
 DEFAULT_AGENT_ID = 3
 DEFAULT_AGENT_TYPE = "AlarmsControlAgent"
-DEFAULT_AGENT_ENVIRONMENT = "GodotEnvironment"
+DEFAULT_AGENT_ENVIRONMENT = "FrozenLakeEnvironment"
 
 
 def parse_args():

@@ -45,7 +45,9 @@ class ActionSelectionImpl(ActionSelection):
         if isinstance(module, ProceduralMemoryImpl):
             state = module.get_state()
             self.state = state
-            schemes = module.get_schemes(state)
+            schemes = module.get_schemes_(state, module.optimized_schemes)
+            if not schemes:
+                schemes = module.get_schemes(state)
             if schemes:
                 scheme = random.choice(schemes)
                 self.add_behavior(state,scheme)

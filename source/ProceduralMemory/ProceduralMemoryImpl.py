@@ -66,9 +66,11 @@ class ProceduralMemoryImpl(ProceduralMemory):
                 else:
                     if content == 'Agent':
                         object_scheme = random.choice(associations)
-                        action = self.determine_direction(scheme,object_scheme)
-                        if action:
-                            self.add_scheme(self.state, action)
+                        if object_scheme.getCategory('label') == 'Crate':
+                            action = self.determine_direction(scheme,
+                                                              object_scheme)
+                            if action:
+                                self.add_scheme(self.state, action)
                     else:
                         if len(schemes) > 1:
                             schemes.remove(scheme)
@@ -243,10 +245,14 @@ class ProceduralMemoryImpl(ProceduralMemory):
                         if isinstance(schemes, list):
                             if key not in schemes:
                                 self.add_scheme(node, key)
+                                self.add_scheme_(node, key,
+                                                 self.optimized_schemes)
                         else:
                             """Scheme is the goal or only wanted schemes"""
                             if key == schemes:
                                 self.add_scheme(node, key)
+                                self.add_scheme_(node, key,
+                                                 self.optimized_schemes)
                                 break
 
 
