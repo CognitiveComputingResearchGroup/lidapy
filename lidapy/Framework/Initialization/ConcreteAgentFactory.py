@@ -7,7 +7,7 @@ from Framework.Agents.Minimal_Conscious_Agent import \
     MinimalConsciousAgent
 from Framework.Initialization.AgentFactory import AgentFactory
 
-from Configs import Config
+from Configurations import Config
 
 
 class ConcreteAgentFactory(AgentFactory):
@@ -29,7 +29,7 @@ class ConcreteAgentFactory(AgentFactory):
                 raise ModuleNotFoundError(f"Module \"{agent_type}\" not found")
 
     def load_from_module(self, module):
-        proj_path = os.path.dirname(os.path.abspath("Configurations"))
+        proj_path = os.path.dirname(os.path.abspath("Configs"))
         path = Config.module_locations[module]
         full_path = proj_path + path
 

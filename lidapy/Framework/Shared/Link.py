@@ -6,6 +6,7 @@ class Link(Activatible):
         super().__init__()
         self.sink = None
         self.src = None
+        self.extended_id = None
         self.label = ""
         self.id = 0
 

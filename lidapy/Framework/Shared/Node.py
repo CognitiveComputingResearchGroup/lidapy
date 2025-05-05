@@ -7,6 +7,7 @@ class Node(Activatible):
         self.id = 0
         self.label = "Node"
         self.name = ""
+        self.extended_id = None
 
     def getGroundingPamNode(self):
         pass

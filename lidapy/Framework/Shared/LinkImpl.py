@@ -1,4 +1,5 @@
 from Framework.Shared.ActivatibleImpl import ActivatibleImpl
+from Framework.Shared.ExtendedID import ExtendedID
 from Framework.Shared.Link import Link
 
 
@@ -9,6 +10,7 @@ class LinkImpl(Link, ActivatibleImpl):
         self.category = {"id" : self.id,
                          "label" : self.label}
         self.type = None
+        self.extended_id = ExtendedID()
 
     def getSource(self):
         return self.src

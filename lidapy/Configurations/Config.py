@@ -3,6 +3,7 @@ from yaml import load, dump
 module_locations = {
     "GodotEnvironment" : r"\Source\Environment\GodotEnvironment.py",
     "FrozenLakeEnvironment" : r"\Source\Environment\FrozenLakeEnvironment.py",
+    "AtariEnvironment" : r"\Source\Environment\AtariEnvironment.py",
     "Sensors" : r"\Source\SensoryMemory\Sensors.py"
 }
 DEFAULT_PROCESSORS = {"text": "text_processing",

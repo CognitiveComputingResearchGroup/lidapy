@@ -50,9 +50,9 @@ class ActionSelectionImpl(ActionSelection):
                 schemes = module.get_schemes(state)
             if schemes:
                 scheme = random.choice(schemes)
-                self.add_behavior(state,scheme)
+                self.add_behavior(state, scheme)
 
-            if self.behaviors is not None:
+            if self.behaviors:
                 self.logger.debug(
                     f"Behaviors retrieved from instantiated schemes")
             else:

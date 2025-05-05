@@ -37,8 +37,7 @@ class NodeStructureImpl(NodeStructure):
 
     def addDefaultLink(self, source_node, sink_link, category, activation,
                        removal_threshold):
-        if source_node not in self.getConnectedSources(sink_link):
-            self.addDefaultLink_(source_node.getId(),
+        self.addDefaultLink_(source_node.getId(),
                                  sink_link.getCategory("id"), category,
                                  activation, removal_threshold)
 
@@ -70,7 +69,7 @@ class NodeStructureImpl(NodeStructure):
     def addLinks(self, links, link_type):
         for link in links:
             if link not in self.links:
-                self.setLinkType(link, link_type)
+                #self.setLinkType(link, link_type)
                 self.links.append(link)
 
     def setLinkType(self, link, link_type):

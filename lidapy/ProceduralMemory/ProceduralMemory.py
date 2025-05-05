@@ -16,7 +16,7 @@ class ProceduralMemory(Module):
         self.logger = getLogger(__class__.__name__).logger
 
     def start(self, scheme):
-        self.scheme = scheme
+        pass
 
     def add_scheme(self, state, percept):
         lock = RLock()

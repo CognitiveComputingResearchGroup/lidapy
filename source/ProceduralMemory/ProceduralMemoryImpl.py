@@ -66,14 +66,13 @@ class ProceduralMemoryImpl(ProceduralMemory):
                 else:
                     if content == 'Agent':
                         object_scheme = random.choice(associations)
-                        if object_scheme.getCategory('label') == 'Crate':
-                            action = self.determine_direction(scheme,
+                        actions = self.determine_direction(scheme,
                                                               object_scheme)
-                            if action:
-                                self.add_scheme(self.state, action)
+                        if actions:
+                            self.add_scheme(self.state, actions)
                     else:
                         if len(schemes) > 1:
-                            schemes.remove(scheme)
+                                schemes.remove(scheme)
 
             self.logger.debug(f"Instantiated {len(associations)-len(schemes)} "
                                 f"action scheme(s)")
@@ -82,15 +81,15 @@ class ProceduralMemoryImpl(ProceduralMemory):
             self.logger.debug("Instantiated single action scheme")
 
     def get_direction(self, point1, point2):
-        direction = None
+        direction = []
         if point2[0] - point1[0] > 0:
-            direction = "right"
+            direction.append("right")
         elif point2[0] - point1[0] < 0:
-            direction = "left"
-        elif point2[1] - point1[1] > 0:
-            direction = "up"
+            direction.append("left")
+        if point2[1] - point1[1] > 0:
+            direction.append("down")
         elif point2[1] - point1[1] < 0:
-            direction = "left"
+            direction.append("up")
 
         return direction
 

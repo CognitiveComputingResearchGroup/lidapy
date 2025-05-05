@@ -118,7 +118,10 @@ class FrozenLakeEnvironment(Environment):
         if isinstance(module, MotorPlanExecution):
             action = ActionMap[module.send_motor_plan()]
             if not self.state["done"]:
-                self.step(action)
+                if isinstance(action, list):
+                    self.recursive_step(action)
+                else:
+                    self.step(action)
             else:
                 self.close()
 

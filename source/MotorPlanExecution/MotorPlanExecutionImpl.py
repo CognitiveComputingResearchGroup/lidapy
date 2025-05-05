@@ -60,21 +60,33 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
             state = module.get_state()
             self.state = state
             motor_plan = module.send_action_execution_command()
-            if len(motor_plan) >= 1:
-                for action in motor_plan:
-                    self.receive_motor_plan(state, action)
+            if motor_plan:
+                if isinstance(motor_plan, list) and len(motor_plan) >= 1:
+                    for action in motor_plan:
+                        self.receive_motor_plan(state, action)
+                else:
+                    self.receive_motor_plan(state, motor_plan)
             self.notify_observers()
 
     def send_action_request(self):
         if self.publisher is None:
             self.publisher = Publisher()
+            self.connection = self.publisher.connection
         action = self.send_motor_plan()
         if action:
-            request = self.publisher.create_request(data={'event':
-                                {'type': 'action',
-                                'agent': self.publisher.id,
-                                'value': action}
-                                })
-            self.connection = self.publisher.connection
-            reply = self.publisher.send(self.connection, request)
+            if isinstance(action, list):
+                for value in action:
+                    request = self.publisher.create_request(data={'event':
+                                        {'type': 'action',
+                                        'agent': self.publisher.id,
+                                        'value': value}
+                                        })
+                    reply = self.publisher.send(self.connection, request)
+            else:
+                request = self.publisher.create_request(data={'event':
+                                             {'type': 'action',
+                                               'agent': self.publisher.id,
+                                                'value': action}
+                                            })
+                reply = self.publisher.send(self.connection, request)
         return action

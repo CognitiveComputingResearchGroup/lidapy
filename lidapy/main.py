@@ -7,13 +7,13 @@ import importlib
 import os
 from importlib import util
 
-from Configs import Config
-from source.Framework.Initialization.ConcreteAgentFactory import \
+from Configurations import Config
+from Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
 
 DEFAULT_AGENT_ID = 3
 DEFAULT_AGENT_TYPE = "AlarmsControlAgent"
-DEFAULT_AGENT_ENVIRONMENT = "FrozenLakeEnvironment"
+DEFAULT_AGENT_ENVIRONMENT = "SudokuEnvironment"
 
 
 def parse_args():

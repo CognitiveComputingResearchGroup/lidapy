@@ -32,9 +32,9 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.trigger1 = "no_winning_coalition_trigger"
         self.trigger2 = "winning_coalition_trigger"
         self.trigger3 = "no_broadcast_for_extended_period"
-        self.logger.debug("Initialized GlobalWorkspaceImpl")
 
     def run_task(self):
+        self.logger.debug("Initialized GlobalWorkspaceImpl")
         self.coalition_decay_strategy = DEFAULT_DECAY_STRATEGY
         self.aggregate_trigger_threshold = DEFAULT_THRESHOLD
         self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
@@ -66,8 +66,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                     aggregateActivation += coalition.getActivation()
                     if aggregateActivation > self.aggregate_trigger_threshold:
                         self.logger.debug("Aggregate activation trigger fired"
-                                          f" at tick: {
-                                          self.task_manager.getCurrentTick()}")
+                        f" at tick: {self.task_manager.getCurrentTick()}")
                         self.broadcast_started = True
                         self.triggerBroadcast(trigger)
                         sleep(3)
@@ -76,8 +75,7 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                 aggregateActivation += coalition.getActivation()
                 if aggregateActivation > self.aggregate_trigger_threshold:
                     self.logger.debug("Aggregate activation trigger fired"
-                                      f" at tick: {
-                                      self.task_manager.getCurrentTick()}")
+                         f" at tick: { self.task_manager.getCurrentTick()}")
                     self.triggerBroadcast(None)
 
     def getTickAtLastBroadcast(self):

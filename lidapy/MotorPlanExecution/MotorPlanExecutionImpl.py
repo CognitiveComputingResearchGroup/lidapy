@@ -1,12 +1,12 @@
 import random
 from time import sleep
 
-from Framework.Shared.NodeImpl import NodeImpl
+
 from Module.Initialization.DefaultLogger import getLogger
 from MotorPlanExecution.MotorPlanExecution import MotorPlanExecution
 from SensoryMemory.SensoryMemory import SensoryMemory
 from SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
-
+from Sockets.Publisher import Publisher
 
 
 class MotorPlanExecutionImpl(MotorPlanExecution):
@@ -14,11 +14,13 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
         super().__init__()
         self.motor_plans = {}
         self.state = None
+        self.publisher = None
+        self.connection = None
+        self.schemes = None
         self.logger = getLogger(__class__.__name__).logger
-        self.logger.debug("Initialized Motor Plan Execution")
 
     def start(self):
-        pass
+        self.logger.debug("Initialized Motor Plan Execution")
 
     def send_motor_plan(self):
         if self.motor_plans and self.state in self.motor_plans:
@@ -44,19 +46,13 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
     def notify(self, module):
         if isinstance(module, SensoryMemory):
             cue = module.get_sensory_content(module)["cue"]
-            source = NodeImpl()
-            state = (module.get_sensory_content(module)["params"]["state"]
-            ["state"])
-            source.setId(state)
-            for link in cue:
-                if link.getCategory("label") != "hole":
-                    source = link.getSource()
-                    if source is not None and isinstance(source, NodeImpl):
-                        self.state = source
-                        self.receive_motor_plan(source, link.getCategory("id"))
-                    else:
-                        self.state = source
-                        self.receive_motor_plan(source, link.getCategory("id"))
+            for node in cue:
+                content = node.getLabel()
+                if isinstance(content, dict):
+                    for key, value in content.items():
+                        if key != self.schemes[0]:
+                            self.state = node
+                            self.receive_motor_plan(node, key)
             sleep(0.1)
             self.notify_observers()
 
@@ -64,11 +60,21 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
             state = module.get_state()
             self.state = state
             motor_plan = module.send_action_execution_command()
-            if len(motor_plan) > 1:
+            if len(motor_plan) >= 1:
                 for action in motor_plan:
-                    for key, value in action.items():
-                        self.receive_motor_plan(state, value)
-            elif len(motor_plan) == 1:
-                for key, value in motor_plan[0].items():
-                    self.receive_motor_plan(state, value)
+                    self.receive_motor_plan(state, action)
             self.notify_observers()
+
+    def send_action_request(self):
+        if self.publisher is None:
+            self.publisher = Publisher()
+        action = self.send_motor_plan()
+        if action:
+            request = self.publisher.create_request(data={'event':
+                                {'type': 'action',
+                                'agent': self.publisher.id,
+                                'value': action}
+                                })
+            self.connection = self.publisher.connection
+            reply = self.publisher.send(self.connection, request)
+        return action

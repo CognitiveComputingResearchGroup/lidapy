@@ -1,10 +1,11 @@
-import concurrent.futures
+from threading import Thread
 
 
 class ModuleSubject:
     def __init__(self):
         self.observers = []
-        self.observer_threads = []
+        self.threads = {}
+        self.done_threads = []
 
     def add_observer(self, observer):
         self.observers.append(observer)
@@ -14,7 +15,6 @@ class ModuleSubject:
 
     def notify_observers(self):
         for observer in self.observers:
-            with (concurrent.futures.ThreadPoolExecutor(max_workers=5) as
-                  executor):
-                executor.submit(observer.notify, self)
-
+            thread = Thread(target=observer.notify, args=(self,))
+            thread.start()
+            thread.join()

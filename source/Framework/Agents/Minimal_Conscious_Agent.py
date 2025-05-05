@@ -1,6 +1,4 @@
 import concurrent.futures
-import multiprocessing
-from multiprocessing import Process
 from threading import Thread, Lock
 from time import sleep
 from yaml import YAMLError
@@ -20,7 +18,7 @@ from source.SensoryMotorMemory.SensoryMotorMemoryImpl import \
 from source.Workspace.CurrentSituationalModel.CurrentSituationalModelImpl import \
     CurrentSituationalModelImpl
 from source.Workspace.WorkspaceImpl import WorkspaceImpl
-from Configurations import Sensors, Config
+from Configs import Sensors, Config
 
 
 class MinimalConsciousAgent(Agent):

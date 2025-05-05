@@ -35,7 +35,11 @@ class GodotEnvironment(Environment):
     def notify(self, module):
         if isinstance(module, MotorPlanExecutionImpl):
             action = module.send_action_request()
-            self.step(action)
+            if isinstance(action, list):
+                for value in action:
+                    self.step(value)
+            else:
+                self.step(action)
 
     def reset(self):
         try:

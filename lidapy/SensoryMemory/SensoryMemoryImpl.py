@@ -6,6 +6,7 @@ from time import sleep
 
 from Environment.Environment import Environment
 from Framework.Shared.LinkImpl import LinkImpl
+from Framework.Shared.NodeImpl import NodeImpl
 from Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from Module.Initialization.DefaultLogger import getLogger
 from SensoryMemory.SensoryMemory import SensoryMemory
@@ -27,15 +28,15 @@ class SensoryMemoryImpl(SensoryMemory):
         self.stimuli = None
         self.position = None
         self.state = None
-        self.links = []
+        self.nodes = []
         self.sensor_dict = {}
         self.processor_dict = {}
         self.logger = getLogger(__class__.__name__).logger
 
-        self.logger.debug(f"Initialized SensoryMemory with "
-                          f"{len(self.processors)} sensor processors")
 
     def start(self):
+        self.logger.debug(f"Initialized SensoryMemory with "
+                          f"{len(self.processors)} sensor processors")
         # Initialize sensors
         for key, processor in self.processor_dict.items():
             self.processors[key] = getattr(self.sensor, processor)
@@ -43,8 +44,6 @@ class SensoryMemoryImpl(SensoryMemory):
     def notify(self, module):
         if isinstance(module, Environment):
             self.stimuli = module.get_stimuli()
-            self.position = module.get_position()
-            self.state = module.get_state()
         if not self.processors:
             self.start()
         self.run_sensors()
@@ -52,7 +51,7 @@ class SensoryMemoryImpl(SensoryMemory):
     def run_sensors(self):
         """All sensors associated will run with the memory"""
         # Logic to gather information from the environment
-        self.links = []
+        self.nodes = []
         if self.stimuli is not None:
             for sensor, value in self.stimuli.items():
                 if sensor not in self.processor_dict:
@@ -62,12 +61,12 @@ class SensoryMemoryImpl(SensoryMemory):
                     sensory_cue = self.processors[sensor](value)
                     if sensory_cue is not None:
                         if isinstance(sensory_cue, NodeStructureImpl):
-                            links = sensory_cue.getLinks()
-                            for link in links:
-                                self.links.append(link)
-                        elif isinstance(sensory_cue, LinkImpl):
-                            self.links.append(sensory_cue)
-            self.logger.debug(f"Processed {len(self.links)} sensory cue(s)")
+                            nodes = sensory_cue.getNodes()
+                            for node in nodes:
+                                self.nodes.append(node)
+                        elif isinstance(sensory_cue, NodeImpl):
+                            self.nodes.append(sensory_cue)
+            self.logger.debug(f"Processed {len(self.nodes)} sensory cue(s)")
             sleep(0.5)
             self.notify_observers()
         else:
@@ -83,5 +82,4 @@ class SensoryMemoryImpl(SensoryMemory):
         for key, content in self.stimuli.items():
             modality = key
         # Logic to retrieve and return data based on the modality.
-        return {"cue": self.links, "modality": modality,
-                "params": {"position": self.position, "state": self.state}}
+        return {"cue": self.nodes, "modality": modality, "params": None}

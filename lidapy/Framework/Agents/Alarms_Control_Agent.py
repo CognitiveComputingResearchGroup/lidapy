@@ -13,7 +13,7 @@ from ProceduralMemory.ProceduralMemoryImpl import ProceduralMemoryImpl
 from SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 from SensoryMotorMemory.SensoryMotorMemoryImpl import \
     SensoryMotorMemoryImpl
-from Configs import Sensors, Config
+from Configurations import Sensors, Config
 
 
 class AlarmsControlAgent(Agent):

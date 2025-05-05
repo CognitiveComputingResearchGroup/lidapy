@@ -5,6 +5,7 @@ class Environment(Module):
     def __init__(self):
         super().__init__()
         self.args = None
+        self.subscriber = None
 
     def notify(self, module):
         pass

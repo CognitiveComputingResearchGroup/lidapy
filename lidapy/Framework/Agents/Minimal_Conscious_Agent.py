@@ -1,4 +1,6 @@
 import concurrent.futures
+import multiprocessing
+from multiprocessing import Process
 from threading import Thread, Lock
 from time import sleep
 from yaml import YAMLError
@@ -18,7 +20,7 @@ from SensoryMotorMemory.SensoryMotorMemoryImpl import \
 from Workspace.CurrentSituationalModel.CurrentSituationalModelImpl import \
     CurrentSituationalModelImpl
 from Workspace.WorkspaceImpl import WorkspaceImpl
-from Configs import Sensors, Config
+from Configurations import Sensors, Config
 
 
 class MinimalConsciousAgent(Agent):
@@ -61,12 +63,18 @@ class MinimalConsciousAgent(Agent):
 
         #Add workspace csm
         self.workspace.csm = self.csm
+        
+        self.pam.feature_detector["Feature"] = "hole"
+        self.pam.feature_detector["Desired"] = False
 
         #Add attention codelets buffer
         self.attention_codelets.buffer = self.csm
 
         # Add procedural memory schemes
         self.procedural_memory.scheme = ["Avoid hole", "Find goal"]
+
+        #Add dorsal stream schemes
+        self.motor_plan.schemes = ["Avoid hole", "Find goal"]
 
         #Environment thread
         self.environment_thread = None
@@ -136,9 +144,9 @@ class MinimalConsciousAgent(Agent):
         self.environment_thread = Thread(target=self.environment.reset)
         self.threads.insert(0, self.environment_thread)
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(self.start, self.threads)
-        executor.shutdown(wait=True, cancel_futures=False)
+        executor.shutdown(wait=False, cancel_futures=True)
 
     def start(self, worker):
         worker.start()
@@ -146,11 +154,13 @@ class MinimalConsciousAgent(Agent):
         worker.join()
 
     def shutdown(self):
-        while self.get_state() is not None:
-            sleep(5)
-            if self.get_state()["done"]:
-                self.attention_codelets.task_manager.shutdown = True
-                self.global_workspace.task_manager.shutdown = True
+        sleep(3)
+        state = self.environment.get_state()
+        while state and not state["done"]:
+            state = self.environment.get_state()
+            sleep(4)
+        self.attention_codelets.task_manager.shutdown = True
+        self.global_workspace.task_manager.shutdown = True
 
 
     def notify(self, module):

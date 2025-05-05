@@ -5,7 +5,6 @@ from threading import Lock
 from time import sleep
 
 from source.Environment.Environment import Environment
-from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.Module.Initialization.DefaultLogger import getLogger

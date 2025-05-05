@@ -1,7 +1,7 @@
 #LIDA Cognitive Framework
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
-
+import random
 from time import sleep
 import gymnasium as gym
 
@@ -16,45 +16,50 @@ effectively.
 Sends Sensory information to the Sensory Memory.
 """
 
+ActionMap = {
+        "up": 3,
+        "right": 2,
+        "down" : 1,
+        "left" : 0
+    }
+
 class FrozenLakeEnvironment(Environment):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     def __init__(self, render_mode="human"):
         super().__init__()
-        self.render_mode = render_mode
-        self.map_name = "4x4"
-        self.is_slippery = False
-        self.desc = None
-        self.action_space = None  # action_space attribute
+        self.map_size = "8x8"
+        # generating the frozen lake environment
+        self.env = gym.make(
+            'FrozenLake-v1',
+            desc=None,
+            is_slippery=False,
+            map_name=self.map_size,
+            render_mode=render_mode)
+
+        self.action_space = self.env.action_space  # action_space attribute
         self.state = None
         self.row = 0
         self.col = 0
         self.steps = 0
-        self.reward = 0
+        self.id = random.randint(1, 101)
         self.logger = getLogger(__class__.__name__).logger
-        self.agent_stimuli = {}
+        self.stimuli = {}
         self.action_plan = []
-        self.logger.debug(f"Initialized {__class__.__name__} Environment")
 
     # Reseting the environment to start a new episode
     def reset(self):
-        # generating the frozen lake environment
-        self.env = gym.make(
-            'FrozenLake-v1',
-            desc=self.desc,
-            is_slippery=self.is_slippery,
-            map_name=self.map_name,
-            render_mode=self.render_mode)
-        # set the action_space attribute
-        self.action_space = self.env.action_space
-
+        self.logger.debug(f"Initialized {__class__.__name__} Environment")
         # interacting with the environment by using Reset()
         state, info = self.env.reset()
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
-        self.agent_stimuli = {"text": self.form_stimuli(surrounding_tiles)}
+
         self.state = {"state": state, "info": info, "done": False,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
                          f"done: False")
+
+        self.form_external_stimuli(surrounding_tiles)
+        self.form_internal_stimuli(state)
         sleep(0.5)
         self.notify_observers()
 
@@ -65,18 +70,21 @@ class FrozenLakeEnvironment(Environment):
         self.steps += 1
         self.update_position(action)
         surrounding_tiles = self.get_surrounding_tiles(self.row, self.col)
-        self.agent_stimuli = {"text": self.form_stimuli(surrounding_tiles)}
+
         self.state = {"state": state, "info": info, "done": done,
                       "outcome": surrounding_tiles}
         self.logger.info(f"state: {state}, " + f"info: {info}, " +
-                          f"done: {done}, " + f"action: {action}")
+                         f"done: {done}, " + f"action: {action}")
+
+        self.form_external_stimuli(surrounding_tiles)
+        self.form_internal_stimuli(state)
         sleep(0.5)
         self.notify_observers()
 
     def recursive_step(self, action_plan):
         if action_plan is not None:
             for action in action_plan:
-                if not self.state["done"] and self.steps < 100:
+                if not self.state["done"] and self.steps < 1000:
                     state, reward, done, truncated, info = self.env.step(
                         action)
                     sleep(0.5)
@@ -84,15 +92,16 @@ class FrozenLakeEnvironment(Environment):
                     self.update_position(action)
                     surrounding_tiles = self.get_surrounding_tiles(self.row,
                                                                     self.col)
-                    self.agent_stimuli = {
-                        "text": self.form_stimuli(surrounding_tiles)}
                     self.state = {"state": state, "info": info,
                                   "done": done,
                                   "outcome": surrounding_tiles}
                     self.logger.info(
                         f"state: {state}, " + f"info: {info}, " +
                         f"done: {done}, " + f"action: {action}")
-            self.notify_observers()
+
+                    self.form_external_stimuli(surrounding_tiles)
+                    self.form_internal_stimuli(state)
+                    self.notify_observers()
 
 
     # render environment's current state:
@@ -103,12 +112,12 @@ class FrozenLakeEnvironment(Environment):
         return self.state
 
     def get_stimuli(self):
-        return self.agent_stimuli
+        return {"text" : self.stimuli}
 
     def notify(self, module):
         if isinstance(module, MotorPlanExecution):
-            action = module.send_motor_plan()
-            if not self.state["done"] and self.steps < 1000:
+            action = ActionMap[module.send_motor_plan()]
+            if not self.state["done"]:
                 self.step(action)
             else:
                 self.close()
@@ -138,25 +147,27 @@ class FrozenLakeEnvironment(Environment):
                 'utf-8')  # Decode byte to string
         return surrounding_tiles
 
-    def form_stimuli(self, surrounding_tiles):
-        stimuli = {}
-        reward = {"reward" : self.reward}
+    def form_external_stimuli(self, surrounding_tile):
         directions = {
-            "up": 3,
-            "right": 2,
-            "down" : 1,
-            "left" : 0
+            'up': 3,
+            'right': 2,
+            'down' : 1,
+            'left' : 0
         }
-        for direction, tile in surrounding_tiles.items():
-            if tile == "H":
-                stimuli[directions[direction]] = "hole"
-            elif tile == "S":
-                stimuli[directions[direction]] = "start"
-            elif tile == "G":
-                stimuli[directions[direction]] = "goal"
+        self.stimuli["content"] = {}
+        for direction, tile in surrounding_tile.items():
+            if tile == 'H':
+                self.stimuli["content"][direction] = 'hole'
+            elif tile == 'S':
+                self.stimuli["content"][direction] = 'start'
+            elif tile == 'G':
+                self.stimuli["content"][direction] = 'goal'
             else:
-                stimuli[directions[direction]] = "safe"
-        return stimuli
+                self.stimuli["content"][direction] = 'safe'
+
+    def form_internal_stimuli(self, state):
+        self.stimuli["position"] = [self.row, self.col]
+        self.stimuli["id"] = state
 
     def get_position(self):
         return {"row": self.row, "col" : self.col}
