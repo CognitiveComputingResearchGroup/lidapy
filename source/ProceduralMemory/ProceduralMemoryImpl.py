@@ -2,7 +2,6 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 import math
-from threading import RLock
 import string
 
 
@@ -95,23 +94,22 @@ class ProceduralMemoryImpl(ProceduralMemory):
     def get_closest_match(self, links):
         goal_scheme = None
         unwanted_schemes = []
-        lock = RLock()
-        with lock:
-            for link in links:
-                avoid_hole_similarity = self.get_similarity(self.scheme[0],
-                                                            link)
-                if avoid_hole_similarity != -1:
-                    unwanted_schemes.append(link)
-                    avoid_hole_similarity = -1
 
-                find_goal_similarity = self.get_similarity(self.scheme[1],
-                                                           link)
-                if find_goal_similarity != -1:
-                    goal_scheme = link
-                    link.exciteActivation(0.05)
-                    link.exciteIncentiveSalience(0.05)
-                    find_goal_similarity = -1
-                    break
+        for link in links:
+            avoid_hole_similarity = self.get_similarity(self.scheme[0],
+                                                        link)
+            if avoid_hole_similarity != -1:
+                unwanted_schemes.append(link)
+                avoid_hole_similarity = -1
+
+            find_goal_similarity = self.get_similarity(self.scheme[1],
+                                                       link)
+            if find_goal_similarity != -1:
+                goal_scheme = link
+                link.exciteActivation(0.05)
+                link.exciteIncentiveSalience(0.05)
+                find_goal_similarity = -1
+                break
 
         if len(unwanted_schemes) > 0:
             for scheme in unwanted_schemes:

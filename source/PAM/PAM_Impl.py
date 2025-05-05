@@ -8,8 +8,6 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
-from threading import RLock
-
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
@@ -104,15 +102,13 @@ class PAMImpl(PerceptualAssociativeMemory):
             self.form_associations(cue["cue"])
 
     def form_association(self, link, source):
-        lock = RLock()
-        with lock:
-            if (link.getActivation() == 0.0 and
+        if (link.getActivation() == 0.0 and
                     link.getIncentiveSalience() == 0.0):
                 link.setActivation(1.0)
                 link.setIncentiveSalience(0.5)
 
-            link.setSource(source)
-            self.associations.addDefaultLink(link.getSource(), link,
+        link.setSource(source)
+        self.associations.addDefaultLink(link.getSource(), link,
                                              category={
                                                  "id": link.getCategory("id"),
                                                  "label": link.getCategory(
@@ -121,18 +117,15 @@ class PAMImpl(PerceptualAssociativeMemory):
                                              removal_threshold=0.0)
 
     def form_associations(self, cue):
-        lock = RLock()
-        with lock:
-            # Set links to surrounding cell nodes if none exist
-            for link in cue:
-                if (link.getActivation() == 0.0 and
-                        link.getIncentiveSalience() == 0.0):
-                    link.setActivation(1.0)
-                    link.setIncentiveSalience(0.5)
+        # Set links to surrounding cell nodes if none exist
+        for link in cue:
+            if (link.getActivation() == 0.0 and
+                link.getIncentiveSalience() == 0.0):
+                link.setActivation(1.0)
+                link.setIncentiveSalience(0.5)
 
-                link.setSource(self.current_cell)
-                self.associations.addDefaultLink(link.getSource(), link,
-                                                 category={
+            link.setSource(self.current_cell)
+            self.associations.addDefaultLink(link.getSource(), link, category={
                                                      "id": link.getCategory(
                                                          "id"),
                                                      "label": link.getCategory(
