@@ -1,4 +1,4 @@
-from lidapy.Framework.Shared.Activatible import Activatible
+from source.Framework.Shared.Activatible import Activatible
 
 DEFAULT_LEARNABLE_REMOVAL_THRESHOLD = -1.0
 DEFAULT_BASE_LEVEL_ACTIVATION = 0.5
