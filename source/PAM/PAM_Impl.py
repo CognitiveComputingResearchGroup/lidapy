@@ -25,7 +25,7 @@ class PAMImpl(PerceptualAssociativeMemory):
         self.state = None
         self.PAMNodeStructure = NodeStructureImpl()
         self.state = None
-        self.map_columns = 8
+        self.map_columns = 4
         self.feature_detector = {"Feature" : None, "Desired" : False}
 
     def start(self):
@@ -128,12 +128,22 @@ class PAMImpl(PerceptualAssociativeMemory):
             for node in nodes:
                 if node.isRemovable():
                     self.associations.removeNode(node)
-
-                elif self.feature_detector["Feature"] in node.label:
-                    if not self.feature_detector["Desired"]:
-                        for association in self.associations:
-                            if (node.getId() == association.getId() and
-                                    node.getName() == association.getName()):
+                else:
+                    content = node.getLabel()["content"]
+                    if isinstance(content, dict):
+                        for key, value in content.items():
+                            if (self.feature_detector["Feature"] == value and
+                                not self.feature_detector["Desired"]):
+                                if node in self.associations:
+                                    self.associations.removeNode(node)
+                    elif isinstance(content, list):
+                        for value in content:
+                            if (self.feature_detector["Feature"] == value and
+                                not self.feature_detector["Desired"]):
+                                if node in self.associations:
+                                    self.associations.removeNode(node)
+                    elif self.feature_detector["Feature"] in content:
+                            if node in self.associations:
                                 self.associations.removeNode(node)
                     else:
                         self.add_association(node)
@@ -141,14 +151,22 @@ class PAMImpl(PerceptualAssociativeMemory):
             for link in links:
                 if link.isRemovable():
                     self.associations.removeLink(link)
-
-                elif (self.feature_detector["Feature"] in
-                                                    link.getCategory("label")):
-                    if not self.feature_detector["Desired"]:
-                        for association in self.associations:
-                            if (link.getCategory("id") == association.getId()
-                                    and link.getCategory("label") ==
-                                    association.getLabel()):
-                                self.associations.links.removeLink(link)
+                else:
+                    content = link.label
+                    if isinstance(content, dict):
+                        for key, value in content.items():
+                            if (self.feature_detector["Feature"] == value and
+                                not self.feature_detector["Desired"]):
+                                if link in self.associations.link:
+                                    self.associations.links.removeLink(link)
+                    elif isinstance(content, list):
+                        for value in content:
+                            if (self.feature_detector["Feature"] == value and
+                                not self.feature_detector["Desired"]):
+                                if link in self.associations.link:
+                                    self.associations.links.removeLink(link)
+                    elif self.feature_detector["Feature"] in content:
+                        if link in self.associations.link:
+                            self.associations.links.removeLink(link)
                     else:
                         self.associations.addDefaultLink__(link)

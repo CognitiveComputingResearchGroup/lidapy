@@ -16,9 +16,9 @@ class ProceduralMemoryImpl(ProceduralMemory):
     def __init__(self):
         super().__init__()
         self.optimized_schemes = {}
-        self.map_size = 7       #Map rows/columns max index
+        self.map_size = 3       #Map rows/columns max index
         self.goal = [self.map_size, self.map_size]
-        self.similarity_min = 85.0
+        self.similarity_min = 30.0
         
     def start(self, scheme):
         self.logger.debug(f"Initialized ProceduralMemory")
