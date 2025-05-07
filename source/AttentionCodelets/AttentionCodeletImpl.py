@@ -30,7 +30,8 @@ class AttentionCodeletImpl(AttentionCodelet):
     def start(self):
         self.logger.debug("Initialized new attention codelets")
         self.run_task()
-        self.task_manager.run()
+        if not self.task_manager.shutdown:
+            self.task_manager.run()
 
     def run_task(self):
         if self.bufferContainsSoughtContent(self.buffer):
@@ -40,25 +41,28 @@ class AttentionCodeletImpl(AttentionCodelet):
                 self.logger.warning("Null WorkspaceContent returned."
                                           "Coalition cannot be formed.")
             elif csm_content.getLinkableCount() > 0:
-                self.formed_coalition = CoalitionImpl()
-                self.formed_coalition.setContent(csm_content)
-                self.formed_coalition.setCreatingAttentionCodelet(self)
-                self.formed_coalition.setActivation(DEFAULT_CODELET_ACTIVATION)
-                self.tick_at_last_coalition = (
+                if not self.task_manager.shutdown:
+                    self.formed_coalition = CoalitionImpl()
+                    self.formed_coalition.setContent(csm_content)
+                    self.formed_coalition.setCreatingAttentionCodelet(self)
+                    self.formed_coalition.setActivation(DEFAULT_CODELET_ACTIVATION)
+                    self.tick_at_last_coalition = (
                     self.task_manager.getCurrentTick())
-                self.logger.debug("Coalition successfully formed.")
-                self.decay(1.0)
-                self.notify_observers()
-                if not self.isRemovable() and not self.task_manager.shutdown:
-                    if not (self.task_manager.getCurrentTick() -
-                           self.tick_at_last_coalition >=
-                           self.codelet_reinforcement):
-                        sleep(self.codelet_reinforcement)
-                        self.run_task()
+                    self.logger.debug("Coalition successfully formed.")
+                    self.decay(1.0)
+                    self.notify_observers()
+                    if not self.isRemovable():
+                        if not (self.task_manager.getCurrentTick() -
+                            self.tick_at_last_coalition >=
+                            self.codelet_reinforcement):
+                            sleep(self.codelet_reinforcement)
+                            self.run_task()
             else:
-                while csm_content.getLinkableCount() == 0:
+                while (csm_content.getLinkableCount() == 0 and not
+                self.task_manager.shutdown):
                     time.sleep(10)
-                self.run_task()
+                if not self.task_manager.shutdown:
+                    self.run_task()
 
     def set_refactory_period(self, ticks):
         if ticks > 0:

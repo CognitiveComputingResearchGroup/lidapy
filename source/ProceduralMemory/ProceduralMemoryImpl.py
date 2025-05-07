@@ -2,8 +2,8 @@
 #Pennsylvania State University, Course : SWENG480
 #Authors: Katie Killian, Brian Wachira, and Nicole Vadillo
 import math
-import random
 import string
+from threading import Thread, RLock
 
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeImpl import NodeImpl
@@ -29,15 +29,10 @@ class ProceduralMemoryImpl(ProceduralMemory):
             self.state = module.get_state()
             associations = None
 
-            if isinstance(self.state, NodeImpl):
-                if self.state.getLabel() == 'Agent':
-                    associations =\
-                        module.retrieve_associations(module.associations)
-                else:
-                    associations = module.retrieve_association(self.state)
-                for association in associations:
-                    if association.isRemovable():
-                        module.associations.remove(association)
+            associations = module.retrieve_association(self.state)
+            for association in associations:
+                if association.isRemovable():
+                    module.associations.removeLink(association)
 
             """Get the closest_match to the scheme from surrounding
             link nodes"""
@@ -48,37 +43,22 @@ class ProceduralMemoryImpl(ProceduralMemory):
             winning_coalition = module.get_broadcast()
             broadcast = winning_coalition.getContent()
             self.logger.debug(f"Received conscious broadcast: {broadcast}")
-            self.learn(broadcast)
+            thread = Thread(target=self.learn, args=(broadcast,))
+            thread.start()
+
 
 
     def activate_schemes(self, associations):
-        schemes = None
-        if associations is not None:
-            """Get only the links that match the scheme"""
-            schemes = self.get_closest_match(associations)
-        if isinstance(schemes, list):
-            for scheme in associations:
-                content = scheme.getCategory("label")
-                if isinstance(content, dict):
-                    for key, value in content.items():
-                        if key not in schemes:
-                            self.add_scheme(self.state, key)
-                else:
-                    if content == 'Agent':
-                        object_scheme = random.choice(associations)
-                        actions = self.determine_direction(scheme,
-                                                              object_scheme)
-                        if actions:
-                            self.add_scheme(self.state, actions)
-                    else:
-                        if len(schemes) > 1:
-                                schemes.remove(scheme)
-
-            self.logger.debug(f"Instantiated {len(associations)-len(schemes)} "
-                                f"action scheme(s)")
-        else:
-            self.add_scheme(self.state, schemes)
-            self.logger.debug("Instantiated single action scheme")
+        schemes = self.get_closest_match(associations)
+        if schemes:
+            if isinstance(schemes, list):
+                for scheme in schemes:
+                    self.add_scheme(self.state, scheme)
+                self.logger.debug(
+                    f"Instantiated {len(schemes)} action scheme(s)")
+            else:
+                self.add_scheme(self.state, schemes)
+                self.logger.debug(f"Instantiated single action scheme(s)")
 
     def get_direction(self, point1, point2):
         direction = []
@@ -128,18 +108,21 @@ class ProceduralMemoryImpl(ProceduralMemory):
         return table
 
     def horspool_matching(self, text, pattern):
+        new_text = []
+        for i in range(len(text)):
+            new_text.append(text[i].lower())
         m = len(pattern)
-        n = len(text)
+        n = len(new_text)
         table = self.shift_table(pattern)
         i = m - 1
         while i <= n - 1:
             k = 0
-            while k <= m - 1 and pattern[m - 1 - k] == text[i - k]:
+            while k <= m - 1 and pattern[m - 1 - k] == new_text[i - k]:
                 k = k + 1
             if k == m:
                 return i - m + 1
             else:
-                i = i + table[text[i]]
+                i = i + table[new_text[i]]
         return -1
 
     def get_similarity(self, scheme, word):
@@ -150,34 +133,50 @@ class ProceduralMemoryImpl(ProceduralMemory):
     """Gets the link that closely matches the scheme"""
     def get_closest_match(self, linkables):
         goal_scheme = None
-        unwanted_schemes = []
+        content = None
+        position = None
         for linkable in linkables:
             if isinstance(linkable, LinkImpl):
-                content = linkable.getCategory("label")
+                content = linkable.label
             elif isinstance(linkable, NodeImpl):
-                content = linkable.getLabel()
+                content = linkable.getLabel()["content"]
 
             if isinstance(content, dict):
                 for key, value in content.items():
-                    avoid_hole_similarity = self.get_similarity(
-                        self.scheme[0], value)
-                    if avoid_hole_similarity != -1:
-                        unwanted_schemes.append(key)
-                        avoid_hole_similarity = -1
+                    avoid_similarity = self.get_similarity(self.scheme[0],
+                                                           value)
+                    if avoid_similarity != -1:
+                        linkables.remove(linkable)
+                        avoid_similarity = -1
                         linkable.decay(0.05)
 
-                    find_goal_similarity = self.get_similarity(
-                        self.scheme[1], value)
+                    find_goal_similarity = self.get_similarity(self.scheme[1],
+                                                               value)
                     if find_goal_similarity != -1:
-                        goal_scheme = key
+                        goal_scheme = linkable
                         find_goal_similarity = -1
                         linkable.exciteActivation(0.05)
                         linkable.exciteIncentiveSalience(0.05)
                         break
+            else:
+                avoid_similarity = self.get_similarity(self.scheme[0], content)
+                if avoid_similarity != -1:
+                    linkables.remove(linkable)
+                    avoid_similarity = -1
+                    linkable.decay(0.05)
+
+                find_goal_similarity = self.get_similarity(self.scheme[1],
+                                                           content)
+                if find_goal_similarity != -1:
+                    goal_scheme = linkable
+                    find_goal_similarity = -1
+                    linkable.exciteActivation(0.05)
+                    linkable.exciteIncentiveSalience(0.05)
+                    break
             
         if goal_scheme:
             return goal_scheme
-        return unwanted_schemes
+        return linkables
 
     """Updates the column, row value given a specific action"""
     def update_position(self, action, row, col):
@@ -212,7 +211,7 @@ class ProceduralMemoryImpl(ProceduralMemory):
         instantiated_schemes = []
         # Find the links with the shortest distance to the goal
         for scheme in schemes:
-            position = scheme.extended_id.sinkLinkCategory["position"]
+            position = scheme.getLabel()["position"]
             distance = self.closest_pair(distance,
                                          [position[0],
                                           self.goal[0]],

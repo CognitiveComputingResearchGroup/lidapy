@@ -39,8 +39,8 @@ class WorkspaceImpl(Workspace):
 
     def receive_percept(self, percept):
         self.buffer.addLinks(percept, "Adjacent nodes")
-        self.notify_observers()
         sleep(5)
+        self.notify_observers()
 
     def receiveLocalAssociation(self, node_structure):
         self.csm.addBufferContent(node_structure)

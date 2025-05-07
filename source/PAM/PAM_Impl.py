@@ -8,13 +8,13 @@ elements. Interacts with Sensory Memory, Situational Model, and Global Workspace
 Input: Sensory Stimuli and cues from Sensory Memory
 Output: Local Associations, passed to others
 """
+from threading import Thread
+
+
 from source.Framework.Shared.LinkImpl import LinkImpl
 from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.PAM.PAM import PerceptualAssociativeMemory
-from source.PAM.PAMLink import PAMLink
-from source.PAM.PAMLinkImpl import PAMLinkImpl
-from source.PAM.PAMNodeImpl import PAMNodeImpl
 from source.SensoryMemory.SensoryMemoryImpl import SensoryMemoryImpl
 from source.Workspace.WorkspaceImpl import WorkspaceImpl
 
@@ -24,15 +24,15 @@ class PAMImpl(PerceptualAssociativeMemory):
         super().__init__()
         self.state = None
         self.PAMNodeStructure = NodeStructureImpl()
-        self.current_node = None
-        self.position = None
+        self.state = None
+        self.map_columns = 8
         self.feature_detector = {"Feature" : None, "Desired" : False}
 
     def start(self):
         self.logger.debug("Initialized PerceptualAssociativeMemory")
 
     def get_state(self):
-        return self.current_node
+        return self.state
 
     def notify(self, module):
         if isinstance(module, SensoryMemoryImpl):
@@ -42,54 +42,84 @@ class PAMImpl(PerceptualAssociativeMemory):
             cue = module.get_module_content(module)
             if isinstance(cue, NodeStructureImpl):
                 self.logger.debug(f"Cue received from Workspace")
-                self.learn(cue)
+                thread = Thread(target=self.learn, args=(cue,))
+                thread.start()
+                thread.join()
         elif isinstance(module, GlobalWorkSpaceImpl):
             winning_coalition = module.get_broadcast()
             broadcast = winning_coalition.getContent()
             self.logger.debug(
                 f"Received conscious broadcast: {broadcast}")
-            self.learn(broadcast)
+            thread = Thread(target=self.learn, args=(broadcast,))
+            thread.start()
 
 
     def form_associations(self, cue):
         for node in cue['cue']:
-            self.position = node.extended_id.sinkLinkCategory["position"]
-            self.current_node = node
-            node_activation = node.getActivation()
-            pam_node = PAMNodeImpl()
-            pam_node.setId(node.getId())
-            pam_node.setActivation(node_activation)
-            pam_node.extended_id.setSinkLinkCategory({"position":
-                                                          self.position})
-            self.PAMNodeStructure.addNode_(pam_node)
-
-            if node_activation >= 0.01:
-                self.current_node.decay(0.01)
-                node.decay(0.01)
-
-            if node.isRemovable():
-                self.associations.remove(node)
-                self.PAMNodeStructure.removeNode(pam_node)
-
-            self.add_association(node)
-            pam_link = PAMLinkImpl()
-            category = {"id" : node.extended_id.sinkNode1Id,
-                        "label" : node.getLabel(),}
-            pam_link.extended_id.setSinkLinkCategory({"position":
-                                                         self.position})
-            pam_link.setCategory(category["id"], category["label"])
-            pam_link.setActivation(1.0)
-            pam_link.setActivatibleRemovalThreshold(0.0)
-            link = LinkImpl()
-            link.setSource(node)
-            link.setCategory(category["id"], category["label"])
-            link.setActivation(1.0)
-            link.setActivatibleRemovalThreshold(0.0)
-            link.setGroundingPamLink(pam_link)
-            self.associations.addDefaultLink__(link)
-
-                
+            self.state = node
+            node.decay(0.01)
+            state = node.getLabel()["observation_space"]
+            if state == 0:
+                node.extended_id.setLinkCategory("infinity")
+                self.add_association(node)
+                action_space = node.getLabel()["action_space"]
+                self.form_links(state, node, action_space)
+            else:
+                links = self.associations.links
+                action_space = node.getLabel()["action_space"]
+                self.form_links(state, node, action_space)
+                for link in links:
+                    source = link.getSource()
+                    source_state = source.getLabel()["observation_space"]
+                    potential = None
+                    #The current node is connected to the sink by the link
+                    if source_state - state == -1:
+                        link.setSink(node)
+                        potential = 1.0 - link.getActivation()
+                    #The current node is connected to the source by the link
+                    elif (source_state - state == 1 or
+                          source_state - state == 0):
+                        link.setSink(node)
+                        #Backward link
+                        potential = link.getActivation()
+                    elif (source_state - state == self.map_columns or
+                          source_state - state == 0):
+                        link.setSink(node)
+                        potential = link.getActivation()
+                    elif source_state - state == -self.map_columns:
+                        link.setSink(node)
+                        #forward link
+                        potential = 1.0 - link.getActivation()
+                    if potential > 0.0:
+                        flow = self.min(potential, source.getActivation())
+                        link.setActivation(flow)
+                self.add_association(node)
         self.notify_observers()
+
+    def form_links(self, state, current_node, action_space):
+        if isinstance(action_space, list):
+            for action in action_space:
+                link = LinkImpl()
+                link.setSource(current_node)
+                link.setActivation(0.0)
+                link.setCategory(state, {"action": action})
+                link.label = current_node.getLabel()["content"]
+                self.associations.addDefaultLink__(link)
+        elif isinstance(action_space, dict):
+            for key, value in action_space.items():
+                link = LinkImpl()
+                link.setSource(current_node)
+                link.setActivation(0.0)
+                link.setCategory(state, {"action": value})
+                link.label = current_node.getLabel()["content"]
+                if isinstance (link.label, dict):
+                    link.label = link.label[key]
+                self.associations.addDefaultLink__(link)
+
+    def min(self, num1, num2):
+        if num1 > num2:
+            return num2
+        return num1
 
     def learn(self, broadcast):
         nodes = broadcast.getNodes()
@@ -97,28 +127,28 @@ class PAMImpl(PerceptualAssociativeMemory):
         if len(nodes) > 0:
             for node in nodes:
                 if node.isRemovable():
-                    self.associations.remove(node)
+                    self.associations.removeNode(node)
 
                 elif self.feature_detector["Feature"] in node.label:
                     if not self.feature_detector["Desired"]:
                         for association in self.associations:
                             if (node.getId() == association.getId() and
                                     node.getName() == association.getName()):
-                                self.associations.remove(node)
+                                self.associations.removeNode(node)
                     else:
                         self.add_association(node)
         if len(links) > 0:
             for link in links:
                 if link.isRemovable():
-                    self.associations.remove(link)
+                    self.associations.removeLink(link)
 
                 elif (self.feature_detector["Feature"] in
                                                     link.getCategory("label")):
                     if not self.feature_detector["Desired"]:
                         for association in self.associations:
-                            if (link.getCategory("id") == association.getId() and
-                                    link.getCategory("label") ==
+                            if (link.getCategory("id") == association.getId()
+                                    and link.getCategory("label") ==
                                     association.getLabel()):
-                                self.associations.links.remove(link)
+                                self.associations.links.removeLink(link)
                     else:
                         self.associations.addDefaultLink__(link)

@@ -1,4 +1,6 @@
 import random
+from multiprocessing import Process
+from threading import Thread
 from time import sleep
 
 
@@ -53,7 +55,7 @@ class MotorPlanExecutionImpl(MotorPlanExecution):
                         if key != self.schemes[0]:
                             self.state = node
                             self.receive_motor_plan(node, key)
-            sleep(0.1)
+            sleep(5)
             self.notify_observers()
 
         elif isinstance(module, SensoryMotorMemory):

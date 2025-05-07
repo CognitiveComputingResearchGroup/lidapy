@@ -1,4 +1,5 @@
 from threading import Thread
+from time import sleep
 
 
 class ModuleSubject:
@@ -15,6 +16,4 @@ class ModuleSubject:
 
     def notify_observers(self):
         for observer in self.observers:
-            thread = Thread(target=observer.notify, args=(self,))
-            thread.start()
-            thread.join()
+            observer.notify(self)

@@ -6,6 +6,10 @@
 This module can temporarily store sensory data from the environment and then
 process and transfer to further working memory.
 """
+from multiprocessing import Process
+from threading import Thread
+from time import sleep
+
 from source.ActionSelection.ActionSelection import ActionSelection
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
 from source.Module.Initialization.DefaultLogger import getLogger
@@ -15,7 +19,7 @@ from source.SensoryMotorMemory.SensoryMotorMemory import SensoryMotorMemory
 class SensoryMotorMemoryImpl(SensoryMotorMemory):
     def __init__(self):
         super().__init__()
-        self.action_plan = None
+        self.action_plan = []
         self.state = None
         self.logger = getLogger(__class__.__name__).logger
         self.logger.debug("Initialized SensoryMotorMemory")
@@ -31,21 +35,31 @@ class SensoryMotorMemoryImpl(SensoryMotorMemory):
         if isinstance(module, ActionSelection):
             state = module.get_state()
             self.state = state
-            self.action_event = module.select_action_plan(state)
-            if self.action_event is not None:
-                self.logger.debug("Retrieved motor plan(s) from action plan")
-                if isinstance(self.action_event, list):
-                    for action_plan in self.action_event:
-                        self.action_plan.append(action_plan)
+            behaviors = module.select_action_plan(state)
+            if behaviors:
+                self.logger.debug("Retrieved behavior(s) from action plan")
+                if isinstance(behaviors, list):
+                    for behavior in behaviors:
+                        action_plans = behavior.getCategory("label")
+                        if action_plans and isinstance(action_plans, list):
+                            for action_plan in action_plans:
+                                self.action_plan.append(action_plan)
+                        elif action_plans and isinstance(action_plans, dict):
+                            for key, value in action_plans.items():
+                                self.action_plan.append(value)
+                        else:
+                            if action_plans:
+                                self.action_plan.append(action_plans)
                 else:
-                    self.action_plan.append(self.action_event)
+                    self.action_plan.append(behaviors.getCategory("label"))
             self.notify_observers()
 
         elif isinstance(module, GlobalWorkSpaceImpl):
             winning_coalition = module.get_broadcast()
             broadcast = winning_coalition.getContent()
             self.logger.debug(f"Received conscious broadcast: {broadcast}")
-            self.learn(broadcast)
+            thread = Thread(target=self.learn, args=(broadcast,))
+            thread.start()
 
     def send_action_execution_command(self):
         return self.action_plan

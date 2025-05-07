@@ -87,14 +87,10 @@ class AlarmsControlAgent(Agent):
         self.environment_thread = Thread(target=self.environment.reset)
         self.threads.insert(0, self.environment_thread)
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(self.start, self.threads)
-        executor.shutdown(wait=True, cancel_futures=False)
-
-    def start(self, worker):
-        worker.start()
-        sleep(3)
-        worker.join()
+        for thread in self.threads:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.submit(thread.start)
+                executor.shutdown(wait=True, cancel_futures=True)
 
     def notify(self, module):
         if isinstance(module, Environment):

@@ -63,16 +63,16 @@ class MinimalConsciousAgent(Agent):
         self.workspace.csm = self.csm
         
         self.pam.feature_detector["Feature"] = "hole"
-        self.pam.feature_detector["Desired"] = False
+        self.pam.feature_detector["Desired"] = True
 
         #Add attention codelets buffer
         self.attention_codelets.buffer = self.csm
 
         # Add procedural memory schemes
-        self.procedural_memory.scheme = ["Avoid hole", "Find goal"]
+        self.procedural_memory.scheme = ["Avoid Hole", "Find Goal"]
 
         #Add dorsal stream schemes
-        self.motor_plan.schemes = ["Avoid hole", "Find goal"]
+        self.motor_plan.schemes = ["Avoid Hole", "Find Goal"]
 
         #Environment thread
         self.environment_thread = None
@@ -106,7 +106,7 @@ class MinimalConsciousAgent(Agent):
         # ProceduralMem thread
         self.procedural_memory_thread = (
             Thread(target=self.procedural_memory.start,
-                    args=(["Avoid hole", "Find goal"],)))
+                    args=(["Avoid Hole", "Find Goal"],)))
 
         # ActionSelection thread
         self.action_selection_thread = (
@@ -134,7 +134,7 @@ class MinimalConsciousAgent(Agent):
             self.motor_plan_thread,
             self.shutdown_thread
         ]
-
+        self.quit = False
 
     def run(self):
         self.environment.add_observer(self.sensory_memory)
@@ -142,23 +142,21 @@ class MinimalConsciousAgent(Agent):
         self.environment_thread = Thread(target=self.environment.reset)
         self.threads.insert(0, self.environment_thread)
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(self.start, self.threads)
-        executor.shutdown(wait=False, cancel_futures=True)
-
-    def start(self, worker):
-        worker.start()
-        sleep(3)
-        worker.join()
+        for thread in self.threads:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.submit(thread.start)
+            executor.shutdown(wait=False, cancel_futures=True)
 
     def shutdown(self):
         sleep(3)
         state = self.environment.get_state()
-        while state and not state["done"]:
+        while state and not state["done"] and not self.quit:
             state = self.environment.get_state()
-            sleep(4)
+            sleep(1)
+        self.quit = True
         self.attention_codelets.task_manager.shutdown = True
         self.global_workspace.task_manager.shutdown = True
+
 
 
     def notify(self, module):

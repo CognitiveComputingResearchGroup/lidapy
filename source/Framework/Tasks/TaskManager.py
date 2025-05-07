@@ -12,13 +12,14 @@ class TaskManager:
         self.logger = getLogger(__class__.__name__).logger
 
     def run(self):
-        self.logger.name = __class__.__name__ +  f" ({self.name})"
-        self.logger.debug("Initializing Task Manager")
-        while not self.shutdown:
-            lock = RLock()
-            with lock:
-                self.tick += 3
-            sleep(3)
+        if not self.shutdown:
+            self.logger.name = __class__.__name__ +  f" ({self.name})"
+            self.logger.debug("Initializing Task Manager")
+            while not self.shutdown:
+                lock = RLock()
+                with lock:
+                    self.tick += 3
+                sleep(2)
 
     def getCurrentTick(self):
         return self.tick

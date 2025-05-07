@@ -5,9 +5,14 @@
 import argparse
 import importlib
 import os
+import sys
 from importlib import util
+from threading import Thread
 
+import keyboard
 from Configs import Config
+
+
 from source.Framework.Initialization.ConcreteAgentFactory import \
     ConcreteAgentFactory
 
@@ -46,7 +51,22 @@ def load_from_module(module_name):
     spec.loader.exec_module(module)
     return module
 
+def shutdown(agent_):
+    while True:
+        if keyboard.is_pressed('q') or keyboard.is_pressed('Q') or agent_.quit:
+            agent_.quit = True
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print("~~~~~~~~~~~~~~~Shutting down~~~~~~~~~~~~~~~~~~~~~~~")
+            print("~~~~~~~~~~~This may take some time~~~~~~~~~~~~~~~~")
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            sys.exit(0)
+
+
 if __name__ == "__main__":
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("~~~~~~~~~~~~~~~Press q or Q to quit~~~~~~~~~~~~~~~~")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
     # Create agent factory
     agent_factory = ConcreteAgentFactory()
     try:
@@ -61,6 +81,12 @@ if __name__ == "__main__":
 
         # Start the agent
         agent.run()
+
+        thread = Thread(target=shutdown, args=(agent,))
+        thread.start()
+        thread.join()
+        sys.exit(0)
+
     except Exception as e:
         raise e
 

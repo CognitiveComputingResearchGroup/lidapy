@@ -1,5 +1,5 @@
 import random
-
+from threading import Thread
 
 from source.ActionSelection.ActionSelection import ActionSelection
 from source.GlobalWorkspace.GlobalWorkSpaceImpl import GlobalWorkSpaceImpl
@@ -50,6 +50,7 @@ class ActionSelectionImpl(ActionSelection):
                 schemes = module.get_schemes(state)
             if schemes:
                 scheme = random.choice(schemes)
+                scheme.exciteActivation(0.01)
                 self.add_behavior(state, scheme)
 
             if self.behaviors:
@@ -63,7 +64,8 @@ class ActionSelectionImpl(ActionSelection):
             winning_coalition = module.get_broadcast()
             broadcast = winning_coalition.getContent()
             self.logger.debug(f"Received conscious broadcast: {broadcast}")
-            self.update_behaviors(broadcast)
+            thread = Thread(target=self.update_behaviors, args=(broadcast,))
+            thread.start()
 
 
     def update_behaviors(self, broadcast):

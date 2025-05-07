@@ -7,14 +7,16 @@ from source.Framework.Shared.NodeStructureImpl import NodeStructureImpl
 def text_processing(text):
     buffer = NodeStructureImpl()
     node = NodeImpl()
-    node.label = text["content"]
+    node.label = {"content" : text["content"],
+                  "observation_space" : text["observation_space"],
+                  "action_space" : text["action_space"],
+                  "Reward" : text["Reward"],
+                  "position": text["position"]}
     node.setActivation(1.0)
     node.id = text['id']
-    node.extended_id.setLinkCategory("link")
-    node.extended_id.setSinkLinkCategory({"position": text['position']})
-    node.extended_id.setSinkNode1Id(random.randint(1, 101))
     buffer.addNode_(node)
     return buffer
+
 
 def image_processing(image):
     pass

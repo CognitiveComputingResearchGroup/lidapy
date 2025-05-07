@@ -34,14 +34,15 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
         self.trigger3 = "no_broadcast_for_extended_period"
 
     def run_task(self):
-        self.logger.debug("Initialized GlobalWorkspaceImpl")
-        self.coalition_decay_strategy = DEFAULT_DECAY_STRATEGY
-        self.aggregate_trigger_threshold = DEFAULT_THRESHOLD
-        self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
-        self.broadcast_refractory_period = DEFAULT_REFRACTORY_PERIOD
-        self.broadcast_triggers.append(self.trigger1)
-        self.name = __class__.__name__
-        self.task_manager.run()
+        if not self.task_manager.shutdown:
+            self.logger.debug("Initialized GlobalWorkspaceImpl")
+            self.coalition_decay_strategy = DEFAULT_DECAY_STRATEGY
+            self.aggregate_trigger_threshold = DEFAULT_THRESHOLD
+            self.coalition_removal_threshold = DEFAULT_COALITION_REMOVAL_THRESHOLD
+            self.broadcast_refractory_period = DEFAULT_REFRACTORY_PERIOD
+            self.broadcast_triggers.append(self.trigger1)
+            self.name = __class__.__name__
+            self.task_manager.run()
 
     def addCoalition(self, coalition):
         coalition.setDecayStrategy(self.coalition_decay_strategy)
@@ -88,7 +89,8 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                     self.tick_at_last_broadcast <
                 self.broadcast_refractory_period):
                 self.broadcast_started = False
-                sleep(25)
+                if not self.task_manager.shutdown:
+                    sleep(25)
                 """No winning coalition for some time, add trigger"""
                 if self.trigger3 not in self.broadcast_triggers:
                     self.broadcast_triggers.append(self.trigger3)
@@ -100,7 +102,8 @@ class GlobalWorkSpaceImpl(GlobalWorkspace):
                 if self.broadcast_was_sent:
                     self.last_broadcast_trigger = trigger
                     self.notify_observers()
-                    sleep(25)
+                    if not self.task_manager.shutdown:
+                        sleep(25)
 
     def sendBroadCast(self):
         self.logger.debug("Triggering broadcast")

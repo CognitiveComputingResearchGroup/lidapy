@@ -92,4 +92,8 @@ class GodotEnvironment(Environment):
 
     def get_stimuli(self):
         return {"text" : {"content" : self.state["content"],
-         "id" : self.state["id"], "position" : self.state["position"]}}
+                           "id" : self.state["id"],
+                          "observation_space": self.state["seqno"],
+                          "action_space": ACTION_MAP,
+                          "Reward": None,
+                          "position" : self.state["position"]}}
