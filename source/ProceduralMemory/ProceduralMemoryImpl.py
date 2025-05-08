@@ -46,8 +46,6 @@ class ProceduralMemoryImpl(ProceduralMemory):
             thread = Thread(target=self.learn, args=(broadcast,))
             thread.start()
 
-
-
     def activate_schemes(self, associations):
         schemes = self.get_closest_match(associations)
         if schemes:
@@ -108,21 +106,20 @@ class ProceduralMemoryImpl(ProceduralMemory):
         return table
 
     def horspool_matching(self, text, pattern):
-        new_text = []
-        for i in range(len(text)):
-            new_text.append(text[i].lower())
+        text = text.lower()
+        pattern = pattern.lower()
         m = len(pattern)
-        n = len(new_text)
+        n = len(text)
         table = self.shift_table(pattern)
         i = m - 1
         while i <= n - 1:
             k = 0
-            while k <= m - 1 and pattern[m - 1 - k] == new_text[i - k]:
+            while k <= m - 1 and pattern[m - 1 - k] == text[i - k]:
                 k = k + 1
             if k == m:
                 return i - m + 1
             else:
-                i = i + table[new_text[i]]
+                i = i + table[text[i]]
         return -1
 
     def get_similarity(self, scheme, word):
